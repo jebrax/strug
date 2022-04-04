@@ -1,57 +1,31 @@
 #pragma once
 
-#include <glade/GladeObject.h>
 #include <glade/State.h>
+#include <glade/controls/VirtualController.h>
 #include <glade/debug/log.h>
-#include <strug/generator/MazeGenerator.h>
 
 class Context;
-class Block;
-class StrugController;
-class Player;
+class Frank;
+class VirtualContoller;
 
-class MazeTest: public State
+class MazeTest: public State, VirtualController
 {
-  friend class MazeController;
-  
   private:
-    static const float BASE_RUNNING_SPEED;
-
-    float runningSpeed;
-    float blockWidth, blockHeight;
-    float screenScaleX, screenScaleY;
-    Vector2i cameraMan;
-    StrugController *controller;
-    Player *player;
-    MazeGenerator mazeGenerator;
-    
-    int
-      prevPlayerBlockCoordX,
-      prevPlayerBlockCoordY,
-      prevPlayerAreaCoordX,
-      prevPlayerAreaCoordY;
+    Frank *frank;
+    Context *context;
 
   public:
     MazeTest();
     ~MazeTest();
     
-    virtual void init(Context &context);
-    virtual void shutdown(Context &context);
-    virtual void applyRules(Context &context);
-    
-    private:
-      float blockToWorldCoordX(int blockX)
-      {
-        return blockX * blockWidth - screenScaleX + blockWidth / 2;
-      }
-      
-      float blockToWorldCoordY(int blockY)
-      {
-        return blockY * blockHeight - screenScaleY + blockHeight / 2;
-      }
+    void init(Context &context);
+    void shutdown(Context &context);
+    void applyRules(Context &context);
 
-      int getBlockCoordX(Block &object);
-      int getBlockCoordY(Block &object);
-      int areaCoordFromBlockCoord(int blockCoord);
-      void applyStartingRulesForBlock(Block &block, int block_x, int block_y);
+    void initController() {};
+    bool buttonPress(int controlId, int terminalId) { return false; }
+    bool buttonRelease(int controlId, int terminalId) { return false; }
+    bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId);
+    bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId) { return false; }
+    bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId);
 };

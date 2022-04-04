@@ -1,99 +1,50 @@
-#include <algorithm>
-
 #include <glade/Context.h>
-#include <strug/Area.h>
-#include <strug/ResourceManager.h>
-#include <strug/blocks/Terrain.h>
-#include <strug/blocks/Player.h>
+#include <glade/render/Perception.h>
+#include <glade/controls/VirtualController.h>
 #include <strug/states/MazeTest.h>
-#include <strug/generator/MazeGenerator.h>
-#include <strug/controls/StrugController.h>
+#include <strug/blocks/Frank.h>
+#include <strug/blocks/Cube.h>
 
-extern Strug::ResourceManager *game_resource_manager;
+#include <fcl/fcl.h>
 
-const float MazeTest::BASE_RUNNING_SPEED = 0.5f;
+#include <unordered_map>
 
-class MazeController: public StrugController
+typedef std::vector<int> Indices;
+typedef std::unordered_map<Vector3i,Indices*> SpatialIndex;
+typedef SpatialIndex::iterator SpatialIndexI;
+
+static SpatialIndex spatialMeshIndex;
+
+static void initSpatialIndex(Frank *frank)
 {
-  private:
-    MazeTest &playState;
-    Context &context;
-    
-  public:
-    MazeController(Context &context_param, MazeTest &play_state):
-      StrugController(),
-      playState(play_state),
-      context(context_param)
-    {}
-    
-    bool buttonPress(int id, int terminalId)
-    {
-      bool handled = false;
-      
-      switch (id) {
-        case StrugController::BUTTON_LEFT:
-          playState.cameraMan.x = -1;
-          handled = true;
-          break;
-        case StrugController::BUTTON_RIGHT:
-          playState.cameraMan.x =  1;
-          handled = true;
-          break;
-        case StrugController::BUTTON_UP:
-          playState.cameraMan.y = -1;
-          handled = true;
-          break;
-        case StrugController::BUTTON_DOWN:
-          playState.cameraMan.y =  1;
-          handled = true;
-          break;
-        case StrugController::BUTTON_FIRE:
-          log("FIRE!");
-          context.requestStateChange(std::unique_ptr<State>(new MazeTest()));
-          handled = true;
-          break;
-      }
-      
-      return handled;
+  //TODO don't forget about transforming vertices with the object's Transform
+
+  Drawable *view = frank->view;
+  std::shared_ptr<Glade::Mesh> mesh = view->getMesh();
+
+  for (unsigned i = 0; i < mesh->getVertexBufferSize(); i += 8) {
+    Vector3i cellCoord;
+    cellCoord.x = std::floor(mesh->getVertices()[i + 0]);
+    cellCoord.y = std::floor(mesh->getVertices()[i + 1]);
+    cellCoord.z = std::floor(mesh->getVertices()[i + 2]);
+
+    Indices *indicesVector = nullptr;
+    SpatialIndexI cell = spatialMeshIndex.find(cellCoord);
+
+    if (cell == spatialMeshIndex.end()) {
+      indicesVector = new Indices();
+      spatialMeshIndex.insert({cellCoord, indicesVector});
+    } else {
+      indicesVector = cell->second;
     }
-  
-    bool buttonRelease(int id, int terminalId)
-    {
-      bool handled = false;
-      
-      switch (id) {
-        case StrugController::BUTTON_LEFT:
-          playState.cameraMan.x = 0;
-          handled = true;
-          break;
-        case StrugController::BUTTON_RIGHT:
-          playState.cameraMan.x = 0;
-          handled = true;
-          break;
-        case StrugController::BUTTON_UP:
-          playState.cameraMan.y = 0;
-          handled = true;
-          break;
-        case StrugController::BUTTON_DOWN:
-          playState.cameraMan.y = 0;
-          handled = true;
-          break;
-      }
-      
-      return handled;
-    }
-    
-    void init()
-    {  
-    }
-};
+
+    indicesVector->push_back(i / 8);
+  }
+}
 
 MazeTest::MazeTest():
   State(),
-  screenScaleX(0),
-  screenScaleY(0),
-  controller(NULL),
-  player(NULL)
+  frank(nullptr)
 {}
 
 MazeTest::~MazeTest()
@@ -102,93 +53,104 @@ MazeTest::~MazeTest()
 
 void MazeTest::init(Context &context)
 {
-  log("AREA WIDTH BLOCKS: %d", Area::AREA_WIDTH_BLOCKS);
-  context.renderer->setBackgroundColor(0.0f, 0.0f, 0.0f);
-  context.renderer->setSceneProjectionMode(Glade::Renderer::ORTHO);
-  //context.renderer->setDrawingOrderComparator(new Block.DrawingOrderComparator());
-  
-  screenScaleX = context.renderer->getViewportWidthCoords()  / 2;
-  screenScaleY = context.renderer->getViewportHeightCoords() / 2;
-  
-  //blockWidth = blockHeight = min(
-  //  context.renderer->getViewportWidthCoords()  / Area::AREA_WIDTH_BLOCKS,
-  //  context.renderer->getViewportHeightCoords() / Area::AREA_WIDTH_BLOCKS
-  //);
-  
-  blockWidth = blockHeight = 0.1f;
-  
-  log("BLOCK SIZE: %3.3f, %3.3f", blockWidth, blockHeight);
-  
-  // set actual speeds
-  runningSpeed = BASE_RUNNING_SPEED * blockWidth;
-  
-  // Create and initialize the player
-  Player *playerCharacter = new Player();
-  playerCharacter->initialize("common", blockWidth, blockHeight);
-  int playerBlockCoord = Area::AREA_WIDTH_BLOCKS / 2;
-  int playerAreaCoord  = areaCoordFromBlockCoord(playerBlockCoord);
-  applyStartingRulesForBlock(*playerCharacter, playerBlockCoord, playerBlockCoord);
-  prevPlayerBlockCoordX = prevPlayerBlockCoordY = playerBlockCoord;
-  prevPlayerAreaCoordX = prevPlayerAreaCoordY = playerAreaCoord;
-  context.add(playerCharacter);
+  log("Init MazeTest");
+  this->context = &context;
 
-  mazeGenerator.createMaze();
-  
-  for (int i = 0; i < MazeGenerator::MAZE_WIDTH; ++i) {
-    for (int j = 0; j < MazeGenerator::MAZE_HEIGHT; ++j) {
-      if (!mazeGenerator.isCellPassable(i, j)) {
-        Block *block = new Terrain();
-        block->initialize("cave", blockWidth, blockHeight);
-        applyStartingRulesForBlock(*block, i, j);
-        context.add(block);
-      }
-    }
-  }
-  
-  controller = new MazeController(context, *this);
-  context.setController(*controller);
+  context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
+  context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
+
+  frank = new Frank();
+  frank->initialize();
+  context.add(frank);
+
+  typedef fcl::BVHModel<fcl::OBBRSSf> Model;
+  std::shared_ptr<Model> geom = std::make_shared<Model>();
+
+  initSpatialIndex(frank);
+
+  Perception *perception = new Perception();
+  context.renderer->setPerception(perception);
+  //context.renderer->getCamera()->position->y = 4.0;
+
+  context.setController(*this);
 }
 
-void MazeTest::applyStartingRulesForBlock(Block &block, int block_x, int block_y)
+bool MazeTest::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
 {
-  block.getTransform()->setPosition(blockToWorldCoordX(block_x), blockToWorldCoordY(block_y), 0);
-  
-  if (block.getType() == Block::PLAYER) {
-    player = (Player*) &block;
+  //frank->getTransform()->rotation->y = xPos * 0.001;
+  //frank->getTransform()->rotation->x = yPos * 0.001;
+  context->getRenderer()->getCamera()->rotation->y = xPos * 0.001;
+  context->getRenderer()->getCamera()->rotation->x = yPos * 0.001;
+
+  return true;
+}
+
+bool MazeTest::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
+{
+  Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
+
+  log("Near point: %f %f %f", nearPoint.x, nearPoint.y, nearPoint.z);
+
+  Vector3f cameraPos = *context->getRenderer()->getCamera()->position;
+
+  Vector3f dir(nearPoint.x, nearPoint.y, nearPoint.z);
+  dir.subtract(cameraPos);
+  dir.normalize();
+
+  // for the smaller step:
+  dir.x *= 0.5;
+  dir.y *= 0.5;
+  dir.z *= 0.5;
+
+  log("Ray dir: %f %f %f", dir.x, dir.y, dir.z);
+
+  Vector3f stepPoint(nearPoint.x, nearPoint.y, nearPoint.z);
+
+  for (int i = 0; i < 50; i++) {
+    /*
+    Cube *another = new Cube();
+    //Frank *another = new Frank();
+    another->initialize();
+    another->getTransform()->position->x = stepPoint.x;
+    another->getTransform()->position->y = stepPoint.y;
+    another->getTransform()->position->z = stepPoint.z;
+    context->add(another);
+    */
+
+    Vector3i cellCoord;
+    cellCoord.x = std::floor(stepPoint.x);
+    cellCoord.y = std::floor(stepPoint.y);
+    cellCoord.z = std::floor(stepPoint.z);
+
+    SpatialIndexI cell = spatialMeshIndex.find(cellCoord);
+
+    if (cell != spatialMeshIndex.end()) {
+      log("Shot at vertices:");
+
+      for (int i = 0; i < cell->second->size(); i++) {
+        unsigned vertexIndex = (*cell->second)[i];
+        printf("%d ", vertexIndex);
+        float *vertex = frank->view->getMesh()->getVertices() + vertexIndex*8;
+        vertex[2] -= 1;
+      }
+      printf("\n");
+
+      context->add(frank);
+      break;
+    }
+
+    stepPoint.add(dir);
   }
+
+  return true;
 }
 
 void MazeTest::applyRules(Context &context)
 {
-  player->getTransform()->position->x += cameraMan.x * runningSpeed;
-  player->getTransform()->position->y += cameraMan.y * runningSpeed;
-
-  context.renderer->getCamera()->position->x = player->getTransform()->position->x;
-  context.renderer->getCamera()->position->y = player->getTransform()->position->y;
-}
-
-int MazeTest::getBlockCoordX(Block &object)
-{
-  return ::floor(((object.getTransform()->position->x + screenScaleX) / blockWidth));
-}
-
-int MazeTest::getBlockCoordY(Block &object)
-{
-  return ::floor(((object.getTransform()->position->y + screenScaleY) / blockHeight));
-}
-
-int MazeTest::areaCoordFromBlockCoord(int blockCoord)
-{
-  return blockCoord ? ::floor((float) blockCoord / Area::AREA_WIDTH_BLOCKS) : 0;
 }
 
 void MazeTest::shutdown(Context &context)
 {
-  // TODO free level and other memory
-  
-  //context.setController(NULL);
-  
-  if (controller) {
-    delete controller;
-  }
+  delete frank;
 }
+
