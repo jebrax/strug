@@ -65,6 +65,44 @@ void processInput(GLFWwindow* window)
   if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
     fly = -0.1;
 
+  VirtualController *controller = gameContext->getController();
+
+  if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
+    controller->buttonPress(1, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+    controller->buttonPress(2, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
+    controller->buttonPress(3, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE)
+    controller->buttonRelease(3, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+    controller->buttonPress(4, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE)
+    controller->buttonRelease(4, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+    controller->buttonPress(5, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_C) == GLFW_RELEASE)
+    controller->buttonRelease(5, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    controller->buttonPress(6, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    controller->buttonPress(7, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    controller->buttonPress(8, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    controller->buttonPress(9, 0);
+
   float zModifier = forward * cos(camera->rotation->y) + strafe * sin(camera->rotation->y);
   float xModifier = -forward * sin(camera->rotation->y) + strafe * cos(camera->rotation->y);
   float yModifier = forward * sin(camera->rotation->x) + fly;

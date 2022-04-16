@@ -2,7 +2,7 @@
 
 #include <strug/blocks/StrugObject.h>
 
-class Cube: public StrugObject
+class Sphere: public StrugObject
 {
   public:
     virtual void initialize();

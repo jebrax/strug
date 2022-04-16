@@ -1,28 +1,16 @@
-#include <glade/render/Texture.h>
 #include <glade/render/Drawable.h>
 #include <glade/render/ShaderProgram.h>
-#include <glade/render/TextureTransform.h>
-#include <glade/render/meshes/Rectangle.h>
-#include <glade/render/meshes/Cube.h>
-#include <glade/render/meshes/DynamicMesh.h>
+#include <glade/render/meshes/Mesh.h>
 #include <glade/render/meshes/DynamicMeshGenerator.h>
-#include <glade/util/Path.h>
 #include <strug/blocks/Frank.h>
 #include <strug/ResourceManager.h>
 
 extern Strug::ResourceManager *game_resource_manager;
 
-Frank::Frank(): initialized(false)
+void Frank::initialize(float radius)
 {
-  setName("Some kind of object");
-}
+  StrugObject::initialize();
 
-Frank::~Frank()
-{
-}
-
-void Frank::initialize()
-{
   if (!initialized) {
     std::shared_ptr<ShaderProgram> program =
       game_resource_manager->getShaderProgram(
@@ -30,11 +18,11 @@ void Frank::initialize()
         "phong.fragment.glsl"
       );
 
-    //view = new Drawable(game_resource_manager->getMesh("geometry/cube.min.obj"), program);
+    this->radius = radius;
 
-    std::shared_ptr<DynamicMesh> mesh = std::make_shared<DynamicMesh>();
+    std::shared_ptr<Glade::Mesh> mesh = std::make_shared<Glade::Mesh>();
     DynamicMeshGenerator gen;
-    gen.generateHull(*mesh);
+    gen.generateHull(*mesh, radius, true);
     view = new Drawable(mesh, program);
 
     addDrawable(view);

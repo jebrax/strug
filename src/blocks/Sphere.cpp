@@ -1,11 +1,12 @@
 #include <glade/render/Drawable.h>
 #include <glade/render/ShaderProgram.h>
-#include <strug/blocks/Cube.h>
+#include <glade/render/meshes/DynamicMeshGenerator.h>
+#include <strug/blocks/Sphere.h>
 #include <strug/ResourceManager.h>
 
 extern Strug::ResourceManager *game_resource_manager;
 
-void Cube::initialize()
+void Sphere::initialize()
 {
   if (!initialized ) {
     std::shared_ptr<ShaderProgram> program =
@@ -14,7 +15,12 @@ void Cube::initialize()
         "phong.fragment.glsl"
       );
 
-    view = new Drawable(game_resource_manager->getMesh("geometry/polyhedron.obj"), program);
+    //view = new Drawable(game_resource_manager->getMesh("geometry/sphere.obj"), program);
+
+    std::shared_ptr<Glade::Mesh> mesh = std::make_shared<Glade::Mesh>();
+    DynamicMeshGenerator gen;
+    gen.generateHull(*mesh, 5.0, true);
+    view = new Drawable(mesh, program);
 
     /*
     for (int i = 0; i < view->getMesh()->getVertexBufferSize(); i += 8) {
@@ -28,9 +34,6 @@ void Cube::initialize()
     }
     */
 
-    //view->getTransform()->setRotation(-1.52f, 0.0f, 1.52f);
-    //view->getTransform()->setScale(0.2f, 0.2f, 0.2f);
-    
     addDrawable(view);
     initialized = true;
   }

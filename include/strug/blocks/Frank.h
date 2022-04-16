@@ -1,16 +1,11 @@
 #pragma once
 
-#include <glade/GladeObject.h>
+#include <strug/blocks/StrugObject.h>
 
-class Frank: public GladeObject
+class Frank: public StrugObject
 {
   public:
-    bool initialized;
-    Drawable *view;
+    float radius;
 
-  public:
-    Frank();
-    virtual ~Frank();
-
-    virtual void initialize();
+    void initialize(float radius);
 };

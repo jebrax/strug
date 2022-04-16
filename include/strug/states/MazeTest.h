@@ -5,14 +5,20 @@
 #include <glade/debug/log.h>
 
 class Context;
+class StrugObject;
 class Frank;
 class VirtualContoller;
 
 class MazeTest: public State, VirtualController
 {
   private:
-    Frank *frank;
+    StrugObject *terrain;
+    Frank *shovel;
     Context *context;
+
+    bool digPressed;
+    bool clearPressed;
+    bool createPressed;
 
   public:
     MazeTest();
@@ -21,10 +27,12 @@ class MazeTest: public State, VirtualController
     void init(Context &context);
     void shutdown(Context &context);
     void applyRules(Context &context);
+    void dig();
+    void createEntities();
 
     void initController() {};
-    bool buttonPress(int controlId, int terminalId) { return false; }
-    bool buttonRelease(int controlId, int terminalId) { return false; }
+    bool buttonPress(int controlId, int terminalId);
+    bool buttonRelease(int controlId, int terminalId);
     bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId);
     bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId) { return false; }
     bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId);
