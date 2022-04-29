@@ -20,6 +20,7 @@ void Sphere::initialize()
     std::shared_ptr<Glade::Mesh> mesh = std::make_shared<Glade::Mesh>();
     DynamicMeshGenerator gen;
     gen.generateHull(*mesh, 5.0, true);
+    //gen.generate(*mesh);
     view = new Drawable(mesh, program);
 
     /*

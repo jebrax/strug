@@ -176,7 +176,7 @@ void MazeTest::createEntities()
   context->add(shovel);
   shovel->getTransform()->position->y = 0.0f;
   shovel->getTransform()->position->x = 5.0f;
-  shovel->getTransform()->position->z = -10.0f;
+  shovel->getTransform()->position->z = 0.0f;
 
 /*
   Frank *frank = new Frank();
@@ -243,6 +243,16 @@ void MazeTest::dig()
   std::unordered_map<unsigned,unsigned> oldToNewIndices;
 
   for (unsigned i = 0; i < terrain->view->getMesh()->getIndexBufferSize(); i += 3) {
+    bool triangleShoveled = false;
+    for (int ii = 0; ii < 3; ii++) {
+      unsigned oldVertIndex = indices[i + ii];
+      float r;
+      triangleShoveled |= isVertexShoveled(shovel, vertices, oldVertIndex, &r);
+    }
+
+    if (triangleShoveled)
+      continue;
+
     for (int ii = 0; ii < 3; ii++) {
       unsigned oldVertIndex = indices[i + ii];
       float r;
