@@ -17,6 +17,9 @@
 #include <strug/controls/StrugController.h>
 #include <strug/exception/StrugException.h>
 #include <strug/states/MazeTest.h>
+#include <strug/states/Minecraft.h>
+#include <strug/states/CubeTest.h>
+#include <strug/states/MarchingCubes.h>
 
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
@@ -147,7 +150,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(std::unique_ptr<State>(new MazeTest()));
+  gameContext->requestStateChange(std::unique_ptr<State>(new MarchingCubes()));
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

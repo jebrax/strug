@@ -1,13 +1,13 @@
 #include <glade/render/Drawable.h>
 #include <glade/render/ShaderProgram.h>
 #include <glade/render/meshes/Mesh.h>
-#include <glade/render/meshes/DynamicMeshGenerator.h>
-#include <strug/blocks/Frank.h>
+#include <glade/render/meshes/CubeTerrainGenerator.h>
+#include <strug/blocks/Isosurface.h>
 #include <strug/ResourceManager.h>
 
 extern Strug::ResourceManager *game_resource_manager;
 
-void Frank::initialize(float radius)
+void Isosurface::initialize()
 {
   StrugObject::initialize();
 
@@ -18,12 +18,9 @@ void Frank::initialize(float radius)
         "phong.fragment.glsl"
       );
 
-    this->radius = radius;
-
     std::shared_ptr<Glade::Mesh> mesh = std::make_shared<Glade::Mesh>();
-    DynamicMeshGenerator gen;
-    gen.generateHull(*mesh, radius, true);
-    //gen.generate(*mesh);
+    CubeTerrainGenerator gen;
+    gen.marchingCubes(*mesh);
     view = new Drawable(mesh, program);
 
     addDrawable(view);
