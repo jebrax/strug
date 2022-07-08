@@ -8,6 +8,8 @@
 
 #include <unordered_map>
 
+static Isosurface *surf = nullptr;
+
 MarchingCubes::MarchingCubes():
   State(),
   terrain(nullptr),
@@ -22,7 +24,7 @@ MarchingCubes::~MarchingCubes()
 
 void MarchingCubes::createEntities()
 {
-  Isosurface *surf = new Isosurface();
+  surf = new Isosurface();
   surf->initialize();
   context->add(surf);
 }
@@ -50,8 +52,6 @@ void MarchingCubes::dig()
 
 bool MarchingCubes::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
 {
-  //terrain->getTransform()->rotation->y = xPos * 0.001;
-  //terrain->getTransform()->rotation->x = yPos * 0.001;
   context->getRenderer()->getCamera()->rotation->y = xPos * 0.001;
   context->getRenderer()->getCamera()->rotation->x = yPos * 0.001;
 
@@ -65,23 +65,58 @@ bool MarchingCubes::buttonPress(int controlId, int terminalId)
 
 bool MarchingCubes::buttonRelease(int controlId, int terminalId)
 {
-  if (controlId == 3) {
-    digPressed = false;
-  }
-
-  if (controlId == 4) {
-    clearPressed = false;
-  }
-
-  if (controlId == 5) {
-    createPressed = false;
-  }
-
   return true;
 }
 
 bool MarchingCubes::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
+  Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
+
+  log("Near point: %f %f %f", nearPoint.x, nearPoint.y, nearPoint.z);
+
+  Glade::Vector3f cameraPos = *context->getRenderer()->getCamera()->position;
+
+  Glade::Vector3f dir(nearPoint.x, nearPoint.y, nearPoint.z);
+  dir.subtract(cameraPos);
+  dir.normalize();
+
+  // for the smaller step:
+  dir.x *= 0.1;
+  dir.y *= 0.1;
+  dir.z *= 0.1;
+
+  log("Ray dir: %f %f %f", dir.x, dir.y, dir.z);
+
+  Glade::Vector3f stepPoint(nearPoint.x, nearPoint.y, nearPoint.z);
+  Grid::CellsI currentCell;
+
+  for (int i = 0; i < 100; i++) {
+    Glade::Vector3i cellIndex = surf->grid.getCellIndexByCoords(stepPoint);
+    currentCell = surf->grid.cells.find(cellIndex);
+
+    if (currentCell == surf->grid.cells.end()) {
+      break;
+    }
+
+    bool shotSolid = false;
+
+    for (int j = 0; j < 8; j++) {
+      if (currentCell->second.val[j] < 0.5) {
+        shotSolid = true;
+      }
+    }
+
+    surf->grid.addValueAt(cellIndex, 0.1);
+
+    if (shotSolid)
+      break;
+
+    stepPoint.add(dir);
+  }
+
+  surf->initialize();
+  context->add(surf);
+
   return true;
 }
 
