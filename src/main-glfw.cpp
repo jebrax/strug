@@ -20,6 +20,7 @@
 #include <strug/states/Minecraft.h>
 #include <strug/states/CubeTest.h>
 #include <strug/states/MarchingCubes.h>
+#include <strug/states/Chunked.h>
 
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
@@ -150,7 +151,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(std::unique_ptr<State>(new MarchingCubes()));
+  gameContext->requestStateChange(std::unique_ptr<State>(new Chunked()));
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

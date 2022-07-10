@@ -1,7 +1,7 @@
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
 #include <glade/controls/VirtualController.h>
-#include <strug/states/MarchingCubes.h>
+#include <strug/states/Chunked.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Isosurface.h>
 #include <glade/render/meshes/CubeTerrainGenerator.h>
@@ -9,31 +9,39 @@
 
 #include <unordered_map>
 
-static Isosurface *surf = nullptr;
+typedef std::unordered_map<Glade::Vector2i, Isosurface*> ChunksMap;
+typedef ChunksMap::iterator ChunksMapI;
+
+static const int CHUNKS_SIDE = 3;
 static Grid grid(60, 0.25);
 
-MarchingCubes::MarchingCubes():
+static ChunksMap chunks;
+
+Chunked::Chunked():
   State(),
-  terrain(nullptr),
-  digPressed(false),
-  clearPressed(false),
-  createPressed(false)
+  digPressed(false)
 {}
 
-MarchingCubes::~MarchingCubes()
+Chunked::~Chunked()
 {
 }
 
-void MarchingCubes::createEntities()
+void Chunked::createEntities()
 {
-  surf = new Isosurface();
-  surf->initialize(Glade::Vector2i(0, 0), grid);
-  context->add(surf);
+  for (int i = 0; i < CHUNKS_SIDE; i++) {
+    for (int j = 0; j < CHUNKS_SIDE; j++) {
+      Glade::Vector2i chunkIndex(i, j);
+      Isosurface* surf = new Isosurface();
+      surf->initialize(chunkIndex, grid);
+      context->add(surf);
+      chunks[chunkIndex] = surf;
+    }
+  }
 }
 
-void MarchingCubes::init(Context &context)
+void Chunked::init(Context &context)
 {
-  log("Init MarchingCubes");
+  log("Init Chunked");
   this->context = &context;
 
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
@@ -48,11 +56,11 @@ void MarchingCubes::init(Context &context)
   context.setController(*this);
 }
 
-void MarchingCubes::dig()
+void Chunked::dig()
 {
 }
 
-bool MarchingCubes::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
+bool Chunked::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
 {
   context->getRenderer()->getCamera()->rotation->y = xPos * 0.001;
   context->getRenderer()->getCamera()->rotation->x = yPos * 0.001;
@@ -60,17 +68,17 @@ bool MarchingCubes::pointerMove(float xPos, float yPos, float zPos, int controlI
   return true;
 }
 
-bool MarchingCubes::buttonPress(int controlId, int terminalId)
+bool Chunked::buttonPress(int controlId, int terminalId)
 {
   return true;
 }
 
-bool MarchingCubes::buttonRelease(int controlId, int terminalId)
+bool Chunked::buttonRelease(int controlId, int terminalId)
 {
   return true;
 }
 
-bool MarchingCubes::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
+bool Chunked::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
   Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
 
@@ -92,8 +100,10 @@ bool MarchingCubes::pointerDown(float axisX, float axisY, float axisZ, int contr
   Glade::Vector3f stepPoint(nearPoint.x, nearPoint.y, nearPoint.z);
   Grid::CellsI currentCell;
 
+  std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo;
+
   for (int i = 0; i < 100; i++) {
-    std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo = grid.getCellIndexByCoords(stepPoint);
+    cellInfo = grid.getCellIndexByCoords(stepPoint);
     currentCell = grid.cells.find(cellInfo.second);
 
     if (currentCell == grid.cells.end()) {
@@ -116,18 +126,35 @@ bool MarchingCubes::pointerDown(float axisX, float axisY, float axisZ, int contr
     stepPoint.add(dir);
   }
 
-  surf->initialize(Glade::Vector2i(0, 0), grid);
-  context->add(surf);
+  reloadChunk(cellInfo.first);
+
+  std::vector<Glade::Vector2i> adjacentChunks;
+  grid.getAdjacentChunks(cellInfo.second, adjacentChunks);
+
+  for (const Glade::Vector2i &chunkIndex: adjacentChunks) {
+    //log("Adj chunk (%d, %d)", chunkIndex.x, chunkIndex.y);
+    reloadChunk(chunkIndex);
+  }
 
   return true;
 }
 
-void MarchingCubes::applyRules(Context &context)
+void Chunked::reloadChunk(const Glade::Vector2i &chunkIndex)
+{
+  ChunksMapI chunk = chunks.find(chunkIndex);
+
+  if (chunk != chunks.end()) {
+    Isosurface* surf = chunk->second;
+    surf->initialize(chunkIndex, grid);
+    context->add(surf);
+  }
+}
+
+void Chunked::applyRules(Context &context)
 {
 }
 
-void MarchingCubes::shutdown(Context &context)
+void Chunked::shutdown(Context &context)
 {
-  delete terrain;
 }
 

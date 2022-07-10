@@ -8,8 +8,8 @@ run:
 glade:
 	cd ../glade && $(MAKE)
 
-strug: main-glfw.o ResourceManager.o Frank.o Cube.o Sphere.o Isosurface.o MarchingCubes.o sha1.o builddir
-	clang++ -mmacos-version-min=11.6 -O0 -g -o build/strug/strug -L../../vendor/libccd/src -L../../vendor/fcl/build/lib -L../../vendor/zlib-1.2.11 -L../../vendor/assimp/lib -L../../vendor/glew/lib/ -L../glade/build/glade -L../../vendor/freetype-2.10.1/objs/.libs/ -L../../vendor/glfw/build/src -lccd -lfcl -lz -lassimp -lglfw3 -lGLEW -lfreetype -lglade -framework OpenGL -framework AppKit -framework IOKit build/strug/main-glfw.o build/strug/ResourceManager.o build/strug/Sphere.o build/strug/Frank.o build/strug/Cube.o build/strug/Isosurface.o build/strug/MazeTest.o build/strug/Minecraft.o build/strug/MarchingCubes.o build/strug/CubeTest.o build/sha1/sha1.o
+strug: main-glfw.o ResourceManager.o Frank.o Cube.o Sphere.o Isosurface.o MarchingCubes.o Chunked.o sha1.o builddir
+	clang++ -mmacos-version-min=11.6 -O0 -g -o build/strug/strug -L../../vendor/libccd/src -L../../vendor/fcl/build/lib -L../../vendor/zlib-1.2.11 -L../../vendor/assimp/lib -L../../vendor/glew/lib/ -L../glade/build/glade -L../../vendor/freetype-2.10.1/objs/.libs/ -L../../vendor/glfw/build/src -lccd -lfcl -lz -lassimp -lglfw3 -lGLEW -lfreetype -lglade -framework OpenGL -framework AppKit -framework IOKit build/strug/main-glfw.o build/strug/ResourceManager.o build/strug/Sphere.o build/strug/Frank.o build/strug/Cube.o build/strug/Isosurface.o build/strug/MazeTest.o build/strug/Minecraft.o build/strug/MarchingCubes.o build/strug/Chunked.o build/strug/CubeTest.o build/sha1/sha1.o
 
 
 ######################
@@ -49,6 +49,9 @@ CubeTest.o: builddir
 
 MarchingCubes.o: builddir
 	clang++ -std=c++20 -O0 -g -I../../vendor/libccd/src -I../../vendor/PerlinNoise/include -I../../vendor/eigen -I../../vendor/fcl/include -I../../vendor/fcl/build/include -I../../vendor/glew/include -I include -I ../glade/include -DGLADE_MACOS -c src/states/MarchingCubes.cpp -o build/strug/MarchingCubes.o
+
+Chunked.o: builddir
+	clang++ -std=c++20 -O0 -g -I../../vendor/libccd/src -I../../vendor/PerlinNoise/include -I../../vendor/eigen -I../../vendor/fcl/include -I../../vendor/fcl/build/include -I../../vendor/glew/include -I include -I ../glade/include -DGLADE_MACOS -c src/states/Chunked.cpp -o build/strug/Chunked.o
 
 ######################
 
