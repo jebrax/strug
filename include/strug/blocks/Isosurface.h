@@ -1,7 +1,7 @@
 #pragma once
 
 #include <strug/blocks/StrugObject.h>
-#include <glade/render/meshes/CubeTerrainGenerator.h>
+#include <glade/generation/CubeTerrainGenerator.h>
 
 class Grid;
 

@@ -4,7 +4,7 @@
 #include <strug/states/Minecraft.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Cube.h>
-#include <glade/render/meshes/CubeTerrainGenerator.h>
+#include <glade/generation/CubeTerrainGenerator.h>
 
 #include <unordered_map>
 

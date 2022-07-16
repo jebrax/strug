@@ -1,7 +1,7 @@
 #include <glade/render/Drawable.h>
 #include <glade/render/ShaderProgram.h>
 #include <glade/render/meshes/Mesh.h>
-#include <glade/render/meshes/DynamicMeshGenerator.h>
+#include <glade/generation/DynamicMeshGenerator.h>
 #include <strug/blocks/Frank.h>
 #include <strug/ResourceManager.h>
 

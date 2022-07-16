@@ -4,8 +4,8 @@
 #include <strug/states/MarchingCubes.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Isosurface.h>
-#include <glade/render/meshes/CubeTerrainGenerator.h>
-#include <glade/render/meshes/Grid.h>
+#include <glade/generation/CubeTerrainGenerator.h>
+#include <glade/generation/Grid.h>
 
 #include <unordered_map>
 
@@ -108,7 +108,7 @@ bool MarchingCubes::pointerDown(float axisX, float axisY, float axisZ, int contr
       }
     }
 
-    grid.addValueAt(cellInfo.second, 0.1);
+    grid.addValueAtCell(cellInfo.second, 0.1);
 
     if (shotSolid)
       break;

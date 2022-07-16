@@ -1,7 +1,7 @@
 #include <glade/render/Drawable.h>
 #include <glade/render/ShaderProgram.h>
 #include <glade/render/meshes/Mesh.h>
-#include <glade/render/meshes/Grid.h>
+#include <glade/generation/Grid.h>
 #include <strug/blocks/Isosurface.h>
 #include <strug/ResourceManager.h>
 

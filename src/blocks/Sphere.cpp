@@ -1,6 +1,6 @@
 #include <glade/render/Drawable.h>
 #include <glade/render/ShaderProgram.h>
-#include <glade/render/meshes/DynamicMeshGenerator.h>
+#include <glade/generation/DynamicMeshGenerator.h>
 #include <strug/blocks/Sphere.h>
 #include <strug/ResourceManager.h>
 

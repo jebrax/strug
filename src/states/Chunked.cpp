@@ -4,15 +4,15 @@
 #include <strug/states/Chunked.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Isosurface.h>
-#include <glade/render/meshes/CubeTerrainGenerator.h>
-#include <glade/render/meshes/Grid.h>
+#include <glade/generation/CubeTerrainGenerator.h>
+#include <glade/generation/Grid.h>
 
 #include <unordered_map>
 
 typedef std::unordered_map<Glade::Vector2i, Isosurface*> ChunksMap;
 typedef ChunksMap::iterator ChunksMapI;
 
-static const int CHUNKS_SIDE = 3;
+static const int CHUNKS_SIDE = 1;
 static Grid grid(60, 0.25);
 
 static ChunksMap chunks;
@@ -101,8 +101,10 @@ bool Chunked::pointerDown(float axisX, float axisY, float axisZ, int controlId, 
   Grid::CellsI currentCell;
 
   std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo;
+  std::pair<Glade::Vector2i, Glade::Vector3i> prevCellInfo;
 
   for (int i = 0; i < 100; i++) {
+    prevCellInfo = cellInfo;
     cellInfo = grid.getCellIndexByCoords(stepPoint);
     currentCell = grid.cells.find(cellInfo.second);
 
@@ -111,17 +113,27 @@ bool Chunked::pointerDown(float axisX, float axisY, float axisZ, int controlId, 
     }
 
     bool shotSolid = false;
+    bool shotDenseAir = false;
 
     for (int j = 0; j < 8; j++) {
       if (currentCell->second.val[j] < 0.5) {
         shotSolid = true;
       }
+
+      if (currentCell->second.val[j] < 0.998) {
+        shotDenseAir = true;
+      }
     }
 
-    grid.addValueAt(cellInfo.second, 0.1);
+    if (shotSolid || shotDenseAir) {
+      // use prevCellInfo for growing
+      //grid.addValueAtCellPerCubeVertex(cellInfo.second, stepPoint, 0.002);
+      grid.addValueAtCellPerCubeVertex(prevCellInfo.second, stepPoint, -0.002);
+      //grid.addValueAtCell(cellInfo.second, 0.1, -1);
 
-    if (shotSolid)
-      break;
+      if (shotSolid)
+        break;
+    }
 
     stepPoint.add(dir);
   }
