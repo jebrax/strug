@@ -9,5 +9,5 @@ class Isosurface: public StrugObject
 {
   public:
     Isosurface(): StrugObject() {}
-    virtual void initialize(const Glade::Vector2i &chunkIndex, Grid &grid);
+    virtual void initialize(const Glade::Vector2i &chunkIndex, Grid &grid, bool empty = false);
 };

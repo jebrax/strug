@@ -1,7 +1,7 @@
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
 #include <glade/controls/VirtualController.h>
-#include <strug/states/Chunked.h>
+#include <strug/states/Craft.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Isosurface.h>
 #include <glade/generation/CubeTerrainGenerator.h>
@@ -12,37 +12,37 @@
 typedef std::unordered_map<Glade::Vector2i, Isosurface*> ChunksMap;
 typedef ChunksMap::iterator ChunksMapI;
 
-static const int CHUNKS_SIDE = 3;
+static const int CHUNKS_SIDE = 1;
 static Grid grid(60, 0.25);
 
 static ChunksMap chunks;
 
-Chunked::Chunked():
+Craft::Craft():
   State(),
   digging(false),
   growing(false)
 {}
 
-Chunked::~Chunked()
+Craft::~Craft()
 {
 }
 
-void Chunked::createEntities()
+void Craft::createEntities()
 {
   for (int i = 0; i < CHUNKS_SIDE; i++) {
     for (int j = 0; j < CHUNKS_SIDE; j++) {
       Glade::Vector2i chunkIndex(i, j);
       Isosurface* surf = new Isosurface();
-      surf->initialize(chunkIndex, grid, false);
+      surf->initialize(chunkIndex, grid, true);
       context->add(surf);
       chunks[chunkIndex] = surf;
     }
   }
 }
 
-void Chunked::init(Context &context)
+void Craft::init(Context &context)
 {
-  log("Init Chunked");
+  log("Init Craft");
   this->context = &context;
 
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
@@ -57,7 +57,7 @@ void Chunked::init(Context &context)
   context.setController(*this);
 }
 
-bool Chunked::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
+bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
 {
   context->getRenderer()->getCamera()->rotation->y = xPos * 0.001;
   context->getRenderer()->getCamera()->rotation->x = yPos * 0.001;
@@ -65,17 +65,17 @@ bool Chunked::pointerMove(float xPos, float yPos, float zPos, int controlId, int
   return true;
 }
 
-bool Chunked::buttonPress(int controlId, int terminalId)
+bool Craft::buttonPress(int controlId, int terminalId)
 {
   return true;
 }
 
-bool Chunked::buttonRelease(int controlId, int terminalId)
+bool Craft::buttonRelease(int controlId, int terminalId)
 {
   return true;
 }
 
-void Chunked::dig()
+void Craft::dig()
 {
   Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
 
@@ -105,16 +105,16 @@ void Chunked::dig()
     cellInfo = grid.getCellIndexByCoords(stepPoint);
     currentCell = grid.cells.find(cellInfo.second);
 
-    if (currentCell == grid.cells.end()) {
-      break;
-    }
-
     bool shotSolid = false;
 
-    for (int j = 0; j < 8; j++) {
-      if (currentCell->second.val[j] < 0.5) {
-        shotSolid = true;
-        break;
+    if (cellInfo.second.x == 0 && cellInfo.second.y == 0 && cellInfo.second.z == 0) {
+      shotSolid = true;
+    } else {
+      for (int j = 0; j < 8; j++) {
+        if (currentCell->second.val[j] < 0.5) {
+          shotSolid = true;
+          break;
+        }
       }
     }
 
@@ -139,7 +139,7 @@ void Chunked::dig()
 
 }
 
-void Chunked::grow()
+void Craft::grow()
 {
   Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
 
@@ -174,6 +174,14 @@ void Chunked::grow()
     }
 
     bool shotSolid = false;
+
+    /*
+    if (cellInfo.second.x == 0 && cellInfo.second.y == 0 && cellInfo.second.z == 0) {
+      printf("Center!\n");
+      shotSolid = true;
+      break;
+    }
+    */
 
     for (int j = 0; j < 8; j++) {
       if (currentCell->second.val[j] < 0.5) {
@@ -202,7 +210,7 @@ void Chunked::grow()
   }
 }
 
-bool Chunked::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
+bool Craft::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
   switch (controlId) {
     case 0: digging = true;
@@ -216,14 +224,14 @@ bool Chunked::pointerDown(float axisX, float axisY, float axisZ, int controlId, 
   return true;
 }
 
-bool Chunked::pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId)
+bool Craft::pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
   digging = growing = false;
 
   return true;
 }
 
-void Chunked::reloadChunk(const Glade::Vector2i &chunkIndex)
+void Craft::reloadChunk(const Glade::Vector2i &chunkIndex)
 {
   ChunksMapI chunk = chunks.find(chunkIndex);
 
@@ -234,7 +242,7 @@ void Chunked::reloadChunk(const Glade::Vector2i &chunkIndex)
   }
 }
 
-void Chunked::applyRules(Context &context)
+void Craft::applyRules(Context &context)
 {
   if (digging)
     dig();
@@ -243,7 +251,7 @@ void Chunked::applyRules(Context &context)
     grow();
 }
 
-void Chunked::shutdown(Context &context)
+void Craft::shutdown(Context &context)
 {
 }
 

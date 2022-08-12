@@ -7,7 +7,7 @@
 
 extern Strug::ResourceManager *game_resource_manager;
 
-void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid)
+void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, bool empty)
 {
   CubeTerrainGenerator gen;
 
@@ -24,7 +24,9 @@ void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid)
 
     getTransform()->position->x = chunkIndex.x * grid.chunkSizeCoords;
     getTransform()->position->z = chunkIndex.y * grid.chunkSizeCoords;
+
     gen.mcGenChunk(chunkIndex, grid, *mesh, 0.5);
+    //gen.genIsoCube(grid, *mesh, 0.5);
 
     view = new Drawable(mesh, program);
     addDrawable(view);
@@ -32,6 +34,7 @@ void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid)
   } else {
     std::shared_ptr<Glade::Mesh> mesh = view->getMesh();
     gen.mcGenChunk(chunkIndex, grid, *mesh, 0.5, false);
+    //gen.genIsoCube(grid, *mesh, 0.5);
   }
 }
 

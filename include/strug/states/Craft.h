@@ -12,7 +12,7 @@ namespace Glade {
   class Vector2i;
 }
 
-class Chunked: public State, VirtualController
+class Craft: public State, VirtualController
 {
   private:
     StrugObject *terrain;
@@ -24,10 +24,9 @@ class Chunked: public State, VirtualController
     void grow();
     void createEntities();
     void reloadChunk(const Glade::Vector2i &chunkIndex);
-
   public:
-    Chunked();
-    ~Chunked();
+    Craft();
+    ~Craft();
     
     void init(Context &context);
     void shutdown(Context &context);

@@ -21,6 +21,7 @@
 #include <strug/states/CubeTest.h>
 #include <strug/states/MarchingCubes.h>
 #include <strug/states/Chunked.h>
+#include <strug/states/Craft.h>
 
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
@@ -42,10 +43,19 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
 
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    int gladeControlId;
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT)
+      gladeControlId = 0;
+    if (button == GLFW_MOUSE_BUTTON_RIGHT)
+      gladeControlId = 1;
+
     VirtualController *controller = gameContext->getController();
-    controller->pointerDown(0, 0, 0, 0, 0);
-  }
+
+  if (action == GLFW_PRESS)
+    controller->pointerDown(0, 0, 0, gladeControlId, 0);
+  if (action == GLFW_RELEASE)
+    controller->pointerUp(0, 0, 0, gladeControlId, 0);
 }
 
 void processInput(GLFWwindow* window)
@@ -151,7 +161,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(std::unique_ptr<State>(new Chunked()));
+  gameContext->requestStateChange(std::unique_ptr<State>(new Craft()));
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
