@@ -161,7 +161,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(std::unique_ptr<State>(new Craft()));
+  gameContext->requestStateChange(std::unique_ptr<State>(new Chunked()));
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

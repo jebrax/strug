@@ -4,7 +4,7 @@
 #include <strug/states/Minecraft.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Cube.h>
-#include <glade/generation/CubeTerrainGenerator.h>
+#include <glade/generation/AdvancedMeshGenerator.h>
 
 #include <unordered_map>
 
@@ -38,7 +38,7 @@ Minecraft::~Minecraft()
 
 void Minecraft::createEntities()
 {
-  CubeTerrainGenerator gen;
+  AdvancedMeshGenerator gen;
 
   auto createBlock = [this](Glade::Vector3i &gridCoord, float y1, float y2, float y3, float y4) {
     Block block;

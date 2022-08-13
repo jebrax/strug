@@ -4,7 +4,6 @@
 #include <strug/states/MarchingCubes.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Isosurface.h>
-#include <glade/generation/CubeTerrainGenerator.h>
 #include <glade/generation/Grid.h>
 
 #include <unordered_map>

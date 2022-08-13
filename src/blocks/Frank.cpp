@@ -1,7 +1,7 @@
 #include <glade/render/Drawable.h>
 #include <glade/render/ShaderProgram.h>
 #include <glade/render/meshes/Mesh.h>
-#include <glade/generation/DynamicMeshGenerator.h>
+#include <glade/generation/MeshGenerator.h>
 #include <strug/blocks/Frank.h>
 #include <strug/ResourceManager.h>
 
@@ -21,7 +21,7 @@ void Frank::initialize(float radius)
     this->radius = radius;
 
     std::shared_ptr<Glade::Mesh> mesh = std::make_shared<Glade::Mesh>();
-    DynamicMeshGenerator gen;
+    MeshGenerator gen;
     gen.generateHull(*mesh, radius, true);
     //gen.generate(*mesh);
     view = new Drawable(mesh, program);
