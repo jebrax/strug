@@ -8,11 +8,14 @@
 
 #include <unordered_map>
 
+#define GRID_CELL_SIZE_COORDS 0.25
+#define GRID_CELLS_IN_A_CHUNK 60
+
 typedef std::unordered_map<Glade::Vector2i, Isosurface*> ChunksMap;
 typedef ChunksMap::iterator ChunksMapI;
 
 static const int CHUNKS_SIDE = 1;
-static Grid grid(60, 0.25);
+static Grid grid(GRID_CELLS_IN_A_CHUNK, GRID_CELL_SIZE_COORDS);
 
 static ChunksMap chunks;
 
@@ -32,7 +35,7 @@ void Craft::createEntities()
     for (int j = 0; j < CHUNKS_SIDE; j++) {
       Glade::Vector2i chunkIndex(i, j);
       Isosurface* surf = new Isosurface();
-      surf->initialize(chunkIndex, grid, true);
+      surf->initialize(chunkIndex, grid, false);
       context->add(surf);
       chunks[chunkIndex] = surf;
     }
@@ -51,15 +54,44 @@ void Craft::init(Context &context)
 
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
-  //context.renderer->getCamera()->position->z = 4.0;
+  context.renderer->getCamera()->position->z = 4.0;
 
   context.setController(*this);
+  pointerMove(0,0,0,0,0);
 }
 
-bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
+bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
 {
-  context->getRenderer()->getCamera()->rotation->y = xPos * 0.001;
-  context->getRenderer()->getCamera()->rotation->x = yPos * 0.001;
+  static float phi = 0.0, theta = 0.0;
+  static float r = 4.0f;
+  static float originX = GRID_CELLS_IN_A_CHUNK * GRID_CELL_SIZE_COORDS / 2,
+               originY = 0,
+               originZ = GRID_CELLS_IN_A_CHUNK * GRID_CELL_SIZE_COORDS / 2;
+
+  if (controlId == 0 || controlId == 1) {
+    float x, y, z;
+
+    if (controlId == 0 && rotateIsDown) {
+      phi = yPos * 0.001;
+      theta = xPos * 0.001;
+    }
+
+    if (controlId == 1) {
+      r += yPos * 0.1;
+    }
+
+    y = cos(phi);
+    x = cos(theta) * sin(phi);
+    z = sin(theta) * sin(phi);
+    x *= r; y *= r; z *= r;
+
+    context->getRenderer()->getCamera()->position->x = x + originX;
+    context->getRenderer()->getCamera()->position->y = y + originY;
+    context->getRenderer()->getCamera()->position->z = z + originZ;
+
+    context->getRenderer()->getCamera()->rotation->x = phi + PI / 2.0;
+    context->getRenderer()->getCamera()->rotation->y = theta + PI / 2.0;
+   }
 
   return true;
 }
@@ -74,15 +106,16 @@ bool Craft::buttonRelease(int controlId, int terminalId)
   return true;
 }
 
-void Craft::dig()
+void Craft::shoot()
 {
-  Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
+  // near plane point (or should I say ray that goes through the near plane and the screen center)
+  Glade::Vector3f towardsPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
 
-  log("Near point: %f %f %f", nearPoint.x, nearPoint.y, nearPoint.z);
+  log("Towards point: %f %f %f", towardsPoint.x, towardsPoint.y, towardsPoint.z);
 
   Glade::Vector3f cameraPos = *context->getRenderer()->getCamera()->position;
 
-  Glade::Vector3f dir(nearPoint.x, nearPoint.y, nearPoint.z);
+  Glade::Vector3f dir(towardsPoint.x, towardsPoint.y, towardsPoint.z);
   dir.subtract(cameraPos);
   dir.normalize();
 
@@ -93,96 +126,35 @@ void Craft::dig()
 
   log("Ray dir: %f %f %f", dir.x, dir.y, dir.z);
 
-  Glade::Vector3f stepPoint(nearPoint.x, nearPoint.y, nearPoint.z);
+  Glade::Vector3f stepPoint(towardsPoint.x, towardsPoint.y, towardsPoint.z);
   Grid::CellsI currentCell;
 
   std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo;
   std::pair<Glade::Vector2i, Glade::Vector3i> prevCellInfo;
 
-  for (int i = 0; i < 100; i++) {
-    prevCellInfo = cellInfo;
-    cellInfo = grid.getCellIndexByCoords(stepPoint);
-    currentCell = grid.cells.find(cellInfo.second);
+  bool shotSolid = false;
 
-    bool shotSolid = false;
-
-    if (cellInfo.second.x == 0 && cellInfo.second.y == 0 && cellInfo.second.z == 0) {
-      shotSolid = true;
-    } else {
-      for (int j = 0; j < 8; j++) {
-        if (currentCell->second.val[j] < 0.5) {
-          shotSolid = true;
-          break;
-        }
-      }
-    }
-
-    if (shotSolid) {
-      grid.addValueAtCellPerCubeVertex(cellInfo.second, stepPoint, 0.008);
-      //grid.addValueAtCell(cellInfo.second, 0.1, -1);
-      break;
-    }
-
-    stepPoint.add(dir);
-  }
-
-  reloadChunk(cellInfo.first);
-
-  std::vector<Glade::Vector2i> adjacentChunks;
-  grid.getAdjacentChunks(cellInfo.second, adjacentChunks);
-
-  for (const Glade::Vector2i &chunkIndex: adjacentChunks) {
-    //log("Adj chunk (%d, %d)", chunkIndex.x, chunkIndex.y);
-    reloadChunk(chunkIndex);
-  }
-
-}
-
-void Craft::grow()
-{
-  Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
-
-  log("Near point: %f %f %f", nearPoint.x, nearPoint.y, nearPoint.z);
-
-  Glade::Vector3f cameraPos = *context->getRenderer()->getCamera()->position;
-
-  Glade::Vector3f dir(nearPoint.x, nearPoint.y, nearPoint.z);
-  dir.subtract(cameraPos);
-  dir.normalize();
-
-  // for the smaller step:
-  dir.x *= 0.1;
-  dir.y *= 0.1;
-  dir.z *= 0.1;
-
-  log("Ray dir: %f %f %f", dir.x, dir.y, dir.z);
-
-  Glade::Vector3f stepPoint(nearPoint.x, nearPoint.y, nearPoint.z);
-  Grid::CellsI currentCell;
-
-  std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo;
-  std::pair<Glade::Vector2i, Glade::Vector3i> prevCellInfo;
-
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 200; i++) {
+    // this will not work because step is much less then a cell size
     prevCellInfo = cellInfo;
     cellInfo = grid.getCellIndexByCoords(stepPoint);
     currentCell = grid.cells.find(cellInfo.second);
 
     if (currentCell == grid.cells.end()) {
+      log("NO CELL");
       break;
     }
 
-    bool shotSolid = false;
+    if (cellInfo.first.x != 0 || cellInfo.first.y != 0 || cellInfo.second.x != 0 || cellInfo.second.y != 0 || cellInfo.second.z)
+    //  printf("CELL INFO: %d, %d -> %d, %d, %d\n", cellInfo.first.x, cellInfo.first.y, cellInfo.second.x, cellInfo.second.y, cellInfo.second.z);
 
-    /*
-    if (cellInfo.second.x == 0 && cellInfo.second.y == 0 && cellInfo.second.z == 0) {
-      printf("Center!\n");
-      shotSolid = true;
+    if (cellInfo.second.x == 29 && cellInfo.second.z == 29) {
+      printf("HIT CENTER\n");
       break;
     }
-    */
 
     for (int j = 0; j < 8; j++) {
+      // this is not the best way, because prevCell gains value together with the currentCell
       if (currentCell->second.val[j] < 0.5) {
         shotSolid = true;
         break;
@@ -190,13 +162,13 @@ void Craft::grow()
     }
 
     if (shotSolid) {
-      grid.addValueAtCellPerCubeVertex(cellInfo.second, stepPoint, -0.008);
-      //grid.addValueAtCell(cellInfo.second, -0.1, -1);
       break;
     }
 
     stepPoint.add(dir);
   }
+
+  grid.addValueAtCellPerCubeVertex(cellInfo.second, stepPoint, digging ? 0.008 : -0.008);
 
   reloadChunk(cellInfo.first);
 
@@ -218,6 +190,8 @@ bool Craft::pointerDown(float axisX, float axisY, float axisZ, int controlId, in
     case 1: growing = true;
             digging = false;
             break;
+    case 2: rotateIsDown = true;
+            break;
   }
 
   return true;
@@ -225,7 +199,11 @@ bool Craft::pointerDown(float axisX, float axisY, float axisZ, int controlId, in
 
 bool Craft::pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
-  digging = growing = false;
+  if (controlId == 2) {
+    rotateIsDown = false;
+  } else {
+    digging = growing = false;
+  }
 
   return true;
 }
@@ -243,11 +221,8 @@ void Craft::reloadChunk(const Glade::Vector2i &chunkIndex)
 
 void Craft::applyRules(Context &context)
 {
-  if (digging)
-    dig();
-
-  if (growing)
-    grow();
+  if (digging || growing)
+    shoot();
 }
 
 void Craft::shutdown(Context &context)

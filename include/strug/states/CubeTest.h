@@ -12,13 +12,8 @@ class VirtualContoller;
 class CubeTest: public State, VirtualController
 {
   private:
-    StrugObject *terrain;
-    Frank *shovel;
     Context *context;
-
-    bool digPressed;
-    bool clearPressed;
-    bool createPressed;
+    bool rotateIsDown;
 
   public:
     CubeTest();
@@ -27,13 +22,12 @@ class CubeTest: public State, VirtualController
     void init(Context &context);
     void shutdown(Context &context);
     void applyRules(Context &context);
-    void dig();
     void createEntities();
 
     void initController() {};
     bool buttonPress(int controlId, int terminalId);
     bool buttonRelease(int controlId, int terminalId);
     bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId);
-    bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId) { return false; }
-    bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId);
+    bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId);
+    bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute = false);
 };

@@ -20,8 +20,7 @@ class Chunked: public State, VirtualController
 
     bool digging, growing;
 
-    void dig();
-    void grow();
+    void shoot();
     void createEntities();
     void reloadChunk(const Glade::Vector2i &chunkIndex);
 

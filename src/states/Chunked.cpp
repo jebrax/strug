@@ -74,7 +74,7 @@ bool Chunked::buttonRelease(int controlId, int terminalId)
   return true;
 }
 
-void Chunked::dig()
+void Chunked::shoot()
 {
   Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
 
@@ -118,7 +118,7 @@ void Chunked::dig()
     }
 
     if (shotSolid) {
-      grid.addValueAtCellPerCubeVertex(cellInfo.second, stepPoint, 0.008);
+      grid.addValueAtCellPerCubeVertex(cellInfo.second, stepPoint, digging ? 0.008 : -0.008);
       //grid.addValueAtCell(cellInfo.second, 0.1, -1);
       break;
     }
@@ -136,69 +136,6 @@ void Chunked::dig()
     reloadChunk(chunkIndex);
   }
 
-}
-
-void Chunked::grow()
-{
-  Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
-
-  log("Near point: %f %f %f", nearPoint.x, nearPoint.y, nearPoint.z);
-
-  Glade::Vector3f cameraPos = *context->getRenderer()->getCamera()->position;
-
-  Glade::Vector3f dir(nearPoint.x, nearPoint.y, nearPoint.z);
-  dir.subtract(cameraPos);
-  dir.normalize();
-
-  // for the smaller step:
-  dir.x *= 0.1;
-  dir.y *= 0.1;
-  dir.z *= 0.1;
-
-  log("Ray dir: %f %f %f", dir.x, dir.y, dir.z);
-
-  Glade::Vector3f stepPoint(nearPoint.x, nearPoint.y, nearPoint.z);
-  Grid::CellsI currentCell;
-
-  std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo;
-  std::pair<Glade::Vector2i, Glade::Vector3i> prevCellInfo;
-
-  for (int i = 0; i < 100; i++) {
-    prevCellInfo = cellInfo;
-    cellInfo = grid.getCellIndexByCoords(stepPoint);
-    currentCell = grid.cells.find(cellInfo.second);
-
-    if (currentCell == grid.cells.end()) {
-      break;
-    }
-
-    bool shotSolid = false;
-
-    for (int j = 0; j < 8; j++) {
-      if (currentCell->second.val[j] < 0.5) {
-        shotSolid = true;
-        break;
-      }
-    }
-
-    if (shotSolid) {
-      grid.addValueAtCellPerCubeVertex(cellInfo.second, stepPoint, -0.008);
-      //grid.addValueAtCell(cellInfo.second, -0.1, -1);
-      break;
-    }
-
-    stepPoint.add(dir);
-  }
-
-  reloadChunk(cellInfo.first);
-
-  std::vector<Glade::Vector2i> adjacentChunks;
-  grid.getAdjacentChunks(cellInfo.second, adjacentChunks);
-
-  for (const Glade::Vector2i &chunkIndex: adjacentChunks) {
-    //log("Adj chunk (%d, %d)", chunkIndex.x, chunkIndex.y);
-    reloadChunk(chunkIndex);
-  }
 }
 
 bool Chunked::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
@@ -235,11 +172,8 @@ void Chunked::reloadChunk(const Glade::Vector2i &chunkIndex)
 
 void Chunked::applyRules(Context &context)
 {
-  if (digging)
-    dig();
-
-  if (growing)
-    grow();
+  if (digging || growing)
+    shoot();
 }
 
 void Chunked::shutdown(Context &context)

@@ -19,9 +19,9 @@ class Craft: public State, VirtualController
     Context *context;
 
     bool digging, growing;
+    bool rotateIsDown;
 
-    void dig();
-    void grow();
+    void shoot();
     void createEntities();
     void reloadChunk(const Glade::Vector2i &chunkIndex);
   public:
@@ -37,6 +37,6 @@ class Craft: public State, VirtualController
     bool buttonRelease(int controlId, int terminalId);
     bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId);
     bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId);
-    bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId);
+    bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute = false);
 };
 

@@ -26,7 +26,7 @@ class StrugController : public VirtualController
       return false;
     }
     
-    virtual bool pointerMove(float axisX, float axisY, float axisZ, int controlId, int terminalId)
+    virtual bool pointerMove(float axisX, float axisY, float axisZ, int controlId, int terminalId, bool isAbsolute)
     {
       return false;
     }

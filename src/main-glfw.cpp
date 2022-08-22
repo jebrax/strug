@@ -41,16 +41,27 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
   controller->pointerMove(xpos - initXpos, ypos - initYpos, 0, 0, 0);
 }
 
+static void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+  VirtualController *controller = gameContext->getController();
+  controller->pointerMove(xoffset, yoffset, 0, 1, 0, false);
+}
+
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-    int gladeControlId;
+  int gladeControlId;
 
-    if (button == GLFW_MOUSE_BUTTON_LEFT)
-      gladeControlId = 0;
-    if (button == GLFW_MOUSE_BUTTON_RIGHT)
-      gladeControlId = 1;
+  if (button == GLFW_MOUSE_BUTTON_LEFT)
+    gladeControlId = 0;
+  if (button == GLFW_MOUSE_BUTTON_RIGHT)
+    gladeControlId = 1;
+  if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
+    gladeControlId = 2;
 
-    VirtualController *controller = gameContext->getController();
+    //glfwSetInputMode(window, GLFW_CURSOR, action == GLFW_PRESS ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+  }
+
+  VirtualController *controller = gameContext->getController();
 
   if (action == GLFW_PRESS)
     controller->pointerDown(0, 0, 0, gladeControlId, 0);
@@ -158,10 +169,11 @@ int main()
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetScrollCallback(window, mouse_scroll_callback);
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(std::unique_ptr<State>(new Chunked()));
+  gameContext->requestStateChange(std::unique_ptr<State>(new Craft()));
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

@@ -1,6 +1,7 @@
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
 #include <glade/controls/VirtualController.h>
+#include <glade/math/util.h>
 #include <strug/states/CubeTest.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Cube.h>
@@ -11,10 +12,7 @@ static Cube* cube;
 
 CubeTest::CubeTest():
   State(),
-  terrain(nullptr),
-  digPressed(false),
-  clearPressed(false),
-  createPressed(false)
+  rotateIsDown(false)
 {}
 
 CubeTest::~CubeTest()
@@ -43,21 +41,40 @@ void CubeTest::init(Context &context)
 
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
-  //context.renderer->getCamera()->position->z = 4.0;
 
   context.setController(*this);
+  pointerMove(0,0,0,0,0);
 }
 
-void CubeTest::dig()
+bool CubeTest::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
 {
-}
+  static float phi = 0.0, theta = 0.0;
+  static float r = 4.0f;
 
-bool CubeTest::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
-{
-  //terrain->getTransform()->rotation->y = xPos * 0.001;
-  //terrain->getTransform()->rotation->x = yPos * 0.001;
-  context->getRenderer()->getCamera()->rotation->y = xPos * 0.001;
-  context->getRenderer()->getCamera()->rotation->x = yPos * 0.001;
+  if (controlId == 0 || controlId == 1) {
+    float x, y, z;
+
+    if (controlId == 0 && rotateIsDown) {
+      phi = yPos * 0.001;
+      theta = xPos * 0.001;
+    }
+
+    if (controlId == 1) {
+      r += yPos * 0.1;
+    }
+
+    y = cos(phi);
+    x = cos(theta) * sin(phi);
+    z = sin(theta) * sin(phi);
+    x *= r; y *= r; z *= r;
+
+    context->getRenderer()->getCamera()->position->x = x;
+    context->getRenderer()->getCamera()->position->y = y;
+    context->getRenderer()->getCamera()->position->z = z;
+
+    context->getRenderer()->getCamera()->rotation->x = phi + PI / 2.0;
+    context->getRenderer()->getCamera()->rotation->y = theta + PI / 2.0;
+   }
 
   return true;
 }
@@ -69,23 +86,24 @@ bool CubeTest::buttonPress(int controlId, int terminalId)
 
 bool CubeTest::buttonRelease(int controlId, int terminalId)
 {
-  if (controlId == 3) {
-    digPressed = false;
-  }
-
-  if (controlId == 4) {
-    clearPressed = false;
-  }
-
-  if (controlId == 5) {
-    createPressed = false;
-  }
-
   return true;
 }
 
 bool CubeTest::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
+  if (controlId == 2) {
+    rotateIsDown = true;
+  }
+
+  return true;
+}
+
+bool CubeTest::pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId)
+{
+  if (controlId == 2) {
+    rotateIsDown = false;
+  }
+
   return true;
 }
 
@@ -95,6 +113,6 @@ void CubeTest::applyRules(Context &context)
 
 void CubeTest::shutdown(Context &context)
 {
-  delete terrain;
+
 }
 
