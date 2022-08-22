@@ -2,8 +2,10 @@
 #include <GLFW/glfw3.h>
 
 #include <fstream>
-#include <stdio.h>
-#include <math.h>
+#include <cmath>
+#include <cstdlib>
+#include <sys/syslimits.h>
+#include <mach-o/dyld.h>
 
 #include <glade/exception/GladeException.h>
 #include <glade/debug/log.h>
@@ -11,6 +13,7 @@
 #include <glade/render/GladeRenderer.h>
 #include <glade/Context.h>
 #include <glade/State.h>
+#include <glade/util/Path.h>
 #include <glade/util/DesktopFileManager.h>
 #include <glade/util/ResourceManager.h>
 #include <strug/ResourceManager.h>
@@ -67,6 +70,24 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
     controller->pointerDown(0, 0, 0, gladeControlId, 0);
   if (action == GLFW_RELEASE)
     controller->pointerUp(0, 0, 0, gladeControlId, 0);
+}
+
+static Path determineAssetsDirectory()
+{
+  char* executablePath = nullptr;
+  uint32_t size = 0;
+
+  assert(_NSGetExecutablePath(executablePath, &size) < 0);
+  executablePath = (char*) malloc(size);
+  assert(_NSGetExecutablePath(executablePath, &size) == 0);
+
+  Path assetsDir(executablePath);
+  assetsDir = assetsDir.base();
+  assetsDir.append("assets");
+
+  log("Assets directory: %s", assetsDir.cString());
+ 
+  return assetsDir;
 }
 
 void processInput(GLFWwindow* window)
@@ -152,9 +173,8 @@ int main()
 
   glewInit();
 
-  const char assetsDir[200] = "/Users/jebrax/sourcery/sources/strug/build/strug/assets";
-  log("Assets directory: %s", assetsDir);
- 
+  Path assetsDir = determineAssetsDirectory();
+
   // Set resource manager pointers
   file_manager = new DesktopFileManager(assetsDir);
   resource_manager = new Strug::ResourceManager(file_manager);
