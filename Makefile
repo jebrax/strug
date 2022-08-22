@@ -9,7 +9,7 @@ glade:
 	cd ../glade && $(MAKE)
 
 strug: main-glfw.o ResourceManager.o Frank.o Cube.o Sphere.o Isosurface.o MarchingCubes.o Chunked.o CubeTest.o Craft.o sha1.o assets builddir
-	clang++ -mmacos-version-min=11.6 -O0 -g -o build/strug/strug -L../../vendor/zlib-1.2.11 -L../../vendor/assimp/lib -L../../vendor/glew/lib/ -L../glade/build/glade -L../../vendor/freetype-2.10.1/objs/.libs/ -L../../vendor/glfw/build/src -lz -lassimp -lglfw3 -lGLEW -lfreetype -lglade -framework OpenGL -framework AppKit -framework IOKit build/strug/main-glfw.o build/strug/ResourceManager.o build/strug/Sphere.o build/strug/Frank.o build/strug/Cube.o build/strug/Isosurface.o build/strug/MazeTest.o build/strug/Minecraft.o build/strug/MarchingCubes.o build/strug/Chunked.o build/strug/Craft.o build/strug/CubeTest.o build/sha1/sha1.o
+	clang++ -O0 -g -o build/strug/strug -L../../vendor/zlib-1.2.11 -L../../vendor/assimp/lib -L../../vendor/glew/lib/ -L../glade/build/glade -L../../vendor/freetype-2.10.1/objs/.libs/ -L../../vendor/glfw/build/src -lz -lassimp -lglfw3 -lGLEW -lfreetype -lglade -framework OpenGL -framework AppKit -framework IOKit build/strug/main-glfw.o build/strug/ResourceManager.o build/strug/Sphere.o build/strug/Frank.o build/strug/Cube.o build/strug/Isosurface.o build/strug/MazeTest.o build/strug/Minecraft.o build/strug/MarchingCubes.o build/strug/Chunked.o build/strug/Craft.o build/strug/CubeTest.o build/sha1/sha1.o
 
 
 ######################
