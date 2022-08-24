@@ -1,3 +1,6 @@
 [submodule "deps/glade"]
 	path = deps/glade
 	url = git@github.com:batonez/glade.git
+[submodule "deps/PerlinNoise"]
+	path = deps/PerlinNoise
+	url = git@github.com:batonez/PerlinNoise.git
