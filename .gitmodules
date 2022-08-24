@@ -4,3 +4,6 @@
 [submodule "deps/PerlinNoise"]
 	path = deps/PerlinNoise
 	url = git@github.com:batonez/PerlinNoise.git
+[submodule "deps/lodepng"]
+	path = deps/lodepng
+	url = git@github.com:batonez/lodepng.git
