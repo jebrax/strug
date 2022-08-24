@@ -1,0 +1,3 @@
+[submodule "deps/glade"]
+	path = deps/glade
+	url = git@github.com:batonez/glade.git
