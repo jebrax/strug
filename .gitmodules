@@ -19,3 +19,6 @@
 [submodule "deps/glfw"]
 	path = deps/glfw
 	url = git@github.com:batonez/glfw.git
+[submodule "deps/zlib"]
+	path = deps/zlib
+	url = git@github.com:batonez/zlib.git
