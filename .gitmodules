@@ -7,3 +7,6 @@
 [submodule "deps/lodepng"]
 	path = deps/lodepng
 	url = git@github.com:batonez/lodepng.git
+[submodule "deps/sha1"]
+	path = deps/sha1
+	url = git@github.com:batonez/sha1.git
