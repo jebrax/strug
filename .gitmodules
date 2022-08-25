@@ -22,3 +22,6 @@
 [submodule "deps/zlib"]
 	path = deps/zlib
 	url = git@github.com:batonez/zlib.git
+[submodule "deps/freetype"]
+	path = deps/freetype
+	url = git@github.com:batonez/freetype.git
