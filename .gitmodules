@@ -13,3 +13,6 @@
 [submodule "deps/assimp"]
 	path = deps/assimp
 	url = https://github.com/batonez/assimp
+[submodule "deps/glew"]
+	path = deps/glew
+	url = git@github.com:batonez/glew.git
