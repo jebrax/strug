@@ -30,7 +30,7 @@ brew install autoconf automake libtool cmake
 </pre>
 
 [Autoconf](https://www.gnu.org/software/autoconf/) and [Automake](https://www.gnu.org/software/automake/) are used to build Freetype.
-[Libtool](https://www.gnu.org/software/libtool/) is also used to build glade and [cmake](https://cmake.org/) is used by almost everyone out there.
+[Libtool](https://www.gnu.org/software/libtool/) is also used to build a part of our code and [cmake](https://cmake.org/) is used by almost everyone out there.
 
 ### Assimp
 
