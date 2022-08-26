@@ -18,6 +18,7 @@ And stay in this directory for the rest of the build process (I warned you!).
 
 We have a bunch of dependencies living in submodules, so let's update those too:
 <pre>
+git submodule init
 git submodule update
 </pre>
 
@@ -59,6 +60,7 @@ pushd deps/glew
     make
   popd
   make glew.lib.static
+  git checkout doc/glew.html
 popd
 </pre>
 
@@ -66,7 +68,7 @@ Or see the `README.md` file in the root of our [GLEW repo](https://github.com/ba
 
 ### GLFW
 
-Not as boring as what GLEW does, but very helpful if you don't wanna mess with platform specific windowing, events and input APIs. I used to do that manually on Windows, but then I <strike>got an arrow in the knee</strike> switched to macOS and realised I can stay cross platform with [GLFW](https://www.glfw.org/) at no additional cost! (The project still lost it's compilability on Windows due to my lazyness, but that's another story). Nuff said: 
+Not as boring as what GLEW does, but very helpful if you don't wanna mess with platform specific windowing, events and input APIs. I used to do that manually on Windows, but then I <strike>got an arrow in the knee</strike> switched to macOS and realised I can stay cross platform with [GLFW](https://www.glfw.org/) at no additional cost! (The project still lost it's compilability on Windows due to my laziness, but that's another story). Nuff said: 
 
 <pre>
 pushd deps/glfw
@@ -87,6 +89,7 @@ Everyone knows what [this](http://zlib.net/) is. Some assets (3D models, texture
 pushd deps/zlib
   ./configure --static
   make
+  git checkout Makefile zconf.h
 popd
 </pre>
 
@@ -116,7 +119,7 @@ There are some other dependencies but they are either single source or header on
 
 ## 🔮 It works?!
 
-Phew! That's it. Luckily, all the above dependencies are only needed to be built once. What we typically need to rebuild many times is our code which is split into two parts: the engine (**glade**) and the app (**strug**). To build both of them from your working directory run:
+We're almost there. Luckily, all the above dependencies are only needed to be built once. What we typically need to rebuild many times is our code which is split into two parts: the engine (**glade**) and the app (**strug**). To build both of them from your working directory run:
 
 <pre>
 make rr
