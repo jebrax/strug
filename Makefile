@@ -8,8 +8,8 @@ run:
 glade:
 	cd deps/glade && ${MAKE} VENDOR=..
 
-strug: set-env main-glfw.o ResourceManager.o Frank.o Cube.o Sphere.o Isosurface.o MarchingCubes.o Chunked.o CubeTest.o Craft.o sha1.o assets builddir
-	clang++ -O0 -g -o build/strug/strug -L${DEPS_PATH}/zlib -L${DEPS_PATH}/assimp/lib -L${DEPS_PATH}/glew/lib/ -Ldeps/glade/build/glade -L${DEPS_PATH}/freetype/objs/.libs/ -L${DEPS_PATH}/glfw/build/src -lz -lassimp -lglfw3 -lGLEW -lfreetype -lglade -framework OpenGL -framework AppKit -framework IOKit build/strug/main-glfw.o build/strug/ResourceManager.o build/strug/Sphere.o build/strug/Frank.o build/strug/Cube.o build/strug/Isosurface.o build/strug/MazeTest.o build/strug/Minecraft.o build/strug/MarchingCubes.o build/strug/Chunked.o build/strug/Craft.o build/strug/CubeTest.o build/sha1/sha1.o
+strug: set-env main-glfw.o ResourceManager.o Frank.o Cube.o Sphere.o Isosurface.o MarchingCubes.o Chunked.o CubeTest.o Craft.o Minecraft.o sha1.o assets builddir
+	clang++ -O0 -g -o build/strug/strug -L${DEPS_PATH}/zlib -L${DEPS_PATH}/assimp/lib -L${DEPS_PATH}/glew/lib/ -Ldeps/glade/build/glade -L${DEPS_PATH}/freetype/objs/.libs/ -L${DEPS_PATH}/glfw/build/src -lz -lassimp -lglfw3 -lGLEW -lfreetype -lglade -framework OpenGL -framework AppKit -framework IOKit build/strug/main-glfw.o build/strug/ResourceManager.o build/strug/Sphere.o build/strug/Frank.o build/strug/Cube.o build/strug/Isosurface.o build/strug/Minecraft.o build/strug/MarchingCubes.o build/strug/Chunked.o build/strug/Craft.o build/strug/CubeTest.o build/sha1/sha1.o
 
 
 ######################
