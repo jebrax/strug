@@ -65,7 +65,7 @@ bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int t
   static float phi = 0.0, theta = 0.0;
   static float r = 4.0f;
   static float originX = GRID_CELLS_IN_A_CHUNK * GRID_CELL_SIZE_COORDS / 2,
-               originY = 0,
+               originY = 40 * GRID_CELL_SIZE_COORDS / 2,
                originZ = GRID_CELLS_IN_A_CHUNK * GRID_CELL_SIZE_COORDS / 2;
 
   if (controlId == 0 || controlId == 1) {
@@ -155,7 +155,7 @@ void Craft::shoot()
 
     for (int j = 0; j < 8; j++) {
       // this is not the best way, because prevCell gains value together with the currentCell
-      if (currentCell->second.val[j] < 0.5) {
+      if (currentCell->second.val[j] < 0.3) {
         shotSolid = true;
         break;
       }
@@ -168,7 +168,7 @@ void Craft::shoot()
     stepPoint.add(dir);
   }
 
-  grid.addValueAtCellPerCubeVertex(cellInfo.second, stepPoint, digging ? 0.008 : -0.008);
+  grid.addValueAtCellPerCubeVertex(cellInfo.second, stepPoint, digging ? 0.18 : -0.18);
 
   reloadChunk(cellInfo.first);
 
