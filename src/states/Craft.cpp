@@ -1,10 +1,11 @@
+#include <glade/system.h>
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
 #include <glade/controls/VirtualController.h>
+#include <glade/generation/Grid.h>
 #include <strug/states/Craft.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Isosurface.h>
-#include <glade/generation/Grid.h>
 
 #include <unordered_map>
 
@@ -22,7 +23,10 @@ static ChunksMap chunks;
 Craft::Craft():
   State(),
   digging(false),
-  growing(false)
+  growing(false),
+  rotateIsDown(false),
+  xCursorPosNormalized(0),
+  yCursorPosNormalized(0)
 {}
 
 Craft::~Craft()
@@ -62,6 +66,28 @@ void Craft::init(Context &context)
 
 bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
 {
+  unsigned int viewportWidth, viewportHeight;
+  Glade::System::getViewportSize(&viewportWidth, &viewportHeight);
+
+  if (rotateIsDown && controlId == 0) {
+    if (firstMove) {
+      xPosRotationDelta = 0;
+      yPosRotationDelta = 0;
+      firstMove = false;
+    } else {
+      xPosRotationDelta = xPos - xPosRotationLast;
+      yPosRotationDelta = yPos - yPosRotationLast;
+    }
+  }
+
+  if (controlId == 0) {
+    xPosRotationLast = xPos;
+    yPosRotationLast = yPos;
+
+    xCursorPosNormalized =  (xPos / viewportWidth * 2 - 1);
+    yCursorPosNormalized = -(yPos / viewportHeight * 2 - 1);
+  }
+
   static float phi = 0.0, theta = 0.0;
   static float r = 4.0f;
   static float originX = GRID_CELLS_IN_A_CHUNK * GRID_CELL_SIZE_COORDS / 2,
@@ -72,11 +98,11 @@ bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int t
     float x, y, z;
 
     if (controlId == 0 && rotateIsDown) {
-      phi = yPos * 0.001;
-      theta = xPos * 0.001;
+      phi += yPosRotationDelta * 0.001;
+      theta += xPosRotationDelta * 0.001;
     }
 
-    if (controlId == 1) {
+    if (controlId == 1 && !rotateIsDown) {
       r += yPos * 0.1;
     }
 
@@ -109,9 +135,9 @@ bool Craft::buttonRelease(int controlId, int terminalId)
 void Craft::shoot()
 {
   // near plane point (or should I say ray that goes through the near plane and the screen center)
-  Glade::Vector3f towardsPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
+  Glade::Vector3f towardsPoint = context->getRenderer()->unprojectPoint(xCursorPosNormalized, yCursorPosNormalized, 0);
 
-  log("Towards point: %f %f %f", towardsPoint.x, towardsPoint.y, towardsPoint.z);
+  //log("Towards point: %f %f %f", towardsPoint.x, towardsPoint.y, towardsPoint.z);
 
   Glade::Vector3f cameraPos = *context->getRenderer()->getCamera()->position;
 
@@ -124,7 +150,7 @@ void Craft::shoot()
   dir.y *= 0.1;
   dir.z *= 0.1;
 
-  log("Ray dir: %f %f %f", dir.x, dir.y, dir.z);
+  //log("Ray dir: %f %f %f", dir.x, dir.y, dir.z);
 
   Glade::Vector3f stepPoint(towardsPoint.x, towardsPoint.y, towardsPoint.z);
   Grid::CellsI currentCell;
@@ -184,13 +210,19 @@ void Craft::shoot()
 bool Craft::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
   switch (controlId) {
-    case 0: digging = true;
+    case 0: if (rotateIsDown)
+              break;
+            digging = true;
             growing = false;
             break;
-    case 1: growing = true;
+    case 1: if (rotateIsDown)
+              break;
+            growing = true;
             digging = false;
             break;
     case 2: rotateIsDown = true;
+            firstMove = true;
+            Glade::System::toggleMouseCursor(false);
             break;
   }
 
@@ -201,6 +233,7 @@ bool Craft::pointerUp(float axisX, float axisY, float axisZ, int controlId, int 
 {
   if (controlId == 2) {
     rotateIsDown = false;
+    Glade::System::toggleMouseCursor(true);
   } else {
     digging = growing = false;
   }

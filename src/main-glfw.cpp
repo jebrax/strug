@@ -29,6 +29,7 @@
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
 
+GLFWwindow *window = nullptr;
 // FIXME global resource manager is shit. Make it a part of context (Game Context probably should extend Glade Context)
 FileManager *file_manager = NULL;
 Glade::ResourceManager *resource_manager;
@@ -36,12 +37,23 @@ Strug::ResourceManager *game_resource_manager;
 
 Context *gameContext = NULL;
 
+namespace Glade {
+  namespace System {
+    void getViewportSize(unsigned int *width, unsigned int *height) {
+      *width = VIEWPORT_WIDTH;
+      *height = VIEWPORT_HEIGHT;
+    }
+
+    void toggleMouseCursor(bool enable) {
+      glfwSetInputMode(window, GLFW_CURSOR, enable ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+    }
+  }
+}
+
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
-  static double initXpos = xpos, initYpos = ypos;
-
   VirtualController *controller = gameContext->getController();
-  controller->pointerMove(xpos - initXpos, ypos - initYpos, 0, 0, 0);
+  controller->pointerMove(xpos, ypos, 0, 0, 0);
 }
 
 static void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -60,16 +72,17 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
     gladeControlId = 1;
   if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
     gladeControlId = 2;
-
-    //glfwSetInputMode(window, GLFW_CURSOR, action == GLFW_PRESS ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
   }
 
   VirtualController *controller = gameContext->getController();
 
+  double x, y;
+  glfwGetCursorPos(window, &x, &y);
+
   if (action == GLFW_PRESS)
-    controller->pointerDown(0, 0, 0, gladeControlId, 0);
+    controller->pointerDown(x, y, 0, gladeControlId, 0);
   if (action == GLFW_RELEASE)
-    controller->pointerUp(0, 0, 0, gladeControlId, 0);
+    controller->pointerUp(x, y, 0, gladeControlId, 0);
 }
 
 static Path determineAssetsDirectory()
@@ -166,7 +179,7 @@ int main()
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-  GLFWwindow *window = glfwCreateWindow(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "GLFW OpenGL", NULL, NULL);
+  window = glfwCreateWindow(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, "GLFW OpenGL", NULL, NULL);
   glfwMakeContextCurrent(window);
 
   log("OpenGL version: %s", glGetString(GL_VERSION));
@@ -186,7 +199,6 @@ int main()
   renderer.onSurfaceChanged(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
   gameContext = new Context(&renderer);
 
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetScrollCallback(window, mouse_scroll_callback);

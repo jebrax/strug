@@ -19,7 +19,10 @@ class Craft: public State, VirtualController
     Context *context;
 
     bool digging, growing;
-    bool rotateIsDown;
+    bool rotateIsDown, firstMove;
+    float xCursorPosNormalized, yCursorPosNormalized;
+    float xPosRotationDelta, yPosRotationDelta;
+    float xPosRotationLast, yPosRotationLast;
 
     void shoot();
     void createEntities();
