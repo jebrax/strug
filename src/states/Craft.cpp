@@ -171,9 +171,6 @@ void Craft::shoot()
       break;
     }
 
-    if (cellInfo.first.x != 0 || cellInfo.first.y != 0 || cellInfo.second.x != 0 || cellInfo.second.y != 0 || cellInfo.second.z)
-    //  printf("CELL INFO: %d, %d -> %d, %d, %d\n", cellInfo.first.x, cellInfo.first.y, cellInfo.second.x, cellInfo.second.y, cellInfo.second.z);
-
     if (cellInfo.second.x == 29 && cellInfo.second.z == 29) {
       printf("HIT CENTER\n");
       break;
@@ -181,7 +178,7 @@ void Craft::shoot()
 
     for (int j = 0; j < 8; j++) {
       // this is not the best way, because prevCell gains value together with the currentCell
-      if (currentCell->second.val[j] < 0.3) {
+      if (currentCell->second.val[j] < 0.5) {
         shotSolid = true;
         break;
       }
@@ -194,7 +191,8 @@ void Craft::shoot()
     stepPoint.add(dir);
   }
 
-  grid.addValueAtCellPerCubeVertex(cellInfo.second, stepPoint, digging ? 0.18 : -0.18);
+  if (shotSolid)
+    grid.addValueAtCell(cellInfo.second, digging ? 0.18 : -0.18);
 
   reloadChunk(cellInfo.first);
 

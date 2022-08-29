@@ -118,8 +118,7 @@ void Chunked::shoot()
     }
 
     if (shotSolid) {
-      grid.addValueAtCellPerCubeVertex(cellInfo.second, stepPoint, digging ? 0.008 : -0.008);
-      //grid.addValueAtCell(cellInfo.second, 0.1, -1);
+      grid.addValueAtCell(cellInfo.second, 0.1);
       break;
     }
 
