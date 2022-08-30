@@ -41,5 +41,8 @@ class Craft: public State, VirtualController
     bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId);
     bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId);
     bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute = false);
+
+    int getNumberOfPointsWithValueLessThanThreshold(float *values, float threshold);
+    int getNumberOfPointsWithValueMoreThanThreshold(float *values, float threshold);
 };
 
