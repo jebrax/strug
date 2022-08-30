@@ -156,13 +156,10 @@ void Craft::shoot()
   Grid::CellsI currentCell;
 
   std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo;
-  std::pair<Glade::Vector2i, Glade::Vector3i> prevCellInfo;
-
-  bool shotSolid = false;
+  std::pair<Glade::Vector2i, Glade::Vector3i> prevCellInfo = grid.getCellIndexByCoords(stepPoint);
 
   for (int i = 0; i < 200; i++) {
-    // this will not work because step is much less then a cell size
-    prevCellInfo = cellInfo;
+    // this might not always work because step is much less then a cell size
     cellInfo = grid.getCellIndexByCoords(stepPoint);
     currentCell = grid.cells.find(cellInfo.second);
 
@@ -171,28 +168,24 @@ void Craft::shoot()
       break;
     }
 
-    if (cellInfo.second.x == 29 && cellInfo.second.z == 29) {
-      printf("HIT CENTER\n");
-      break;
-    }
+    bool shotSolid = true;
 
     for (int j = 0; j < 8; j++) {
       // this is not the best way, because prevCell gains value together with the currentCell
-      if (currentCell->second.val[j] < 0.5) {
-        shotSolid = true;
+      if (currentCell->second.val[j] > 0.2) {
+        shotSolid = false;
         break;
       }
     }
 
     if (shotSolid) {
+      grid.addValueAtCell(prevCellInfo.second, digging ? 0.18 : -0.18);
       break;
     }
 
+    prevCellInfo = cellInfo;
     stepPoint.add(dir);
   }
-
-  if (shotSolid)
-    grid.addValueAtCell(cellInfo.second, digging ? 0.18 : -0.18);
 
   reloadChunk(cellInfo.first);
 
