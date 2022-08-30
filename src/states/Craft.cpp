@@ -168,20 +168,28 @@ void Craft::shoot()
       break;
     }
 
-    bool shotSolid = true;
+    bool shotFullSolid = true;
+    bool shotPartialSolid = false;
 
     for (int j = 0; j < 8; j++) {
       // this is not the best way, because prevCell gains value together with the currentCell
       if (currentCell->second.val[j] > 0.2) {
-        shotSolid = false;
-        break;
+        shotFullSolid = false;
+      }
+
+      if (currentCell->second.val[j] < 0.5) {
+        shotPartialSolid = true;
       }
     }
 
-    if (shotSolid) {
-      grid.addValueAtCell(prevCellInfo.second, digging ? 0.18 : -0.18);
-      break;
+    if (shotPartialSolid) {
+      grid.addValueAtCell(cellInfo.second, digging ? 0.008 : -0.008);
+      //if (digging)
+      //  break;
     }
+
+    if (shotFullSolid)
+      break;
 
     prevCellInfo = cellInfo;
     stepPoint.add(dir);
