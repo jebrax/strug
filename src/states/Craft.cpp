@@ -160,6 +160,8 @@ void Craft::shoot()
 
   bool inTheMatter = false;
 
+  std::vector<Grid::CellsI> shotCells;
+
   for (int i = 0; i < 200; i++) {
     // this might not always work because step is much less then a cell size
     cellInfo = grid.getCellIndexByCoords(stepPoint);
@@ -181,7 +183,7 @@ void Craft::shoot()
       }
 
       if (currentCell->second.getNumberOfPointsWithValueLessThan(0.5) > (digging ? 0 : 1)) {
-        grid.addValueAtCell(cellInfo.second, digging ? 0.018 : -0.018);
+        shotCells.push_back(currentCell);
         inTheMatter = true;
         log("GOT INTO MATER");
       }
@@ -189,6 +191,11 @@ void Craft::shoot()
 
     prevCellInfo = cellInfo;
     stepPoint.add(dir);
+  }
+
+  for (auto iCell: shotCells) {
+    float growSpeedFactor = iCell->second.sumValues() / 8.0;
+    grid.addValueAtCell(iCell->first, (digging ? 0.028 : -0.028) * growSpeedFactor);
   }
 
   reloadChunk(cellInfo.first);
