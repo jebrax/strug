@@ -195,6 +195,7 @@ void Craft::shoot()
 
   for (auto iCell: shotCells) {
     float growSpeedFactor = iCell->second.sumValues() / 8.0;
+    growSpeedFactor = std::clamp(growSpeedFactor, 0.2f, 1.0f);
     grid.addValueAtCell(iCell->first, (digging ? 0.028 : -0.028) * growSpeedFactor);
   }
 
