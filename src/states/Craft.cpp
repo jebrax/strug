@@ -132,30 +132,6 @@ bool Craft::buttonRelease(int controlId, int terminalId)
   return true;
 }
 
-int Craft::getNumberOfPointsWithValueLessThanThreshold(float *values, float threshold)
-{
-  int result = 0;
-
-  for (int i = 0; i < 8; i++) {
-    if (values[i] < threshold)
-      result++;
-  }
-
-  return result;
-}
-
-int Craft::getNumberOfPointsWithValueMoreThanThreshold(float *values, float threshold)
-{
-  int result = 0;
-
-  for (int i = 0; i < 8; i++) {
-    if (values[i] > threshold)
-      result++;
-  }
-
-  return result;
-}
-
 void Craft::shoot()
 {
   // near plane point (or should I say ray that goes through the near plane and the screen center)
@@ -190,21 +166,21 @@ void Craft::shoot()
     currentCell = grid.cells.find(cellInfo.second);
 
     if (currentCell != grid.cells.end()) {
-      if (getNumberOfPointsWithValueLessThanThreshold(currentCell->second.val, 0.2) == 8) {
+      if (currentCell->second.getNumberOfPointsWithValueLessThan(0.2) == 8) {
         // The ray shot a piece of matter with maximum solidity so we stop it
         log("SHOT MAX SOLID");
         break;
       }
 
       if ((cellInfo.second != prevCellInfo.second) && inTheMatter) {
-        if (getNumberOfPointsWithValueLessThanThreshold(currentCell->second.val, 0.5) < 4) {
+        if (currentCell->second.getNumberOfPointsWithValueLessThan(0.5) < 4) {
           // The ray went out of the matter so we stop it
           log("RAY RAN OUT OF MATTER");
           break;
         }
       }
 
-      if (getNumberOfPointsWithValueLessThanThreshold(currentCell->second.val, 0.5) > (digging ? 0 : 1)) {
+      if (currentCell->second.getNumberOfPointsWithValueLessThan(0.5) > (digging ? 0 : 1)) {
         grid.addValueAtCell(cellInfo.second, digging ? 0.018 : -0.018);
         inTheMatter = true;
         log("GOT INTO MATER");
