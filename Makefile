@@ -21,10 +21,10 @@ main.o: builddir
 	clang -O0 -g -x objective-c -I deps/glade/include -DGLADE_MACOS -DGL_SILENCE_DEPRECATION -c src/main.mm -o build/strug/main.o
 
 main-glfw.o: builddir
-	clang++ -O0 -g -I include -I${DEPS_PATH}/glew/include -I${DEPS_PATH}/glfw/include -I deps/glade/include -DGLADE_MACOS -DGL_SILENCE_DEPRECATION -c src/main-glfw.cpp -o build/strug/main-glfw.o
+	clang++ -std=c++17 -O0 -g -I include -I${DEPS_PATH}/glew/include -I${DEPS_PATH}/glfw/include -I deps/glade/include -DGLADE_MACOS -DGL_SILENCE_DEPRECATION -c src/main-glfw.cpp -o build/strug/main-glfw.o
 
 ResourceManager.o: builddir
-	clang++ -O0 -g -I include -I deps/glade/include -DGLADE_MACOS -c src/ResourceManager.cpp -o build/strug/ResourceManager.o
+	clang++ -std=c++17 -O0 -g -I include -I deps/glade/include -DGLADE_MACOS -c src/ResourceManager.cpp -o build/strug/ResourceManager.o
 
 Sphere.o: builddir
 	clang++ -std=c++17 -O0 -g -I include -I${DEPS_PATH}/PerlinNoise/include -Ideps/glade/include -DGLADE_MACOS -c src/blocks/Sphere.cpp -o build/strug/Sphere.o

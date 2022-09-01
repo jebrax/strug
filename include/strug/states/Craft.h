@@ -31,18 +31,15 @@ class Craft: public State, VirtualController
     Craft();
     ~Craft();
     
-    void init(Context &context);
-    void shutdown(Context &context);
-    void applyRules(Context &context);
+    void init(Context &context) override;
+    void shutdown(Context &context) override;
+    void applyRules(Context &context) override;
 
-    void initController() {};
-    bool buttonPress(int controlId, int terminalId);
-    bool buttonRelease(int controlId, int terminalId);
-    bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId);
-    bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId);
-    bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute = false);
-
-    int getNumberOfPointsWithValueLessThanThreshold(float *values, float threshold);
-    int getNumberOfPointsWithValueMoreThanThreshold(float *values, float threshold);
+    void initController() override {};
+    bool buttonPress(int controlId, int terminalId) override;
+    bool buttonRelease(int controlId, int terminalId) override;
+    bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId) override;
+    bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId) override;
+    bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute = true) override;
 };
 

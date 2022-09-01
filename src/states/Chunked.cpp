@@ -1,3 +1,4 @@
+#include <glade/system.h>
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
 #include <glade/controls/VirtualController.h>
@@ -6,20 +7,13 @@
 #include <strug/blocks/Isosurface.h>
 #include <glade/generation/Grid.h>
 
-#include <unordered_map>
-
-typedef std::unordered_map<Glade::Vector2i, Isosurface*> ChunksMap;
-typedef ChunksMap::iterator ChunksMapI;
-
 static const int CHUNKS_SIDE = 3;
-static Grid grid(60, 0.25);
-
-static ChunksMap chunks;
 
 Chunked::Chunked():
   State(),
   digging(false),
-  growing(false)
+  growing(false),
+  grid(nullptr)
 {}
 
 Chunked::~Chunked()
@@ -32,7 +26,7 @@ void Chunked::createEntities()
     for (int j = 0; j < CHUNKS_SIDE; j++) {
       Glade::Vector2i chunkIndex(i, j);
       Isosurface* surf = new Isosurface();
-      surf->initialize(chunkIndex, grid, false);
+      surf->initialize(chunkIndex, *grid);
       context->add(surf);
       chunks[chunkIndex] = surf;
     }
@@ -46,17 +40,19 @@ void Chunked::init(Context &context)
 
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
- 
-  createEntities();
 
-  Perception *perception = new Perception();
+  grid = new Grid(60, 0.25);
+  createEntities();
+  perception = new Perception();
+
   context.renderer->setPerception(perception);
   //context.renderer->getCamera()->position->z = 4.0;
 
+  Glade::System::toggleMouseCursor(false);
   context.setController(*this);
 }
 
-bool Chunked::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
+bool Chunked::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
 {
   context->getRenderer()->getCamera()->rotation->y = xPos * 0.001;
   context->getRenderer()->getCamera()->rotation->x = yPos * 0.001;
@@ -101,10 +97,10 @@ void Chunked::shoot()
 
   for (int i = 0; i < 100; i++) {
     prevCellInfo = cellInfo;
-    cellInfo = grid.getCellIndexByCoords(stepPoint);
-    currentCell = grid.cells.find(cellInfo.second);
+    cellInfo = grid->getCellIndexByCoords(stepPoint);
+    currentCell = grid->cells.find(cellInfo.second);
 
-    if (currentCell == grid.cells.end()) {
+    if (currentCell == grid->cells.end()) {
       break;
     }
 
@@ -118,7 +114,7 @@ void Chunked::shoot()
     }
 
     if (shotSolid) {
-      grid.addValueAtCell(cellInfo.second, 0.1);
+      grid->addValueAtCell(cellInfo.second, 0.1);
       break;
     }
 
@@ -128,7 +124,7 @@ void Chunked::shoot()
   reloadChunk(cellInfo.first);
 
   std::vector<Glade::Vector2i> adjacentChunks;
-  grid.getAdjacentChunks(cellInfo.second, adjacentChunks);
+  grid->getAdjacentChunks(cellInfo.second, adjacentChunks);
 
   for (const Glade::Vector2i &chunkIndex: adjacentChunks) {
     //log("Adj chunk (%d, %d)", chunkIndex.x, chunkIndex.y);
@@ -164,7 +160,7 @@ void Chunked::reloadChunk(const Glade::Vector2i &chunkIndex)
 
   if (chunk != chunks.end()) {
     Isosurface* surf = chunk->second;
-    surf->initialize(chunkIndex, grid);
+    surf->initialize(chunkIndex, *grid);
     context->add(surf);
   }
 }
@@ -177,5 +173,25 @@ void Chunked::applyRules(Context &context)
 
 void Chunked::shutdown(Context &context)
 {
+  delete grid;
+  grid = nullptr;
+
+  context.renderer->setPerception(nullptr);
+  delete perception;
+  perception = nullptr;
 }
 
+void Chunked::suspend(Context &context)
+{
+  State::suspend(context);
+}
+
+void Chunked::wakeup(Context &context)
+{
+  State::wakeup(context);
+  context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
+  context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
+  context.renderer->setPerception(perception);
+  Glade::System::toggleMouseCursor(false);
+  context.setController(*this);
+}

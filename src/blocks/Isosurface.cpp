@@ -9,7 +9,7 @@
 
 extern Strug::ResourceManager *game_resource_manager;
 
-void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, bool empty)
+void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, bool crafting_mode)
 {
   AdvancedMeshGenerator gen;
 
@@ -27,14 +27,14 @@ void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, bool 
     getTransform()->position->x = chunkIndex.x * grid.chunkSizeCoords;
     getTransform()->position->z = chunkIndex.y * grid.chunkSizeCoords;
 
-    gen.mcGenChunk(chunkIndex, grid, *mesh, 0.5, true, AdvancedMeshGenerator::CENTER_CELL_ONLY);
+    gen.mcGenChunk(chunkIndex, grid, *mesh, 0.5, true, crafting_mode ? AdvancedMeshGenerator::CENTER_CELL_ONLY : AdvancedMeshGenerator::ISOSURFACE_HEIGHTMAP);
 
     view = new Drawable(mesh, program);
     addDrawable(view);
     initialized = true;
   } else {
     std::shared_ptr<Glade::Mesh> mesh = view->getMesh();
-    gen.mcGenChunk(chunkIndex, grid, *mesh, 0.5, false, AdvancedMeshGenerator::CENTER_CELL_ONLY);
+    gen.mcGenChunk(chunkIndex, grid, *mesh, 0.5, false, crafting_mode ? AdvancedMeshGenerator::CENTER_CELL_ONLY : AdvancedMeshGenerator::ISOSURFACE_HEIGHTMAP);
   }
 }
 

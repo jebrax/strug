@@ -299,7 +299,7 @@ void MazeTest::dig()
   context->add(terrain);
 }
 
-bool MazeTest::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
+bool MazeTest::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
 {
   //terrain->getTransform()->rotation->y = xPos * 0.001;
   //terrain->getTransform()->rotation->x = yPos * 0.001;

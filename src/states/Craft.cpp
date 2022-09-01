@@ -39,7 +39,7 @@ void Craft::createEntities()
     for (int j = 0; j < CHUNKS_SIDE; j++) {
       Glade::Vector2i chunkIndex(i, j);
       Isosurface* surf = new Isosurface();
-      surf->initialize(chunkIndex, grid, false);
+      surf->initialize(chunkIndex, grid, true);
       context->add(surf);
       chunks[chunkIndex] = surf;
     }
@@ -250,7 +250,7 @@ void Craft::reloadChunk(const Glade::Vector2i &chunkIndex)
 
   if (chunk != chunks.end()) {
     Isosurface* surf = chunk->second;
-    surf->initialize(chunkIndex, grid);
+    surf->initialize(chunkIndex, grid, true);
     context->add(surf);
   }
 }

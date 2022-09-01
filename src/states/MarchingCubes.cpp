@@ -51,7 +51,7 @@ void MarchingCubes::dig()
 {
 }
 
-bool MarchingCubes::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
+bool MarchingCubes::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
 {
   context->getRenderer()->getCamera()->rotation->y = xPos * 0.001;
   context->getRenderer()->getCamera()->rotation->x = yPos * 0.001;

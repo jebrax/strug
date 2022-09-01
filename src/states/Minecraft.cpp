@@ -108,7 +108,7 @@ void Minecraft::dig()
 {
 }
 
-bool Minecraft::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId)
+bool Minecraft::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
 {
   //terrain->getTransform()->rotation->y = xPos * 0.001;
   //terrain->getTransform()->rotation->x = yPos * 0.001;
