@@ -14,6 +14,7 @@ class Perception;
 
 namespace Glade {
   class Vector2i;
+  class Vector2f;
 }
 
 typedef std::unordered_map<Glade::Vector2i, Isosurface*> ChunksMap;
@@ -26,6 +27,7 @@ class Chunked: public State, VirtualController
     Perception *perception;
 
     bool digging, growing;
+    Glade::Vector2f lastMousePos;
 
     void shoot();
     void createEntities();

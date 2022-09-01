@@ -47,6 +47,10 @@ namespace Glade {
     void toggleMouseCursor(bool enable) {
       glfwSetInputMode(window, GLFW_CURSOR, enable ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
     }
+
+    void setMouseCursorPosition(double x, double y) {
+      glfwSetCursorPos(window, x, y);
+    }
   }
 }
 
@@ -205,7 +209,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(new Craft());
+  gameContext->requestStateChange(new Chunked());
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

@@ -3,6 +3,7 @@
 #include <glade/render/Perception.h>
 #include <glade/controls/VirtualController.h>
 #include <strug/states/Chunked.h>
+#include <strug/states/Craft.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Isosurface.h>
 #include <glade/generation/Grid.h>
@@ -57,11 +58,18 @@ bool Chunked::pointerMove(float xPos, float yPos, float zPos, int controlId, int
   context->getRenderer()->getCamera()->rotation->y = xPos * 0.001;
   context->getRenderer()->getCamera()->rotation->x = yPos * 0.001;
 
+  lastMousePos.x = xPos;
+  lastMousePos.y = yPos;
+
   return true;
 }
 
 bool Chunked::buttonPress(int controlId, int terminalId)
 {
+  if (controlId == 2) {
+    context->requestStateChange(new Craft(this), true);
+  }
+
   return true;
 }
 
@@ -192,6 +200,15 @@ void Chunked::wakeup(Context &context)
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
   context.renderer->setPerception(perception);
+
+  for (int i = 0; i < CHUNKS_SIDE; i++) {
+    for (int j = 0; j < CHUNKS_SIDE; j++) {
+      Glade::Vector2i chunkIndex(i, j);
+      context.add(chunks[chunkIndex]);
+    }
+  }
+
   Glade::System::toggleMouseCursor(false);
+  Glade::System::setMouseCursorPosition(lastMousePos.x, lastMousePos.y);
   context.setController(*this);
 }

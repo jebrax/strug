@@ -4,6 +4,7 @@
 #include <glade/controls/VirtualController.h>
 #include <glade/generation/Grid.h>
 #include <strug/states/Craft.h>
+#include <strug/states/Chunked.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Isosurface.h>
 
@@ -20,13 +21,14 @@ static Grid grid(GRID_CELLS_IN_A_CHUNK, GRID_CELL_SIZE_COORDS);
 
 static ChunksMap chunks;
 
-Craft::Craft():
+Craft::Craft(Chunked *mainState):
   State(),
   digging(false),
   growing(false),
   rotateIsDown(false),
   xCursorPosNormalized(0),
-  yCursorPosNormalized(0)
+  yCursorPosNormalized(0),
+  mMainState(mainState)
 {}
 
 Craft::~Craft()
@@ -60,8 +62,9 @@ void Craft::init(Context &context)
   context.renderer->setPerception(perception);
   context.renderer->getCamera()->position->z = 4.0;
 
+  Glade::System::toggleMouseCursor(true);
   context.setController(*this);
-  pointerMove(0,0,0,0,0);
+  pointerMove(0,0,0,0,0); // wtf?
 }
 
 bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
@@ -124,6 +127,10 @@ bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int t
 
 bool Craft::buttonPress(int controlId, int terminalId)
 {
+  if (controlId == 1) {
+    context->requestStateChange(mMainState);
+  }
+
   return true;
 }
 

@@ -6,6 +6,7 @@
 
 class Context;
 class StrugObject;
+class Chunked;
 class VirtualContoller;
 
 namespace Glade {
@@ -15,8 +16,8 @@ namespace Glade {
 class Craft: public State, VirtualController
 {
   private:
-    StrugObject *terrain;
     Context *context;
+    Chunked *mMainState;
 
     bool digging, growing;
     bool rotateIsDown, firstMove;
@@ -28,9 +29,9 @@ class Craft: public State, VirtualController
     void createEntities();
     void reloadChunk(const Glade::Vector2i &chunkIndex);
   public:
-    Craft();
+    Craft(Chunked *mainState = nullptr);
     ~Craft();
-    
+
     void init(Context &context) override;
     void shutdown(Context &context) override;
     void applyRules(Context &context) override;
