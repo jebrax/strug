@@ -25,3 +25,6 @@
 [submodule "deps/freetype"]
 	path = deps/freetype
 	url = git@github.com:batonez/freetype.git
+[submodule "deps/bullet3"]
+	path = deps/bullet3
+	url = git@github.com:batonez/bullet3.git
