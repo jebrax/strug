@@ -27,6 +27,12 @@ void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, bool 
     getTransform()->position->x = chunkIndex.x * grid.chunkSizeCoords;
     getTransform()->position->z = chunkIndex.y * grid.chunkSizeCoords;
 
+    if (crafting_mode) {
+      getTransform()->position->x = grid.chunkSizeCoords / 2;
+      getTransform()->position->y = 20 * grid.cellSize;
+      getTransform()->position->z = grid.chunkSizeCoords / 2;
+    }
+
     gen.mcGenChunk(chunkIndex, grid, *mesh, 0.5, true, crafting_mode ? AdvancedMeshGenerator::CENTER_CELL_ONLY : AdvancedMeshGenerator::ISOSURFACE_HEIGHTMAP);
 
     view = new Drawable(mesh, program);

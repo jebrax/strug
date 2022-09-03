@@ -4,6 +4,7 @@
 #include <glade/controls/VirtualController.h>
 #include <glade/debug/log.h>
 #include <unordered_map>
+#include <vector>
 
 class Context;
 class StrugObject;
@@ -25,20 +26,26 @@ class Chunked: public State, VirtualController
   private:
     Context *context;
     Perception *perception;
+    StrugObject *mItemToAdd;
 
     bool digging, growing;
     Glade::Vector2f lastMousePos;
 
+    Grid *grid;
+    ChunksMap chunks;
+
+    std::vector<StrugObject*> items;
+
     void shoot();
     void createEntities();
     void reloadChunk(const Glade::Vector2i &chunkIndex);
-    Grid *grid;
-    ChunksMap chunks;
+    void loadAllItems();
 
   public:
     Chunked();
     ~Chunked();
-    
+
+    void addItem(StrugObject *itemToAdd);
     void init(Context &context) override;
     void shutdown(Context &context) override;
     void applyRules(Context &context) override;

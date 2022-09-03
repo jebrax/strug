@@ -14,11 +14,17 @@ Chunked::Chunked():
   State(),
   digging(false),
   growing(false),
-  grid(nullptr)
+  grid(nullptr),
+  mItemToAdd(nullptr)
 {}
 
 Chunked::~Chunked()
 {
+}
+
+void Chunked::addItem(StrugObject *itemToAdd)
+{
+  mItemToAdd = itemToAdd;
 }
 
 void Chunked::createEntities()
@@ -34,6 +40,21 @@ void Chunked::createEntities()
   }
 }
 
+void Chunked::loadAllItems()
+{
+  if (mItemToAdd) {
+    mItemToAdd->getTransform()->position->x = context->getRenderer()->getCamera()->position->x;
+    mItemToAdd->getTransform()->position->y = context->getRenderer()->getCamera()->position->y;
+    mItemToAdd->getTransform()->position->z = context->getRenderer()->getCamera()->position->z;
+
+    items.push_back(mItemToAdd);
+    mItemToAdd = nullptr;
+  }
+
+  for (StrugObject *item: items)
+    context->add(item);
+}
+
 void Chunked::init(Context &context)
 {
   log("Init Chunked");
@@ -42,12 +63,12 @@ void Chunked::init(Context &context)
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
 
+  perception = new Perception();
+  context.renderer->setPerception(perception);
+
   grid = new Grid(60, 0.25);
   createEntities();
-  perception = new Perception();
-
-  context.renderer->setPerception(perception);
-  //context.renderer->getCamera()->position->z = 4.0;
+  loadAllItems();
 
   Glade::System::toggleMouseCursor(false);
   context.setController(*this);
@@ -197,6 +218,7 @@ void Chunked::suspend(Context &context)
 void Chunked::wakeup(Context &context)
 {
   State::wakeup(context);
+
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
   context.renderer->setPerception(perception);
@@ -207,6 +229,8 @@ void Chunked::wakeup(Context &context)
       context.add(chunks[chunkIndex]);
     }
   }
+
+  loadAllItems();
 
   Glade::System::toggleMouseCursor(false);
   Glade::System::setMouseCursorPosition(lastMousePos.x, lastMousePos.y);

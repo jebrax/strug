@@ -16,7 +16,6 @@
 typedef std::unordered_map<Glade::Vector2i, Isosurface*> ChunksMap;
 typedef ChunksMap::iterator ChunksMapI;
 
-static const int CHUNKS_SIDE = 1;
 static Grid grid(GRID_CELLS_IN_A_CHUNK, GRID_CELL_SIZE_COORDS);
 
 static ChunksMap chunks;
@@ -37,15 +36,11 @@ Craft::~Craft()
 
 void Craft::createEntities()
 {
-  for (int i = 0; i < CHUNKS_SIDE; i++) {
-    for (int j = 0; j < CHUNKS_SIDE; j++) {
-      Glade::Vector2i chunkIndex(i, j);
-      Isosurface* surf = new Isosurface();
-      surf->initialize(chunkIndex, grid, true);
-      context->add(surf);
-      chunks[chunkIndex] = surf;
-    }
-  }
+  Glade::Vector2i chunkIndex(0, 0);
+  Isosurface* surf = new Isosurface();
+  surf->initialize(chunkIndex, grid, true);
+  context->add(surf);
+  chunks[chunkIndex] = surf;
 }
 
 void Craft::init(Context &context)
@@ -128,6 +123,8 @@ bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int t
 bool Craft::buttonPress(int controlId, int terminalId)
 {
   if (controlId == 1) {
+    Glade::Vector2i chunkIndex(0, 0);
+    mMainState->addItem(chunks[chunkIndex]);
     context->requestStateChange(mMainState);
   }
 
