@@ -19,12 +19,8 @@
 #include <strug/ResourceManager.h>
 #include <strug/controls/StrugController.h>
 #include <strug/exception/StrugException.h>
-#include <strug/states/MazeTest.h>
-#include <strug/states/Minecraft.h>
-#include <strug/states/CubeTest.h>
-#include <strug/states/MarchingCubes.h>
 #include <strug/states/Chunked.h>
-#include <strug/states/Craft.h>
+#include <strug/states/PhysicsTest.h>
 
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
@@ -209,7 +205,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(new Chunked());
+  gameContext->requestStateChange(new PhysicsTest());
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

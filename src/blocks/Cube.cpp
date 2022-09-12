@@ -15,7 +15,7 @@ void Cube::initialize()
         "phong.fragment.glsl"
       );
 
-    std::shared_ptr<Glade::Mesh> mesh = game_resource_manager->getMesh("geometry/cube.36.obj");
+    std::shared_ptr<Glade::Mesh> mesh = game_resource_manager->getMesh("geometry/cube.obj");
     view = new Drawable(mesh, program);
     //log("Num vertex attrs: %d", mesh->vertices.size());
 
