@@ -20,7 +20,7 @@
 #include <strug/controls/StrugController.h>
 #include <strug/exception/StrugException.h>
 #include <strug/states/Chunked.h>
-#include <strug/states/PhysicsTest.h>
+#include <strug/states/CollisionTest.h>
 
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
@@ -129,8 +129,14 @@ void processInput(GLFWwindow* window)
   if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
     controller->buttonPress(1, 0);
 
+  if (glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE)
+    controller->buttonRelease(1, 0);
+
   if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
     controller->buttonPress(2, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE)
+    controller->buttonRelease(2, 0);
 
   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
     controller->buttonPress(3, 0);
@@ -153,14 +159,26 @@ void processInput(GLFWwindow* window)
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     controller->buttonPress(6, 0);
 
+  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE)
+    controller->buttonRelease(6, 0);
+
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     controller->buttonPress(7, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
+    controller->buttonRelease(7, 0);
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     controller->buttonPress(8, 0);
 
+  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE)
+    controller->buttonRelease(8, 0);
+
   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     controller->buttonPress(9, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE)
+    controller->buttonRelease(9, 0);
 
   float zModifier = forward * cos(camera->rotation->y) + strafe * sin(camera->rotation->y);
   float xModifier = -forward * sin(camera->rotation->y) + strafe * cos(camera->rotation->y);
@@ -205,7 +223,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(new PhysicsTest());
+  gameContext->requestStateChange(new CollisionTest());
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

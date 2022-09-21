@@ -6,8 +6,9 @@
 
 extern Strug::ResourceManager *game_resource_manager;
 
-void Sphere::initialize()
+void Sphere::initialize(float radius)
 {
+  StrugObject::initialize();
   if (!initialized ) {
     std::shared_ptr<ShaderProgram> program =
       game_resource_manager->getShaderProgram(
@@ -19,8 +20,7 @@ void Sphere::initialize()
 
     std::shared_ptr<Glade::Mesh> mesh = std::make_shared<Glade::Mesh>();
     MeshGenerator gen;
-    //gen.generateHull(*mesh, 5.0, true);
-    gen.generate(*mesh);
+    gen.generateHull(*mesh, radius, true);
     view = new Drawable(mesh, program);
 
     addDrawable(view);
