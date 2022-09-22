@@ -6,4 +6,5 @@ class Sphere: public StrugObject
 {
   public:
     virtual void initialize(float radius);
+    float radius;
 };

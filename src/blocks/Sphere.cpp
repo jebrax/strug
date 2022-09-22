@@ -24,6 +24,7 @@ void Sphere::initialize(float radius)
     view = new Drawable(mesh, program);
 
     addDrawable(view);
+    this->radius = radius;
     initialized = true;
   }
 }
