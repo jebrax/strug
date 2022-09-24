@@ -20,7 +20,7 @@ void Cube::initialize()
 
     for (int i = 0; i < mesh->getVertexBufferSize(); i += 3) {
       Glade::Vector3f vertex(mesh->vertices[i], mesh->vertices[i + 1], mesh->vertices[i + 2]);
-      log("%f %f %f", vertex.x, vertex.y, vertex.z);
+      //log("%f %f %f", vertex.x, vertex.y, vertex.z);
     }
 
     //log("Num vertex attrs: %d", mesh->vertices.size());

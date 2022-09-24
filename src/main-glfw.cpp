@@ -180,6 +180,19 @@ void processInput(GLFWwindow* window)
   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE)
     controller->buttonRelease(9, 0);
 
+  if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+    controller->buttonPress(10, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_O) == GLFW_RELEASE)
+    controller->buttonRelease(10, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+    controller->buttonPress(11, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_L) == GLFW_RELEASE)
+    controller->buttonRelease(11, 0);
+
+
   float zModifier = forward * cos(camera->rotation->y) + strafe * sin(camera->rotation->y);
   float xModifier = -forward * sin(camera->rotation->y) + strafe * cos(camera->rotation->y);
   float yModifier = forward * sin(camera->rotation->x) + fly;

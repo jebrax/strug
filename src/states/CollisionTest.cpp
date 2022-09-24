@@ -21,6 +21,7 @@ static Isosurface *terrain = nullptr;
 static Cube* cube = nullptr;
 static Cube* cube2 = nullptr;
 static Grid* grid = nullptr;
+static std::vector<StrugObject*> terrainObjects;
 
 static const float cellSize = 0.25;
 
@@ -28,7 +29,9 @@ static bool
   upPressed = false,
   downPressed = false,
   leftPressed = false,
-  rightPressed = false;
+  rightPressed = false,
+  oPressed = false,
+  lPressed = false;
 
 static void meshSupportFunction(const void *obj, const ccd_vec3_t *dir, ccd_vec3_t *point)
 {
@@ -83,6 +86,62 @@ static void meshSupportFunction(const void *obj, const ccd_vec3_t *dir, ccd_vec3
   ccdVec3Add(point, &translation);
 }
 
+static void isosurfaceCellSupportFunction(const void *obj, const ccd_vec3_t *dir, ccd_vec3_t *point)
+{
+  Grid::Cell *cell= (Grid::Cell*) obj;
+
+  ccd_quat_t q, qx, qy, qz, qinv;
+  ccd_vec3_t axisx, axisy, axisz;
+  ccdVec3Set(&axisx, 1, 0, 0);
+  ccdVec3Set(&axisy, 0, 1, 0);
+  ccdVec3Set(&axisz, 0, 0, 1);
+
+  ccdQuatSetAngleAxis(&qx, terrain->getTransform()->rotation->x, &axisx);
+  ccdQuatSetAngleAxis(&qy, terrain->getTransform()->rotation->y, &axisy);
+  ccdQuatSetAngleAxis(&qz, terrain->getTransform()->rotation->z, &axisz);
+
+  ccdQuatCopy(&q, &qx);
+  ccdQuatMul(&q, &qy);
+  ccdQuatMul(&q, &qz);
+
+  ccdQuatInvert2(&qinv, &q);
+
+  ccd_vec3_t dir_rotated;
+  ccdVec3Set(&dir_rotated, ccdVec3X(dir), ccdVec3Y(dir), ccdVec3Z(dir));
+  ccdQuatRotVec(&dir_rotated, &qinv);
+
+  Glade::Vector3f direction(ccdVec3X(&dir_rotated), ccdVec3Y(&dir_rotated), ccdVec3Z(&dir_rotated));
+  direction.normalize();
+
+  int startingIndex = cell->startingVertexIndex * 8;
+  //log("Starting index: %d, num verts: %d * 8", startingIndex, cell->numVertices);
+
+  std::shared_ptr<Glade::Mesh> mesh = terrain->view->getMesh();
+  Glade::Vector3f vertex(mesh->vertices[startingIndex], mesh->vertices[startingIndex + 1], mesh->vertices[startingIndex + 2]);
+  float maxDot = vertex.dot(direction);
+  int maxi = startingIndex;
+  //log("Box vertex: %f, %f, %f", vertex.x, vertex.y, vertex.z);
+
+  for (int i = startingIndex + 8; i < startingIndex + cell->numVertices * 8; i += 8) {
+    Glade::Vector3f vertex(mesh->vertices[i], mesh->vertices[i + 1], mesh->vertices[i + 2]);
+    //log("Box vertex: %f, %f, %f", vertex.x, vertex.y, vertex.z);
+    float dot = vertex.dot(direction);
+
+    if (dot > maxDot) {
+      maxDot = dot;
+      maxi = i;
+    }
+  }
+
+  ccdVec3Set(point, mesh->vertices[maxi + 0], mesh->vertices[maxi + 1], mesh->vertices[maxi + 2]);
+
+  ccdQuatRotVec(point, &q);
+
+  ccd_vec3_t translation;
+  ccdVec3Set(&translation, terrain->getTransform()->position->x, terrain->getTransform()->position->y, terrain->getTransform()->position->z);
+  ccdVec3Add(point, &translation);
+}
+
 static void sphereSupportFunction(const void *obj, const ccd_vec3_t *dir, ccd_vec3_t *point)
 {
   Sphere *sphere = (Sphere*) obj;
@@ -110,26 +169,32 @@ void CollisionTest::createEntities()
 {
   sphere = new Sphere();
   sphere->initialize(cellSize);
-  this->context->add(sphere);
+  sphere->getTransform()->position->x = grid->chunkSizeCells/2 * grid->cellSize - 3;
+  sphere->getTransform()->position->y = 20 * grid->cellSize;
+  sphere->getTransform()->position->z = grid->chunkSizeCells/2 * grid->cellSize;
+  context->add(sphere);
 
   cube = new Cube();
   cube->initialize();
   cube->getTransform()->rotation->y = 0.5;
   cube->getTransform()->position->z = 5;
-  this->context->add(cube);
+  context->add(cube);
+  terrainObjects.push_back(cube);
 
   cube2 = new Cube();
   cube2->initialize();
   cube2->getTransform()->rotation->y = 0.5;
   cube2->getTransform()->position->z = 5;
-  cube2->getTransform()->position->x = 0.5;
-  this->context->add(cube2);
+  cube2->getTransform()->position->x = 1;
+  context->add(cube2);
+  terrainObjects.push_back(cube2);
 
   Glade::Vector2i chunkIndex(0, 0);
   terrain = new Isosurface();
-  terrain->initialize(chunkIndex, *grid);
+  terrain->initialize(chunkIndex, *grid, false);
   terrain->view->getMesh()->neverErase = true;
   context->add(terrain);
+  //terrainObjects.push_back(terrain);
 }
 
 void CollisionTest::init(Context &context)
@@ -174,6 +239,13 @@ void CollisionTest::applyRules(Context &context)
   if (downPressed)
     sphere->getTransform()->position->z += sphereSpeed;
 
+  if (oPressed)
+    sphere->getTransform()->position->y += sphereSpeed;
+
+  if (lPressed)
+    sphere->getTransform()->position->y -= sphereSpeed;
+
+
   ccd_t ccd;
   CCD_INIT(&ccd); // initialize ccd_t struct
 
@@ -193,35 +265,68 @@ void CollisionTest::applyRules(Context &context)
   ccd_real_t depth;
   ccd_vec3_t dir, pos;
 
-  int intersect = ccdGJKPenetration(cube, sphere, &ccd, &depth, &dir, &pos);
-  if (intersect >= 0) {
-    CollisionInfo collision;
-    collision.depth = depth;
-    collision.dir = dir;
-    collisions.push_back(collision);
+  int intersect;
+
+  for (const GladeObject* terrainObject: terrainObjects) {
+    intersect = ccdGJKPenetration(terrainObject, sphere, &ccd, &depth, &dir, &pos);
+    if (intersect >= 0) {
+      CollisionInfo collision;
+      collision.depth = depth;
+      collision.dir = dir;
+      collisions.push_back(collision);
+    }
   }
 
-  /*
-  intersect = ccdGJKPenetration(cube2, sphere, &ccd, &depth, &dir, &pos);
-  if (intersect >= 0) {
-    CollisionInfo collision;
-    collision.depth = depth;
-    collision.dir = dir;
-    collisions.push_back(collision);
+  ccd.support1 = isosurfaceCellSupportFunction;
+
+  for (int i = 0; i < grid->chunkSizeCells; i++) {
+    for (int j = 0; j < 40; j++) {
+      for (int k = 0; k < grid->chunkSizeCells; k++) {
+        Glade::Vector3i centerCellCoord(i, j, k);
+        auto celli = grid->cells.find(centerCellCoord);
+
+        if (celli == grid->cells.end()) {
+          //log("No cell here");
+          continue;
+        }
+
+        Grid::Cell &cell = celli->second;
+
+        if (cell.numVertices <= 0) {
+          //log("No vertices in this cell");
+          continue;
+        }
+
+        intersect = ccdGJKPenetration(&cell, sphere, &ccd, &depth, &dir, &pos);
+
+        if (intersect >= 0) {
+          CollisionInfo collision;
+          collision.depth = depth;
+          collision.dir = dir;
+          collisions.push_back(collision);
+        }
+      }
+    }
   }
-  */
+
+  Glade::Vector3f separation;
+
+  for (const CollisionInfo& collision: collisions) {
+    Glade::Vector3f partialSeparation(ccdVec3X(&collision.dir), ccdVec3Y(&collision.dir), ccdVec3Z(&collision.dir));
+    partialSeparation.scale(collision.depth);
+    separation.add(partialSeparation);
+  }
 
   {
     //log("Penetration depth: %f, Separation dir: %f %f %f", depth, ccdVec3X(&dir), ccdVec3Y(&dir), ccdVec3Z(&dir));
-    Glade::Vector3f separation(ccdVec3X(&dir), ccdVec3Y(&dir), ccdVec3Z(&dir));
+    Glade::Vector3f separationDir(separation);
+    separationDir.normalize();
 
     Glade::Vector3f toPrevPosition = prevPosition;
     toPrevPosition.subtract(*sphere->getTransform()->position);
     toPrevPosition.normalize();
 
-    float dot = toPrevPosition.dot(separation);
-
-    separation.scale(depth);
+    float dot = toPrevPosition.dot(separationDir);
 
     if (dot > 0.71) { // stick/slide threshold is about 45 degrees
       // stick
@@ -255,6 +360,10 @@ bool CollisionTest::buttonPress(int controlId, int terminalId)
        break;
     case 9: downPressed = true;
        break;
+    case 10: oPressed = true;
+       break;
+    case 11: lPressed = true;
+       break;
   }
 
   return true;
@@ -270,6 +379,10 @@ bool CollisionTest::buttonRelease(int controlId, int terminalId)
     case 8: upPressed = false;
        break;
     case 9: downPressed = false;
+       break;
+    case 10: oPressed = false;
+       break;
+    case 11: lPressed = false;
        break;
   }
 
