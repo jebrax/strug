@@ -28,3 +28,6 @@
 [submodule "deps/bullet3"]
 	path = deps/bullet3
 	url = git@github.com:batonez/bullet3.git
+[submodule "deps/libccd"]
+	path = deps/libccd
+	url = git@github.com:batonez/libccd.git
