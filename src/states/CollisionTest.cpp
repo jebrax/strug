@@ -7,6 +7,7 @@
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
 #include <glade/controls/VirtualController.h>
+#include <glade/physics/SpherePhysicalObject.h>
 #include <glade/math/util.h>
 #include <glade/generation/Grid.h>
 #include <glade/system.h>
@@ -148,7 +149,8 @@ static void sphereSupportFunction(const void *obj, const ccd_vec3_t *dir, ccd_ve
   Glade::Vector3f direction(ccdVec3X(dir), ccdVec3Y(dir), ccdVec3Z(dir));
 
   direction.normalize();
-  direction.scale(sphere->radius);
+  SpherePhysicalObject *phy = (SpherePhysicalObject *) sphere->getPhysicalObject();
+  direction.scale(phy->radius);
 
   Glade::Vector3f resultPoint;
   resultPoint.add(*sphere->getTransform()->position.get());
@@ -205,7 +207,7 @@ void CollisionTest::init(Context &context)
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
  
-  grid = new Grid(60, cellSize);
+  grid = new Grid(60, cellSize, 1);
 
   createEntities();
 
@@ -328,9 +330,11 @@ void CollisionTest::applyRules(Context &context)
 
     float dot = toPrevPosition.dot(separationDir);
 
+    float sumDepth = separation.magnitude();
+
     if (dot > 0.71) { // stick/slide threshold is about 45 degrees
       // stick
-      float pushDistance = depth / dot;
+      float pushDistance = sumDepth / dot;
       Glade::Vector3f pushVector(toPrevPosition);
       pushVector.scale(pushDistance);
       sphere->getTransform()->position->add(pushVector);

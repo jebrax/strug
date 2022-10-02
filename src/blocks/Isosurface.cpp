@@ -3,6 +3,7 @@
 
 #include <glade/generation/AdvancedMeshGenerator.h>
 #include <glade/generation/Grid.h>
+#include <glade/physics/IsosurfaceCellPhysicalObject.h>
 #include <glade/render/Drawable.h>
 #include <glade/render/ShaderProgram.h>
 #include <glade/render/meshes/Mesh.h>
@@ -37,6 +38,10 @@ void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, bool 
 
     view = new Drawable(mesh, program);
     addDrawable(view);
+
+    PhysicalObject *phy = new IsosurfaceCellPhysicalObject(this);
+    setPhysicalObject(*phy);
+
     initialized = true;
   } else {
     std::shared_ptr<Glade::Mesh> mesh = view->getMesh();

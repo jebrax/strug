@@ -16,7 +16,7 @@
 typedef std::unordered_map<Glade::Vector2i, Isosurface*> ChunksMap;
 typedef ChunksMap::iterator ChunksMapI;
 
-static Grid grid(GRID_CELLS_IN_A_CHUNK, GRID_CELL_SIZE_COORDS);
+static Grid grid(GRID_CELLS_IN_A_CHUNK, GRID_CELL_SIZE_COORDS, 1);
 
 static ChunksMap chunks;
 

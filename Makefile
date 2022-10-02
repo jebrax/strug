@@ -6,10 +6,10 @@ run:
 	./build/strug/strug
 
 glade:
-	cd deps/glade && ${MAKE} VENDOR=..
+	cd deps/glade && ${MAKE}
 
-strug: set-env main-glfw.o ResourceManager.o Isosurface.o Cube.o Sphere.o Triangle.o CollisionTest.o Chunked.o Craft.o sha1.o assets builddir
-	clang++ -O0 -g -o build/strug/strug -L${DEPS_PATH}/libccd/src -L${DEPS_PATH}/zlib -L${DEPS_PATH}/assimp/lib -L${DEPS_PATH}/glew/lib/ -L${DEPS_PATH}/glade/build/glade -L${DEPS_PATH}/freetype/objs -L${DEPS_PATH}/glfw/build/src -lz -lassimp -lglfw3 -lGLEW -lfreetype -lglade -lccd -framework OpenGL -framework AppKit -framework IOKit build/strug/main-glfw.o build/strug/ResourceManager.o build/strug/Isosurface.o build/strug/Cube.o build/strug/Sphere.o build/strug/Triangle.o build/strug/Craft.o build/strug/Chunked.o build/strug/CollisionTest.o build/sha1/sha1.o
+strug: set-env main-glfw.o ResourceManager.o Isosurface.o Cube.o Sphere.o Triangle.o CollisionTest.o Chunked.o WalkingTheWorld.o Craft.o sha1.o assets builddir
+	clang++ -O0 -g -o build/strug/strug -L${DEPS_PATH}/libccd/src -L${DEPS_PATH}/zlib -L${DEPS_PATH}/assimp/lib -L${DEPS_PATH}/glew/lib/ -L${DEPS_PATH}/glade/build/glade -L${DEPS_PATH}/freetype/objs -L${DEPS_PATH}/glfw/build/src -lz -lassimp -lglfw3 -lGLEW -lfreetype -lglade -lccd -framework OpenGL -framework AppKit -framework IOKit build/strug/main-glfw.o build/strug/ResourceManager.o build/strug/Isosurface.o build/strug/Cube.o build/strug/Sphere.o build/strug/Triangle.o build/strug/Craft.o build/strug/Chunked.o build/strug/CollisionTest.o build/strug/WalkingTheWorld.o build/sha1/sha1.o
 
 
 ######################
@@ -52,6 +52,9 @@ CubeTest.o: builddir
 
 PhysicsTest.o: builddir
 	clang++ -std=c++20 -O0 -g -I${DEPS_PATH}/bullet3/src -I${DEPS_PATH}/glew/include -Iinclude -Ideps/glade/include -DGLADE_MACOS -c src/states/PhysicsTest.cpp -o build/strug/PhysicsTest.o
+
+WalkingTheWorld.o: builddir
+	clang++ -std=c++20 -O0 -g -Iinclude -Ideps/glade/include -I${DEPS_PATH}/glew/include -DGLADE_MACOS -c src/states/WalkingTheWorld.cpp -o build/strug/WalkingTheWorld.o
 
 CollisionTest.o: builddir
 	clang++ -std=c++20 -O0 -g -I${DEPS_PATH}/libccd/src -I${DEPS_PATH}/glew/include -Iinclude -Ideps/glade/include -DGLADE_MACOS -c src/states/CollisionTest.cpp -o build/strug/CollisionTest.o

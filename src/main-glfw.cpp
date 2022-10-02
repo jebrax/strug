@@ -21,12 +21,13 @@
 #include <strug/exception/StrugException.h>
 #include <strug/states/Chunked.h>
 #include <strug/states/CollisionTest.h>
+#include <strug/states/WalkingTheWorld.h>
 
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
 
 GLFWwindow *window = nullptr;
-// FIXME global resource manager is shit. Make it a part of context (Game Context probably should extend Glade Context)
+
 FileManager *file_manager = NULL;
 Glade::ResourceManager *resource_manager;
 Strug::ResourceManager *game_resource_manager;
@@ -236,7 +237,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(new CollisionTest());
+  gameContext->requestStateChange(new WalkingTheWorld());
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
