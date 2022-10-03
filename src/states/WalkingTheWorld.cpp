@@ -3,6 +3,7 @@
 #include <strug/blocks/Sphere.h>
 #include <strug/blocks/Isosurface.h>
 
+
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
 #include <glade/controls/VirtualController.h>

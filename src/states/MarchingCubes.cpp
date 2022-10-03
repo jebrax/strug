@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 static Isosurface *surf = nullptr;
-static Grid grid(60, 0.25);
+static Grid grid(60, 0.25, 1);
 
 MarchingCubes::MarchingCubes():
   State(),
