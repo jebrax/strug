@@ -14,7 +14,7 @@ DEPS = $(patsubst src/%.cpp, $(STRUG_BUILD_DIR)/%.o.d, $(CXX_SRCS))
 
 all: glade ${STRUG_BUILD_DIR}/strug ass run
 
-strug: ${STRUG_BUILD_DIR}/strug ass run
+strug: ${STRUG_BUILD_DIR}/strug ass
 
 glade:
 	cd ${DEPS_PATH}/glade && ${MAKE}
