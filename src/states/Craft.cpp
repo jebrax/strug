@@ -120,8 +120,10 @@ bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int t
   return true;
 }
 
-bool Craft::buttonPress(int controlId, int terminalId)
+bool Craft::buttonPress(Glade::Key controlId, int terminalId)
 {
+  VirtualController::buttonPress(controlId, terminalId);
+
   if (controlId == 1) {
     Glade::Vector2i chunkIndex(0, 0);
     mMainState->addItem(chunks[chunkIndex]);
@@ -131,8 +133,9 @@ bool Craft::buttonPress(int controlId, int terminalId)
   return true;
 }
 
-bool Craft::buttonRelease(int controlId, int terminalId)
+bool Craft::buttonRelease(Glade::Key controlId, int terminalId)
 {
+  VirtualController::buttonRelease(controlId, terminalId);
   return true;
 }
 

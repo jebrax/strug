@@ -353,46 +353,6 @@ bool CollisionTest::pointerMove(float xPos, float yPos, float zPos, int controlI
   return true;
 }
 
-bool CollisionTest::buttonPress(int controlId, int terminalId)
-{
-  switch (controlId) {
-    case 6: leftPressed = true;
-       break;
-    case 7: rightPressed = true;
-       break;
-    case 8: upPressed = true;
-       break;
-    case 9: downPressed = true;
-       break;
-    case 10: oPressed = true;
-       break;
-    case 11: lPressed = true;
-       break;
-  }
-
-  return true;
-}
-
-bool CollisionTest::buttonRelease(int controlId, int terminalId)
-{
-  switch (controlId) {
-    case 6: leftPressed = false;
-       break;
-    case 7: rightPressed = false;
-       break;
-    case 8: upPressed = false;
-       break;
-    case 9: downPressed = false;
-       break;
-    case 10: oPressed = false;
-       break;
-    case 11: lPressed = false;
-       break;
-  }
-
-  return true;
-}
-
 bool CollisionTest::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
   return true;

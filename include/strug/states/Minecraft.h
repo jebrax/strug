@@ -31,8 +31,6 @@ class Minecraft: public State, VirtualController
     void createEntities();
 
     void initController() override {};
-    bool buttonPress(int controlId, int terminalId) override;
-    bool buttonRelease(int controlId, int terminalId) override;
     bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId) override;
     bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId) override { return false; }
     bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute = true) override;

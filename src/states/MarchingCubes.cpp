@@ -59,16 +59,6 @@ bool MarchingCubes::pointerMove(float xPos, float yPos, float zPos, int controlI
   return true;
 }
 
-bool MarchingCubes::buttonPress(int controlId, int terminalId)
-{
-  return true;
-}
-
-bool MarchingCubes::buttonRelease(int controlId, int terminalId)
-{
-  return true;
-}
-
 bool MarchingCubes::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
   Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);

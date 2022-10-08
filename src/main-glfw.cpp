@@ -1,3 +1,4 @@
+#include "glade/controls/VirtualController.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -19,8 +20,6 @@
 #include <strug/ResourceManager.h>
 #include <strug/controls/StrugController.h>
 #include <strug/exception/StrugException.h>
-#include <strug/states/Chunked.h>
-#include <strug/states/CollisionTest.h>
 #include <strug/states/WalkingTheWorld.h>
 
 #define VIEWPORT_WIDTH 1280
@@ -106,101 +105,112 @@ static Path determineAssetsDirectory()
 
 void processInput(GLFWwindow* window)
 {
-  Transform *camera = gameContext->getRenderer()->getCamera();
-
-  if (!camera)
-    return;
-
-  float forward = 0.0, strafe = 0.0, fly = 0.0;
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    forward = -0.1;
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    forward = 0.1;
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    strafe = -0.1;
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    strafe = 0.1;
-  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-    fly = 0.1;
-  if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
-    fly = -0.1;
-
   VirtualController *controller = gameContext->getController();
 
+  if (controller == nullptr)
+    return;
+
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_W, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_W, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_S, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_S, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_A, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_A, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_D, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_D, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_SPACE, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_SPACE, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_X, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_X) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_X, 0);
+
   if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
-    controller->buttonPress(1, 0);
+    controller->buttonPress(Glade::Key::GLADE_KEY_G, 0);
 
   if (glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE)
-    controller->buttonRelease(1, 0);
+    controller->buttonRelease(Glade::Key::GLADE_KEY_G, 0);
 
   if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-    controller->buttonPress(2, 0);
+    controller->buttonPress(Glade::Key::GLADE_KEY_F, 0);
 
   if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE)
-    controller->buttonRelease(2, 0);
+    controller->buttonRelease(Glade::Key::GLADE_KEY_F, 0);
 
   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
-    controller->buttonPress(3, 0);
+    controller->buttonPress(Glade::Key::GLADE_KEY_T, 0);
 
   if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE)
-    controller->buttonRelease(3, 0);
+    controller->buttonRelease(Glade::Key::GLADE_KEY_T, 0);
 
   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-    controller->buttonPress(4, 0);
+    controller->buttonPress(Glade::Key::GLADE_KEY_R, 0);
 
   if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE)
-    controller->buttonRelease(4, 0);
+    controller->buttonRelease(Glade::Key::GLADE_KEY_R, 0);
 
   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-    controller->buttonPress(5, 0);
+    controller->buttonPress(Glade::Key::GLADE_KEY_C, 0);
 
   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_RELEASE)
-    controller->buttonRelease(5, 0);
+    controller->buttonRelease(Glade::Key::GLADE_KEY_C, 0);
 
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-    controller->buttonPress(6, 0);
+    controller->buttonPress(Glade::Key::GLADE_KEY_LEFT, 0);
 
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE)
-    controller->buttonRelease(6, 0);
+    controller->buttonRelease(Glade::Key::GLADE_KEY_LEFT, 0);
 
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-    controller->buttonPress(7, 0);
+    controller->buttonPress(Glade::Key::GLADE_KEY_RIGHT, 0);
 
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
-    controller->buttonRelease(7, 0);
+    controller->buttonRelease(Glade::Key::GLADE_KEY_RIGHT, 0);
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    controller->buttonPress(8, 0);
+    controller->buttonPress(Glade::Key::GLADE_KEY_UP, 0);
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE)
-    controller->buttonRelease(8, 0);
+    controller->buttonRelease(Glade::Key::GLADE_KEY_UP, 0);
 
   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    controller->buttonPress(9, 0);
+    controller->buttonPress(Glade::Key::GLADE_KEY_DOWN, 0);
 
   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE)
-    controller->buttonRelease(9, 0);
+    controller->buttonRelease(Glade::Key::GLADE_KEY_DOWN, 0);
 
   if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
-    controller->buttonPress(10, 0);
+    controller->buttonPress(Glade::Key::GLADE_KEY_O, 0);
 
   if (glfwGetKey(window, GLFW_KEY_O) == GLFW_RELEASE)
-    controller->buttonRelease(10, 0);
+    controller->buttonRelease(Glade::Key::GLADE_KEY_O, 0);
 
   if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
-    controller->buttonPress(11, 0);
+    controller->buttonPress(Glade::Key::GLADE_KEY_L, 0);
 
   if (glfwGetKey(window, GLFW_KEY_L) == GLFW_RELEASE)
-    controller->buttonRelease(11, 0);
-
-
-  float zModifier = forward * cos(camera->rotation->y) + strafe * sin(camera->rotation->y);
-  float xModifier = -forward * sin(camera->rotation->y) + strafe * cos(camera->rotation->y);
-  float yModifier = forward * sin(camera->rotation->x) + fly;
-
-  camera->position->z += zModifier;
-  camera->position->y += yModifier;
-  camera->position->x += xModifier;
+    controller->buttonRelease(Glade::Key::GLADE_KEY_L, 0);
 }
 
 int main()

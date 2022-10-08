@@ -118,28 +118,6 @@ bool Minecraft::pointerMove(float xPos, float yPos, float zPos, int controlId, i
   return true;
 }
 
-bool Minecraft::buttonPress(int controlId, int terminalId)
-{
-  return true;
-}
-
-bool Minecraft::buttonRelease(int controlId, int terminalId)
-{
-  if (controlId == 3) {
-    digPressed = false;
-  }
-
-  if (controlId == 4) {
-    clearPressed = false;
-  }
-
-  if (controlId == 5) {
-    createPressed = false;
-  }
-
-  return true;
-}
-
 bool Minecraft::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
   Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);

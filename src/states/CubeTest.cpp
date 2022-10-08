@@ -79,16 +79,6 @@ bool CubeTest::pointerMove(float xPos, float yPos, float zPos, int controlId, in
   return true;
 }
 
-bool CubeTest::buttonPress(int controlId, int terminalId)
-{
-  return true;
-}
-
-bool CubeTest::buttonRelease(int controlId, int terminalId)
-{
-  return true;
-}
-
 bool CubeTest::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
   if (controlId == 2) {
