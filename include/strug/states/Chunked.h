@@ -17,7 +17,7 @@ class Perception;
 typedef std::unordered_map<Glade::Vector2i, Isosurface*> ChunksMap;
 typedef ChunksMap::iterator ChunksMapI;
 
-class Chunked: public State, VirtualController
+class Chunked: public State, public VirtualController
 {
   private:
     Context *context;
@@ -28,7 +28,6 @@ class Chunked: public State, VirtualController
     Glade::Vector2f lastMousePos;
 
     Grid *grid;
-    ChunksMap chunks;
 
     std::vector<StrugObject*> items;
 

@@ -33,9 +33,10 @@ void Chunked::createEntities()
     for (int j = 0; j < CHUNKS_SIDE; j++) {
       Glade::Vector2i chunkIndex(i, j);
       Isosurface* surf = new Isosurface();
+      grid->addChunk(i, j, surf);
+
       surf->initialize(chunkIndex, *grid);
       context->add(surf);
-      chunks[chunkIndex] = surf;
     }
   }
 }
@@ -89,7 +90,7 @@ bool Chunked::buttonPress(Glade::Key controlId, int terminalId)
 {
   VirtualController::buttonPress(controlId, terminalId);
 
-  if (controlId == 2) {
+  if (controlId == Glade::Key::GLADE_KEY_F) {
     context->requestStateChange(new Craft(this), true);
   }
 
@@ -146,7 +147,7 @@ void Chunked::shoot()
     }
 
     if (shotSolid) {
-      grid->addValueAtCell(cellInfo.second, 0.1);
+      grid->addValueAtCell(cellInfo.second, digging ? 0.1 : -0.1);
       break;
     }
 
@@ -188,10 +189,9 @@ bool Chunked::pointerUp(float axisX, float axisY, float axisZ, int controlId, in
 
 void Chunked::reloadChunk(const Glade::Vector2i &chunkIndex)
 {
-  ChunksMapI chunk = chunks.find(chunkIndex);
+  Isosurface* surf = (Isosurface *) grid->getChunk(chunkIndex.x, chunkIndex.y);
 
-  if (chunk != chunks.end()) {
-    Isosurface* surf = chunk->second;
+  if (surf) {
     surf->initialize(chunkIndex, *grid);
     context->add(surf);
   }
@@ -199,6 +199,35 @@ void Chunked::reloadChunk(const Glade::Vector2i &chunkIndex)
 
 void Chunked::applyRules(Context &context)
 {
+  float forward = 0.0, strafe = 0.0, fly = 0.0;
+
+  if (isKeyPressed(Glade::Key::GLADE_KEY_W))
+    forward = -0.1;
+
+  if (isKeyPressed(Glade::Key::GLADE_KEY_S))
+    forward = 0.1;
+
+  if (isKeyPressed(Glade::Key::GLADE_KEY_A))
+    strafe = -0.1;
+
+  if (isKeyPressed(Glade::Key::GLADE_KEY_D))
+    strafe = 0.1;
+
+  if (isKeyPressed(Glade::Key::GLADE_KEY_SPACE))
+    fly = 0.1;
+
+  if (isKeyPressed(Glade::Key::GLADE_KEY_X))
+    fly = -0.1;
+
+  Transform *camera = context.getRenderer()->getCamera();
+  float zModifier = forward * cos(camera->rotation->y) + strafe * sin(camera->rotation->y);
+  float xModifier = -forward * sin(camera->rotation->y) + strafe * cos(camera->rotation->y);
+  float yModifier = forward * sin(camera->rotation->x) + fly;
+
+  camera->position->z += zModifier;
+  camera->position->y += yModifier;
+  camera->position->x += xModifier;
+
   if (digging || growing)
     shoot();
 }
@@ -228,8 +257,7 @@ void Chunked::wakeup(Context &context)
 
   for (int i = 0; i < CHUNKS_SIDE; i++) {
     for (int j = 0; j < CHUNKS_SIDE; j++) {
-      Glade::Vector2i chunkIndex(i, j);
-      context.add(chunks[chunkIndex]);
+      context.add(grid->getChunk(i, j));
     }
   }
 

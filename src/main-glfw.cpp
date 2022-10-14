@@ -21,6 +21,7 @@
 #include <strug/controls/StrugController.h>
 #include <strug/exception/StrugException.h>
 #include <strug/states/WalkingTheWorld.h>
+#include <strug/states/Chunked.h>
 
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
@@ -247,7 +248,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(new WalkingTheWorld());
+  gameContext->requestStateChange(new Chunked());
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
