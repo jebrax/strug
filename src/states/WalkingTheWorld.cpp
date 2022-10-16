@@ -18,6 +18,8 @@ static Isosurface *terrain = nullptr;
 static Grid* grid = nullptr;
 static bool flyMode = false;
 static bool needsToReleaseJumpButtonFirst = false;
+static bool digging = false;
+static bool growing = false;
 
 static float gravityAcceleration = -0.08;
 static float jumpAcceleration = 0.4;
@@ -37,7 +39,7 @@ void WalkingTheWorld::createEntities()
 {
   sphere = new Sphere();
   sphere->initialize(cellSize);
-  sphere->getTransform()->position->x = (float) grid->chunkSizeCells/2 * grid->cellSize - 3;
+  sphere->getTransform()->position->x = (float) grid->chunkSizeCells/2 * grid->cellSize;
   sphere->getTransform()->position->y = 20 * grid->cellSize;
   sphere->getTransform()->position->z = (float) grid->chunkSizeCells/2 * grid->cellSize;
   context->add(sphere);
@@ -50,7 +52,6 @@ void WalkingTheWorld::createEntities()
       grid->addChunk(i, j, terrain);
 
       terrain->initialize(chunkIndex, *grid, false);
-      terrain->view->getMesh()->neverErase = true;
       context->add(terrain);
     }
   }
@@ -65,7 +66,7 @@ void WalkingTheWorld::init(Context &context)
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
  
-  grid = new Grid(60, cellSize, 1);
+  grid = new Grid(60, cellSize, 2);
 
   createEntities();
 
@@ -73,9 +74,9 @@ void WalkingTheWorld::init(Context &context)
 
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
-  context.renderer->getCamera()->position->z = 10.0;
-  context.renderer->getCamera()->position->x = 10.0;
-  context.renderer->getCamera()->position->y = 5.0;
+  context.renderer->getCamera()->position->z = 4.0;
+  context.renderer->getCamera()->position->x = 2.0;
+  context.renderer->getCamera()->position->y = 3.0;
 
   Glade::System::toggleMouseCursor(false);
 
@@ -144,7 +145,84 @@ void WalkingTheWorld::applyRules(Context &context)
     verticalSpeed = std::clamp(verticalSpeed, -0.1f, 0.5f);
     sphere->getTransform()->position->y += verticalSpeed;
   }
+
+  if (digging || growing)
+    shoot();
 }
+
+void WalkingTheWorld::shoot()
+{
+  Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
+
+  //log("Near point: %f %f %f", nearPoint.x, nearPoint.y, nearPoint.z);
+
+  Glade::Vector3f cameraPos = *context->getRenderer()->getCamera()->position;
+
+  Glade::Vector3f dir(nearPoint.x, nearPoint.y, nearPoint.z);
+  dir.subtract(cameraPos);
+  dir.normalize();
+
+  // for the smaller step:
+  dir.x *= 0.1;
+  dir.y *= 0.1;
+  dir.z *= 0.1;
+
+  //log("Ray dir: %f %f %f", dir.x, dir.y, dir.z);
+
+  Glade::Vector3f stepPoint(nearPoint.x, nearPoint.y, nearPoint.z);
+  Grid::CellsI currentCell;
+
+  std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo;
+  std::pair<Glade::Vector2i, Glade::Vector3i> prevCellInfo;
+
+  for (int i = 0; i < 100; i++) {
+    prevCellInfo = cellInfo;
+    cellInfo = grid->getCellIndexByCoords(stepPoint);
+    currentCell = grid->cells.find(cellInfo.second);
+
+    if (currentCell == grid->cells.end()) {
+      break;
+    }
+
+    bool shotSolid = false;
+
+    for (int j = 0; j < 8; j++) {
+      if (currentCell->second.val[j] < 0.5) {
+        shotSolid = true;
+        break;
+      }
+    }
+
+    if (shotSolid) {
+      grid->addValueAtCell(cellInfo.second, digging ? 0.1 : -0.1);
+      break;
+    }
+
+    stepPoint.add(dir);
+  }
+
+  reloadChunk(cellInfo.first);
+
+  std::vector<Glade::Vector2i> adjacentChunks;
+  grid->getAdjacentChunks(cellInfo.second, adjacentChunks);
+
+  for (const Glade::Vector2i &chunkIndex: adjacentChunks) {
+    //log("Adj chunk (%d, %d)", chunkIndex.x, chunkIndex.y);
+    reloadChunk(chunkIndex);
+  }
+
+}
+
+void WalkingTheWorld::reloadChunk(const Glade::Vector2i &chunkIndex)
+{
+  Isosurface* surf = (Isosurface *) grid->getChunk(chunkIndex.x, chunkIndex.y);
+
+  if (surf) {
+    surf->initialize(chunkIndex, *grid);
+    context->add(surf);
+  }
+}
+
 
 void WalkingTheWorld::onEvent(Glade::EventType type, void *payload) {
   characterIsOnTheGround = true;
@@ -170,11 +248,22 @@ bool WalkingTheWorld::buttonRelease(Glade::Key key, int terminalId) {
 
 bool WalkingTheWorld::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
+  switch (controlId) {
+    case 0: digging = true;
+            growing = false;
+            break;
+    case 1: growing = true;
+            digging = false;
+            break;
+  }
+
   return true;
 }
 
 bool WalkingTheWorld::pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
+  digging = growing = false;
+
   return true;
 }
 

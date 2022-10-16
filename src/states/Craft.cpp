@@ -89,7 +89,7 @@ bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int t
   static float phi = 0.0, theta = 0.0;
   static float r = 4.0f;
   static float originX = GRID_CELLS_IN_A_CHUNK * GRID_CELL_SIZE_COORDS / 2 + GRID_CELL_SIZE_COORDS / 2,
-               originY = 40 * GRID_CELL_SIZE_COORDS / 2 + GRID_CELL_SIZE_COORDS / 2,
+               originY = Grid::CHUNK_HEIGHT * GRID_CELL_SIZE_COORDS / 2 + GRID_CELL_SIZE_COORDS / 2,
                originZ = GRID_CELLS_IN_A_CHUNK * GRID_CELL_SIZE_COORDS / 2 + GRID_CELL_SIZE_COORDS / 2;
 
   if (controlId == 0 || controlId == 1) {

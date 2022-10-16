@@ -61,7 +61,7 @@ void Minecraft::createEntities()
     }
   };
 
-  gen.generate(createBlock, 40);
+  gen.generate(createBlock, Grid::CHUNK_HEIGHT);
 
   for (SpatialIndexI i = spatialIndex.begin(); i != spatialIndex.end(); i++) {
     int x = i->first.x, y = i->first.y, z = i->first.z;

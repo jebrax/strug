@@ -248,7 +248,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(new Chunked());
+  gameContext->requestStateChange(new WalkingTheWorld());
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

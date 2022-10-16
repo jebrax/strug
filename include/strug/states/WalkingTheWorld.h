@@ -9,6 +9,10 @@ class Context;
 class StrugObject;
 class VirtualContoller;
 
+namespace Glade {
+  class Vector2i;
+}
+
 class WalkingTheWorld: public State, VirtualController, Glade::EventListener
 {
   private:
@@ -23,6 +27,8 @@ class WalkingTheWorld: public State, VirtualController, Glade::EventListener
     void shutdown(Context &context) override;
     void applyRules(Context &context) override;
     void createEntities();
+    void shoot();
+    void reloadChunk(const Glade::Vector2i &chunkIndex);
 
     void onEvent(Glade::EventType type, void *payload) override;
 

@@ -282,7 +282,7 @@ void CollisionTest::applyRules(Context &context)
   ccd.support1 = isosurfaceCellSupportFunction;
 
   for (int i = 0; i < grid->chunkSizeCells; i++) {
-    for (int j = 0; j < 40; j++) {
+    for (int j = 0; j < Grid::CHUNK_HEIGHT; j++) {
       for (int k = 0; k < grid->chunkSizeCells; k++) {
         Glade::Vector3i centerCellCoord(i, j, k);
         auto celli = grid->cells.find(centerCellCoord);
