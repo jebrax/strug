@@ -1,8 +1,9 @@
 #include <algorithm>
-#include <strug/states/WalkingTheWorld.h>
+#include <strug/states/world/WalkingTheWorld.h>
 #include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Sphere.h>
 #include <strug/blocks/Isosurface.h>
+#include <strug/states/world/WorldController.h>
 
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
@@ -16,15 +17,6 @@
 static Sphere *sphere= nullptr;
 static Isosurface *terrain = nullptr;
 static Grid* grid = nullptr;
-static bool flyMode = false;
-static bool needsToReleaseJumpButtonFirst = false;
-static bool digging = false;
-static bool growing = false;
-
-static float gravityAcceleration = -0.08;
-static float jumpAcceleration = 0.4;
-static float verticalSpeed = 0.0;
-
 static const float cellSize = 0.25;
 
 WalkingTheWorld::WalkingTheWorld():
@@ -32,8 +24,7 @@ WalkingTheWorld::WalkingTheWorld():
 {}
 
 WalkingTheWorld::~WalkingTheWorld()
-{
-}
+{}
 
 void WalkingTheWorld::createEntities()
 {
@@ -61,7 +52,6 @@ void WalkingTheWorld::init(Context &context)
 {
   log("Init WalkingTheWorld");
   this->context = &context;
-  context.eventBus.registerListener(Glade::EventType::GLADE_COLLISION_EVENT, this);
 
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
@@ -80,73 +70,15 @@ void WalkingTheWorld::init(Context &context)
 
   Glade::System::toggleMouseCursor(false);
 
-  context.setController(*this);
+  controller = new WorldController(context, sphere);
+  context.setController(*controller);
 }
 
 void WalkingTheWorld::applyRules(Context &context)
 {
-  float forward = 0.0, strafe = 0.0, fly = 0.0;
+  controller->update();
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_W))
-    forward = -0.1;
-
-  if (isKeyPressed(Glade::Key::GLADE_KEY_S))
-    forward = 0.1;
-
-  if (isKeyPressed(Glade::Key::GLADE_KEY_A))
-    strafe = -0.1;
-
-  if (isKeyPressed(Glade::Key::GLADE_KEY_D))
-    strafe = 0.1;
-
-  if (isKeyPressed(Glade::Key::GLADE_KEY_SPACE))
-    fly = 0.1;
-
-  if (isKeyPressed(Glade::Key::GLADE_KEY_X))
-    fly = -0.1;
-
-  Transform *camera = context.getRenderer()->getCamera();
-  float zModifier = forward * cos(camera->rotation->y) + strafe * sin(camera->rotation->y);
-  float xModifier = -forward * sin(camera->rotation->y) + strafe * cos(camera->rotation->y);
-  float yModifier = forward * sin(camera->rotation->x) + fly;
-
-  camera->position->z += zModifier;
-  camera->position->y += yModifier;
-  camera->position->x += xModifier;
-  float sphereSpeed = 0.06;
-
-  if (isKeyPressed(Glade::Key::GLADE_KEY_LEFT))
-    sphere->getTransform()->position->x -= sphereSpeed;
-
-  if (isKeyPressed(Glade::Key::GLADE_KEY_RIGHT))
-    sphere->getTransform()->position->x += sphereSpeed;
-
-  if (isKeyPressed(Glade::Key::GLADE_KEY_UP))
-    sphere->getTransform()->position->z -= sphereSpeed;
-
-  if (isKeyPressed(Glade::Key::GLADE_KEY_DOWN))
-    sphere->getTransform()->position->z += sphereSpeed;
-
-  if (flyMode) {
-    if (isKeyPressed(Glade::Key::GLADE_KEY_O))
-      sphere->getTransform()->position->y += sphereSpeed;
-
-    if (isKeyPressed(Glade::Key::GLADE_KEY_L))
-      sphere->getTransform()->position->y -= sphereSpeed;
-  } else {
-    // gravity and jumping
-    if (isKeyPressed(Glade::GLADE_KEY_F) && characterIsOnTheGround && !needsToReleaseJumpButtonFirst) {
-        verticalSpeed = jumpAcceleration;
-        characterIsOnTheGround = false;
-        needsToReleaseJumpButtonFirst = true;
-    }
-
-    verticalSpeed += gravityAcceleration;
-    verticalSpeed = std::clamp(verticalSpeed, -0.1f, 0.5f);
-    sphere->getTransform()->position->y += verticalSpeed;
-  }
-
-  if (digging || growing)
+  if (controller->isShootButtonDown())
     shoot();
 }
 
@@ -194,7 +126,7 @@ void WalkingTheWorld::shoot()
     }
 
     if (shotSolid) {
-      grid->addValueAtCell(cellInfo.second, digging ? 0.1 : -0.1);
+      grid->addValueAtCell(cellInfo.second, controller->isDigButtonDown()? 0.1 : -0.1);
       break;
     }
 
@@ -223,52 +155,7 @@ void WalkingTheWorld::reloadChunk(const Glade::Vector2i &chunkIndex)
   }
 }
 
-
-void WalkingTheWorld::onEvent(Glade::EventType type, void *payload) {
-  characterIsOnTheGround = true;
-}
-
-bool WalkingTheWorld::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
-{
-  context->getRenderer()->getCamera()->rotation->y = xPos * 0.001;
-  context->getRenderer()->getCamera()->rotation->x = yPos * 0.001;
-
-  return true;
-}
-
-bool WalkingTheWorld::buttonRelease(Glade::Key key, int terminalId) {
-  VirtualController::buttonRelease(key, terminalId);
-
-  if (key == Glade::Key::GLADE_KEY_F) {
-    needsToReleaseJumpButtonFirst = false;
-  }
-
-  return true;
-}
-
-bool WalkingTheWorld::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
-{
-  switch (controlId) {
-    case 0: digging = true;
-            growing = false;
-            break;
-    case 1: growing = true;
-            digging = false;
-            break;
-  }
-
-  return true;
-}
-
-bool WalkingTheWorld::pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId)
-{
-  digging = growing = false;
-
-  return true;
-}
-
 void WalkingTheWorld::shutdown(Context &context)
 {
-
 }
 

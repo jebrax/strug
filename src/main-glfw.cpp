@@ -1,12 +1,8 @@
-#include "glade/controls/VirtualController.h"
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include <fstream>
-#include <cmath>
-#include <cstdlib>
-#include <sys/syslimits.h>
-#include <mach-o/dyld.h>
+#include <strug/ResourceManager.h>
+#include <strug/controls/StrugController.h>
+#include <strug/exception/StrugException.h>
+#include <strug/states/world/WalkingTheWorld.h>
+#include <strug/states/Chunked.h>
 
 #include <glade/exception/GladeException.h>
 #include <glade/debug/log.h>
@@ -17,11 +13,17 @@
 #include <glade/util/Path.h>
 #include <glade/util/DesktopFileManager.h>
 #include <glade/util/ResourceManager.h>
-#include <strug/ResourceManager.h>
-#include <strug/controls/StrugController.h>
-#include <strug/exception/StrugException.h>
-#include <strug/states/WalkingTheWorld.h>
-#include <strug/states/Chunked.h>
+#include <glade/controls/VirtualController.h>
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+#include <sys/syslimits.h>
+#include <mach-o/dyld.h>
+
+#include <fstream>
+#include <cmath>
+#include <cstdlib>
 
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
