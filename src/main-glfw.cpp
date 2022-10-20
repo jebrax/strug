@@ -275,7 +275,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(new Craft());
+  gameContext->requestStateChange(new WalkingTheWorld());
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

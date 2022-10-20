@@ -3,6 +3,7 @@
 #include <glade/controls/VirtualController.h>
 #include <glade/math/Transform.h>
 #include <glade/Context.h>
+#include <glade/system.h>
 
 WorldController::WorldController(Context &context, GladeObject *character):
     context(context),
@@ -26,21 +27,95 @@ void WorldController::onEvent(Glade::EventType type, void *payload) {
   characterIsOnTheGround = true;
 }
 
+void WorldController::setCameraMode(CameraMode mode)
+{
+  cameraMode = mode;
+
+  if (cameraMode == CameraMode::THIRD_PERSON) {
+    Glade::System::toggleMouseCursor(true);
+    thirdPersonCameraMouseMove(0,0,0,0);
+  } else if (cameraMode == CameraMode::FREE) {
+    Glade::System::toggleMouseCursor(false);
+  }
+}
+
 bool WorldController::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
 {
-  context.getRenderer()->getCamera()->rotation->y = xPos * 0.001;
-  context.getRenderer()->getCamera()->rotation->x = yPos * 0.001;
+  if (cameraMode == CameraMode::FREE) {
+    context.getRenderer()->getCamera()->rotation->y = xPos * 0.001;
+    context.getRenderer()->getCamera()->rotation->x = yPos * 0.001;
+  } else {
+    thirdPersonCameraMouseMove(xPos, yPos, zPos, controlId);
+  }
 
   return true;
 }
 
-void WorldController::update()
+void WorldController::thirdPersonCameraMouseMove(float xPos, float yPos, float zPos, int controlId)
 {
-  updateCamera();
-  updateCharacter();
+  unsigned int viewportWidth, viewportHeight;
+  Glade::System::getViewportSize(&viewportWidth, &viewportHeight);
+
+  if (rotateIsDown && controlId == 0) {
+    if (firstMove) {
+      xPosRotationDelta = 0;
+      yPosRotationDelta = 0;
+      firstMove = false;
+    } else {
+      xPosRotationDelta = xPos - xPosRotationLast;
+      yPosRotationDelta = yPos - yPosRotationLast;
+    }
+  }
+
+  if (controlId == 0) {
+    xPosRotationLast = xPos;
+    yPosRotationLast = yPos;
+
+    xCursorPosNormalized =  (xPos / viewportWidth * 2 - 1);
+    yCursorPosNormalized = -(yPos / viewportHeight * 2 - 1);
+  }
+
+  if (controlId == 0 && rotateIsDown) {
+    phi += yPosRotationDelta * 0.001;
+    theta += xPosRotationDelta * 0.001;
+  }
+
+  if (controlId == 1 && !rotateIsDown) {
+    r -= yPos * 0.1;
+  }
+
+  y = cos(phi);
+  x = cos(theta) * sin(phi);
+  z = sin(theta) * sin(phi);
+  x *= r; y *= r; z *= r;
 }
 
-void WorldController::updateCamera()
+void WorldController::update()
+{
+  updateCharacter();
+
+  if (cameraMode == CameraMode::FREE) {
+    updateFreeCamera();
+  } else if (cameraMode == CameraMode::THIRD_PERSON) {
+    updateThirdPersonCamera();
+  }
+}
+
+void WorldController::updateThirdPersonCamera()
+{
+  float originX = character->getTransform()->position->x,
+        originY = character->getTransform()->position->y,
+        originZ = character->getTransform()->position->z;
+
+  context.getRenderer()->getCamera()->position->x = x + originX;
+  context.getRenderer()->getCamera()->position->y = y + originY;
+  context.getRenderer()->getCamera()->position->z = z + originZ;
+
+  context.getRenderer()->getCamera()->rotation->x = phi + PI / 2.0;
+  context.getRenderer()->getCamera()->rotation->y = theta + PI / 2.0;
+}
+
+void WorldController::updateFreeCamera()
 {
   float forward = 0.0, strafe = 0.0, fly = 0.0;
 
@@ -123,6 +198,13 @@ bool WorldController::buttonPress(Glade::Key key, int terminalId) {
     log("Camera and character positions were reset");
   }
 
+  if (key == Glade::Key::GLADE_KEY_4 && changedState) {
+    if (cameraMode == CameraMode::FREE)
+      setCameraMode(CameraMode::THIRD_PERSON);
+    else
+      setCameraMode(CameraMode::FREE);
+  }
+
   if (key == Glade::Key::GLADE_KEY_SPACE && characterIsOnTheGround && changedState) {
       verticalSpeed = jumpAcceleration;
       characterIsOnTheGround = false;
@@ -140,11 +222,21 @@ bool WorldController::buttonRelease(Glade::Key key, int terminalId) {
 bool WorldController::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
   switch (controlId) {
-    case 0: digging = true;
+    case 0: if (cameraMode == CameraMode::THIRD_PERSON)
+              break;  
+            digging = true;
             growing = false;
             break;
-    case 1: growing = true;
+    case 1: if (cameraMode == CameraMode::THIRD_PERSON)
+              break;
+            growing = true;
             digging = false;
+            break;
+    case 2: if (cameraMode != CameraMode::THIRD_PERSON)
+              break;
+            rotateIsDown = true;
+            firstMove = true;
+            Glade::System::toggleMouseCursor(false);
             break;
   }
 
@@ -153,7 +245,12 @@ bool WorldController::pointerDown(float axisX, float axisY, float axisZ, int con
 
 bool WorldController::pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
-  digging = growing = false;
+  if (controlId == 2 && CameraMode::THIRD_PERSON) {
+    rotateIsDown = false;
+    Glade::System::toggleMouseCursor(true);
+  } else {
+    digging = growing = false;
+  }
 
   return true;
 }

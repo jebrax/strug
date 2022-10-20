@@ -9,6 +9,12 @@ class GladeObject;
 class WorldController: public VirtualController, Glade::EventListener
 {
 public:
+  enum CameraMode {
+    FREE,
+    THIRD_PERSON,
+    FIRST_PERSON
+  };
+
   WorldController(Context &context, GladeObject *character);
 
   bool isShootButtonDown() { return digging || growing; }
@@ -25,9 +31,12 @@ public:
   // Character and camera controller functionality
   void update();
   void resetCameraAndCharacterPositions();
+  void setCameraMode(CameraMode mode);
 
 private:
-  void updateCamera();
+  void updateFreeCamera();
+  void updateThirdPersonCamera();
+  void thirdPersonCameraMouseMove(float xPos, float yPos, float zPos, int controlId);
   void updateCharacter();
 
   static constexpr float gravityAcceleration = -0.08;
@@ -38,6 +47,17 @@ private:
   bool digging = false, growing = false;
   float verticalSpeed = 0.0;
 
+  // Third person camera controller variables
+  bool rotateIsDown = false, firstMove = true;
+  float xCursorPosNormalized, yCursorPosNormalized;
+  float xPosRotationDelta, yPosRotationDelta;
+  float xPosRotationLast, yPosRotationLast;
+  float phi = 0.0, theta = 0.0;
+  float r = 4.0f;
+  float x = 0.0, y = 0.0, z = 0.0;
+
+
+  CameraMode cameraMode = CameraMode::FREE;
   GladeObject *character;
   Context &context;
 };
