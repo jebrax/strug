@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <strug/states/world/WalkingTheWorld.h>
-#include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Sphere.h>
 #include <strug/blocks/Isosurface.h>
 #include <strug/states/world/WorldController.h>
@@ -30,12 +29,8 @@ void WalkingTheWorld::createEntities()
 {
   sphere = new Sphere();
   sphere->initialize(cellSize);
-  sphere->getTransform()->position->x = (float) grid->chunkSizeCells/2 * grid->cellSize;
-  sphere->getTransform()->position->y = 20 * grid->cellSize;
-  sphere->getTransform()->position->z = (float) grid->chunkSizeCells/2 * grid->cellSize;
   context->add(sphere);
 
-  // The size is 1 for now
   for (int i = 0; i < grid->getGridSizeChunks(); ++i) {
     for (int j = 0; j < grid->getGridSizeChunks(); ++j) {
       Glade::Vector2i chunkIndex(i, j);
@@ -64,13 +59,12 @@ void WalkingTheWorld::init(Context &context)
 
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
-  context.renderer->getCamera()->position->z = 4.0;
-  context.renderer->getCamera()->position->x = 2.0;
-  context.renderer->getCamera()->position->y = 3.0;
+
+  controller = new WorldController(context, sphere);
+  controller->resetCameraAndCharacterPositions();
 
   Glade::System::toggleMouseCursor(false);
 
-  controller = new WorldController(context, sphere);
   context.setController(*controller);
 }
 

@@ -5,7 +5,6 @@
 #include <glade/debug/log.h>
 
 class Context;
-class StrugObject;
 class Chunked;
 class VirtualContoller;
 

@@ -16,7 +16,7 @@ void Cube::initialize()
       );
 
     std::shared_ptr<Glade::Mesh> mesh = game_resource_manager->getMesh("geometry/cube.obj");
-    view = new Drawable(mesh, program);
+    Drawable *view = new Drawable(mesh, program);
 
     for (int i = 0; i < mesh->getVertexBufferSize(); i += 3) {
       Glade::Vector3f vertex(mesh->vertices[i], mesh->vertices[i + 1], mesh->vertices[i + 2]);
@@ -32,14 +32,14 @@ void Cube::initialize()
 
 void Cube::modifyVertexPosition(int triangleNum, int vertNum, float factor)
 {
-  std::shared_ptr<Glade::Mesh> mesh = view->getMesh();
+  std::shared_ptr<Glade::Mesh> mesh = getView()->getMesh();
   int vertAttrStartIndex = ((triangleNum - 1) * 3 + (vertNum - 1)) * 8;
   mesh->vertices[vertAttrStartIndex + 1] = (mesh->vertices[vertAttrStartIndex + 1] + 0.5) * factor - 0.5;
 }
 
 void Cube::recalculateTriangleNormal(int triangleNum)
 {
-  std::shared_ptr<Glade::Mesh> mesh = view->getMesh();
+  std::shared_ptr<Glade::Mesh> mesh = getView()->getMesh();
   int v0AttrStartIndex = ((triangleNum - 1) * 3 + 0) * 8;
   int v1AttrStartIndex = ((triangleNum - 1) * 3 + 1) * 8;
   int v2AttrStartIndex = ((triangleNum - 1) * 3 + 2) * 8;

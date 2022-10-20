@@ -24,6 +24,7 @@ public:
 
   // Character and camera controller functionality
   void update();
+  void resetCameraAndCharacterPositions();
 
 private:
   void updateCamera();
@@ -33,7 +34,7 @@ private:
   static constexpr float jumpAcceleration = 0.4;
 
   bool flyMode = false;
-  bool needsToReleaseJumpButtonFirst = false, characterIsOnTheGround = false;
+  bool characterIsOnTheGround = false;
   bool digging = false, growing = false;
   float verticalSpeed = 0.0;
 

@@ -5,13 +5,13 @@
 #include <glade/debug/log.h>
 
 class Context;
-class StrugObject;
+class GladeObject;
 class VirtualContoller;
 
 class MarchingCubes: public State, VirtualController
 {
   private:
-    StrugObject *terrain;
+    GladeObject *terrain;
     Context *context;
 
     bool digPressed;

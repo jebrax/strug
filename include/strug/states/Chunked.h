@@ -8,7 +8,7 @@
 #include <vector>
 
 class Context;
-class StrugObject;
+class GladeObject;
 class VirtualContoller;
 class Isosurface;
 class Grid;
@@ -22,14 +22,14 @@ class Chunked: public State, public VirtualController
   private:
     Context *context;
     Perception *perception;
-    StrugObject *mItemToAdd;
+    GladeObject *mItemToAdd;
 
     bool digging, growing;
     Glade::Vector2f lastMousePos;
 
     Grid *grid;
 
-    std::vector<StrugObject*> items;
+    std::vector<GladeObject*> items;
 
     void shoot();
     void createEntities();
@@ -40,7 +40,7 @@ class Chunked: public State, public VirtualController
     Chunked();
     ~Chunked();
 
-    void addItem(StrugObject *itemToAdd);
+    void addItem(GladeObject *itemToAdd);
     void init(Context &context) override;
     void shutdown(Context &context) override;
     void applyRules(Context &context) override;

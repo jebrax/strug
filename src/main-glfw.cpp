@@ -3,6 +3,7 @@
 #include <strug/exception/StrugException.h>
 #include <strug/states/world/WalkingTheWorld.h>
 #include <strug/states/Chunked.h>
+#include <strug/states/Craft.h>
 
 #include <glade/exception/GladeException.h>
 #include <glade/debug/log.h>
@@ -214,6 +215,30 @@ void processInput(GLFWwindow* window)
 
   if (glfwGetKey(window, GLFW_KEY_L) == GLFW_RELEASE)
     controller->buttonRelease(Glade::Key::GLADE_KEY_L, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_1, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_1) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_1, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_2, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_2) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_2, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_3, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_3) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_3, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_4, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_4) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_4, 0);
 }
 
 int main()
@@ -250,7 +275,7 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
-  gameContext->requestStateChange(new WalkingTheWorld());
+  gameContext->requestStateChange(new Craft());
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

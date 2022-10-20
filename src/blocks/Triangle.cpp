@@ -16,7 +16,7 @@ void Triangle::initialize()
       );
 
     std::shared_ptr<Glade::Mesh> mesh = game_resource_manager->getMesh("geometry/triangle-horizontal.obj");
-    view = new Drawable(mesh, program);
+    Drawable *view = new Drawable(mesh, program);
 
     addDrawable(view);
     initialized = true;

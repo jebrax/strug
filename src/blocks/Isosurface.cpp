@@ -15,8 +15,6 @@ void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, bool 
   AdvancedMeshGenerator gen;
 
   if (!initialized) {
-    StrugObject::initialize();
-
     std::shared_ptr<ShaderProgram> program =
       game_resource_manager->getShaderProgram(
         "phong.vertex.glsl",
@@ -28,15 +26,9 @@ void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, bool 
     getTransform()->position->x = chunkIndex.x * grid.chunkSizeCoords;
     getTransform()->position->z = chunkIndex.y * grid.chunkSizeCoords;
 
-    if (crafting_mode) {
-      getTransform()->position->x = grid.chunkSizeCoords / 2;
-      getTransform()->position->y = 20 * grid.cellSize;
-      getTransform()->position->z = grid.chunkSizeCoords / 2;
-    }
-
     gen.mcGenChunk(chunkIndex, grid, *mesh, 0.5, true, crafting_mode ? AdvancedMeshGenerator::CENTER_CELL_ONLY : AdvancedMeshGenerator::ISOSURFACE_HEIGHTMAP);
 
-    view = new Drawable(mesh, program);
+    Drawable *view = new Drawable(mesh, program);
     addDrawable(view);
 
     PhysicalObject *phy = new IsosurfaceCellPhysicalObject(this);
@@ -44,7 +36,7 @@ void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, bool 
 
     initialized = true;
   } else {
-    std::shared_ptr<Glade::Mesh> mesh = view->getMesh();
+    std::shared_ptr<Glade::Mesh> mesh = getView()->getMesh();
     gen.mcGenChunk(chunkIndex, grid, *mesh, 0.5, false, crafting_mode ? AdvancedMeshGenerator::CENTER_CELL_ONLY : AdvancedMeshGenerator::ISOSURFACE_HEIGHTMAP);
   }
 }

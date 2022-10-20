@@ -5,14 +5,14 @@
 #include <glade/debug/log.h>
 
 class Context;
-class StrugObject;
+class GladeObject;
 class Frank;
 class VirtualContoller;
 
 class Minecraft: public State, VirtualController
 {
   private:
-    StrugObject *terrain;
+    GladeObject *terrain;
     Frank *shovel;
     Context *context;
 

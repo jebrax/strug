@@ -4,7 +4,6 @@
 #include <glade/controls/VirtualController.h>
 #include <strug/states/Chunked.h>
 #include <strug/states/Craft.h>
-#include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Isosurface.h>
 #include <glade/generation/Grid.h>
 
@@ -22,7 +21,7 @@ Chunked::~Chunked()
 {
 }
 
-void Chunked::addItem(StrugObject *itemToAdd)
+void Chunked::addItem(GladeObject *itemToAdd)
 {
   mItemToAdd = itemToAdd;
 }
@@ -52,7 +51,7 @@ void Chunked::loadAllItems()
     mItemToAdd = nullptr;
   }
 
-  for (StrugObject *item: items)
+  for (GladeObject *item: items)
     context->add(item);
 }
 

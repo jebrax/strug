@@ -1,8 +1,8 @@
 #pragma once
 
-#include <strug/blocks/StrugObject.h>
+#include <glade/GladeObject.h>
 
-class Frank: public StrugObject
+class Frank: public GladeObject
 {
   public:
     float radius;

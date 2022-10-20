@@ -1,8 +1,8 @@
 #pragma once
 
-#include <strug/blocks/StrugObject.h>
+#include <glade/GladeObject.h>
 
-class Sphere: public StrugObject
+class Sphere: public GladeObject
 {
   public:
     virtual void initialize(float radius);

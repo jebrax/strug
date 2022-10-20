@@ -1,5 +1,4 @@
 #include <strug/states/CollisionTest.h>
-#include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Sphere.h>
 #include <strug/blocks/Cube.h>
 #include <strug/blocks/Isosurface.h>
@@ -22,7 +21,7 @@ static Isosurface *terrain = nullptr;
 static Cube* cube = nullptr;
 static Cube* cube2 = nullptr;
 static Grid* grid = nullptr;
-static std::vector<StrugObject*> terrainObjects;
+static std::vector<GladeObject*> terrainObjects;
 
 static const float cellSize = 0.25;
 
@@ -36,7 +35,7 @@ static bool
 
 static void meshSupportFunction(const void *obj, const ccd_vec3_t *dir, ccd_vec3_t *point)
 {
-  StrugObject *sobj= (StrugObject*) obj;
+  GladeObject *sobj= (GladeObject*) obj;
 
   ccd_quat_t q, qx, qy, qz, qinv;
   ccd_vec3_t axisx, axisy, axisz;
@@ -61,7 +60,7 @@ static void meshSupportFunction(const void *obj, const ccd_vec3_t *dir, ccd_vec3
   Glade::Vector3f direction(ccdVec3X(&dir_rotated), ccdVec3Y(&dir_rotated), ccdVec3Z(&dir_rotated));
   direction.normalize();
 
-  std::shared_ptr<Glade::Mesh> mesh = sobj->view->getMesh();
+  std::shared_ptr<Glade::Mesh> mesh = sobj->getView()->getMesh();
   Glade::Vector3f vertex(mesh->vertices[0], mesh->vertices[1], mesh->vertices[2]);
   float maxDot = vertex.dot(direction);
   int maxi = 0;
@@ -117,7 +116,7 @@ static void isosurfaceCellSupportFunction(const void *obj, const ccd_vec3_t *dir
   int startingIndex = cell->startingVertexIndex * 8;
   //log("Starting index: %d, num verts: %d * 8", startingIndex, cell->numVertices);
 
-  std::shared_ptr<Glade::Mesh> mesh = terrain->view->getMesh();
+  std::shared_ptr<Glade::Mesh> mesh = terrain->getView()->getMesh();
   Glade::Vector3f vertex(mesh->vertices[startingIndex], mesh->vertices[startingIndex + 1], mesh->vertices[startingIndex + 2]);
   float maxDot = vertex.dot(direction);
   int maxi = startingIndex;
@@ -194,7 +193,7 @@ void CollisionTest::createEntities()
   Glade::Vector2i chunkIndex(0, 0);
   terrain = new Isosurface();
   terrain->initialize(chunkIndex, *grid, false);
-  terrain->view->getMesh()->neverErase = true;
+  terrain->getView()->getMesh()->neverErase = true;
   context->add(terrain);
   //terrainObjects.push_back(terrain);
 }

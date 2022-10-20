@@ -1,9 +1,9 @@
 #pragma once
 
-#include <strug/blocks/StrugObject.h>
+#include <glade/GladeObject.h>
 #include <vector>
 
-class Cube: public StrugObject
+class Cube: public GladeObject
 {
   public:
     virtual void initialize();
@@ -13,3 +13,4 @@ class Cube: public StrugObject
     void modifyVertexPosition(int triangleNum, int vertNum, float factor);
     void recalculateTriangleNormal(int triangleNum);
 };
+

@@ -2,7 +2,6 @@
 #include <glade/render/Perception.h>
 #include <glade/controls/VirtualController.h>
 #include <strug/states/Minecraft.h>
-#include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Cube.h>
 #include <glade/generation/AdvancedMeshGenerator.h>
 

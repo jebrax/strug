@@ -11,6 +11,17 @@ WorldController::WorldController(Context &context, GladeObject *character):
   context.eventBus.registerListener(Glade::EventType::GLADE_COLLISION_EVENT, this);
 }
 
+void WorldController::resetCameraAndCharacterPositions()
+{
+  context.renderer->getCamera()->position->z = 4.0f;
+  context.renderer->getCamera()->position->x = 2.0f;
+  context.renderer->getCamera()->position->y = 3.0f;
+
+  character->getTransform()->position->x = 7.5f;
+  character->getTransform()->position->y = 5.0f;
+  character->getTransform()->position->z = 7.5f;
+}
+
 void WorldController::onEvent(Glade::EventType type, void *payload) {
   characterIsOnTheGround = true;
 }
@@ -33,22 +44,22 @@ void WorldController::updateCamera()
 {
   float forward = 0.0, strafe = 0.0, fly = 0.0;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_W))
+  if (isKeyPressed(Glade::Key::GLADE_KEY_UP))
     forward = -0.1;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_S))
+  if (isKeyPressed(Glade::Key::GLADE_KEY_DOWN))
     forward = 0.1;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_A))
+  if (isKeyPressed(Glade::Key::GLADE_KEY_LEFT))
     strafe = -0.1;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_D))
+  if (isKeyPressed(Glade::Key::GLADE_KEY_RIGHT))
     strafe = 0.1;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_SPACE))
+  if (isKeyPressed(Glade::Key::GLADE_KEY_O))
     fly = 0.1;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_X))
+  if (isKeyPressed(Glade::Key::GLADE_KEY_L))
     fly = -0.1;
 
   Transform *camera = context.getRenderer()->getCamera();
@@ -65,32 +76,26 @@ void WorldController::updateCharacter()
 {
   float characterSpeed = 0.06;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_LEFT))
+  if (isKeyPressed(Glade::Key::GLADE_KEY_A))
     character->getTransform()->position->x -= characterSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_RIGHT))
+  if (isKeyPressed(Glade::Key::GLADE_KEY_D))
     character->getTransform()->position->x += characterSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_UP))
+  if (isKeyPressed(Glade::Key::GLADE_KEY_W))
     character->getTransform()->position->z -= characterSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_DOWN))
+  if (isKeyPressed(Glade::Key::GLADE_KEY_S))
     character->getTransform()->position->z += characterSpeed;
 
   if (flyMode) {
-    if (isKeyPressed(Glade::Key::GLADE_KEY_O))
+    if (isKeyPressed(Glade::Key::GLADE_KEY_SPACE))
       character->getTransform()->position->y += characterSpeed;
 
-    if (isKeyPressed(Glade::Key::GLADE_KEY_L))
+    if (isKeyPressed(Glade::Key::GLADE_KEY_X))
       character->getTransform()->position->y -= characterSpeed;
   } else {
-    // gravity and jumping
-    if (isKeyPressed(Glade::GLADE_KEY_F) && characterIsOnTheGround && !needsToReleaseJumpButtonFirst) {
-        verticalSpeed = jumpAcceleration;
-        characterIsOnTheGround = false;
-        needsToReleaseJumpButtonFirst = true;
-    }
-
+    // gravity
     verticalSpeed += gravityAcceleration;
     verticalSpeed = std::clamp(verticalSpeed, -0.1f, 0.5f);
     character->getTransform()->position->y += verticalSpeed;
@@ -98,16 +103,36 @@ void WorldController::updateCharacter()
 }
 
 bool WorldController::buttonPress(Glade::Key key, int terminalId) {
-  VirtualController::buttonPress(key, terminalId);
-  return true;
+  bool changedState = VirtualController::buttonPress(key, terminalId);
+
+  if (key == Glade::Key::GLADE_KEY_1 && changedState) {
+    flyMode = !flyMode;
+    log("Flying mode is %s", flyMode ? "ON" : "OFF");
+
+    if (flyMode)
+      characterIsOnTheGround = false;
+  }
+
+  if (key == Glade::Key::GLADE_KEY_2 && changedState) {
+    context.enableCollisionDetector = !context.enableCollisionDetector;
+    log("Collisions are %s", context.enableCollisionDetector ? "ON" : "OFF");
+  }
+
+  if (key == Glade::Key::GLADE_KEY_3 && changedState) {
+    resetCameraAndCharacterPositions();
+    log("Camera and character positions were reset");
+  }
+
+  if (key == Glade::Key::GLADE_KEY_SPACE && characterIsOnTheGround && changedState) {
+      verticalSpeed = jumpAcceleration;
+      characterIsOnTheGround = false;
+  }
+
+  return changedState;
 }
 
 bool WorldController::buttonRelease(Glade::Key key, int terminalId) {
   VirtualController::buttonRelease(key, terminalId);
-
-  if (key == Glade::Key::GLADE_KEY_F) {
-    needsToReleaseJumpButtonFirst = false;
-  }
 
   return true;
 }

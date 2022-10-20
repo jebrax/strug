@@ -1,9 +1,8 @@
 #pragma once
 
-#include <strug/blocks/StrugObject.h>
-#include <vector>
+#include <glade/GladeObject.h>
 
-class Triangle: public StrugObject
+class Triangle: public GladeObject
 {
   public:
     virtual void initialize();

@@ -3,7 +3,6 @@
 #include <glade/controls/VirtualController.h>
 #include <glade/math/util.h>
 #include <strug/states/CubeTest.h>
-#include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Cube.h>
 
 #include <unordered_map>

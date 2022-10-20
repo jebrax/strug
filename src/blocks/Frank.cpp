@@ -9,8 +9,6 @@ extern Strug::ResourceManager *game_resource_manager;
 
 void Frank::initialize(float radius)
 {
-  StrugObject::initialize();
-
   if (!initialized) {
     std::shared_ptr<ShaderProgram> program =
       game_resource_manager->getShaderProgram(
@@ -24,7 +22,7 @@ void Frank::initialize(float radius)
     MeshGenerator gen;
     gen.generateHull(*mesh, radius, true);
     //gen.generate(*mesh);
-    view = new Drawable(mesh, program);
+    Drawable *view = new Drawable(mesh, program);
 
     addDrawable(view);
     initialized = true;

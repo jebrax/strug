@@ -5,20 +5,15 @@
 #include <glade/generation/Grid.h>
 #include <strug/states/Craft.h>
 #include <strug/states/Chunked.h>
-#include <strug/blocks/StrugObject.h>
 #include <strug/blocks/Isosurface.h>
+#include <strug/blocks/Sphere.h>
 
 #include <unordered_map>
 
 #define GRID_CELL_SIZE_COORDS 0.25
-#define GRID_CELLS_IN_A_CHUNK 60
-
-typedef std::unordered_map<Glade::Vector2i, Isosurface*> ChunksMap;
-typedef ChunksMap::iterator ChunksMapI;
+#define GRID_CELLS_IN_A_CHUNK 60 
 
 static Grid grid(GRID_CELLS_IN_A_CHUNK, GRID_CELL_SIZE_COORDS, 1);
-
-static ChunksMap chunks;
 
 Craft::Craft(Chunked *mainState):
   State(),
@@ -38,9 +33,10 @@ void Craft::createEntities()
 {
   Glade::Vector2i chunkIndex(0, 0);
   Isosurface* surf = new Isosurface();
+  grid.addChunk(chunkIndex.x, chunkIndex.y, surf);
+
   surf->initialize(chunkIndex, grid, true);
   context->add(surf);
-  chunks[chunkIndex] = surf;
 }
 
 void Craft::init(Context &context)
@@ -55,7 +51,6 @@ void Craft::init(Context &context)
 
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
-  context.renderer->getCamera()->position->z = 4.0;
 
   Glade::System::toggleMouseCursor(true);
   context.setController(*this);
@@ -88,9 +83,6 @@ bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int t
 
   static float phi = 0.0, theta = 0.0;
   static float r = 4.0f;
-  static float originX = GRID_CELLS_IN_A_CHUNK * GRID_CELL_SIZE_COORDS / 2 + GRID_CELL_SIZE_COORDS / 2,
-               originY = Grid::CHUNK_HEIGHT * GRID_CELL_SIZE_COORDS / 2 + GRID_CELL_SIZE_COORDS / 2,
-               originZ = GRID_CELLS_IN_A_CHUNK * GRID_CELL_SIZE_COORDS / 2 + GRID_CELL_SIZE_COORDS / 2;
 
   if (controlId == 0 || controlId == 1) {
     float x, y, z;
@@ -109,6 +101,10 @@ bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int t
     z = sin(theta) * sin(phi);
     x *= r; y *= r; z *= r;
 
+    static float originX = GRID_CELLS_IN_A_CHUNK * GRID_CELL_SIZE_COORDS / 2.0 + GRID_CELL_SIZE_COORDS / 2.0,
+      originY = Grid::CHUNK_HEIGHT * GRID_CELL_SIZE_COORDS / 2.0 + GRID_CELL_SIZE_COORDS / 2.0,
+      originZ = GRID_CELLS_IN_A_CHUNK * GRID_CELL_SIZE_COORDS / 2.0 + GRID_CELL_SIZE_COORDS / 2.0;
+
     context->getRenderer()->getCamera()->position->x = x + originX;
     context->getRenderer()->getCamera()->position->y = y + originY;
     context->getRenderer()->getCamera()->position->z = z + originZ;
@@ -126,7 +122,7 @@ bool Craft::buttonPress(Glade::Key controlId, int terminalId)
 
   if (controlId == 1) {
     Glade::Vector2i chunkIndex(0, 0);
-    mMainState->addItem(chunks[chunkIndex]);
+    mMainState->addItem(grid.getChunk(0, 0));
     context->requestStateChange(mMainState);
   }
 
@@ -253,11 +249,10 @@ bool Craft::pointerUp(float axisX, float axisY, float axisZ, int controlId, int 
 
 void Craft::reloadChunk(const Glade::Vector2i &chunkIndex)
 {
-  ChunksMapI chunk = chunks.find(chunkIndex);
+  Isosurface* surf = (Isosurface *) grid.getChunk(chunkIndex.x, chunkIndex.y);
 
-  if (chunk != chunks.end()) {
-    Isosurface* surf = chunk->second;
-    surf->initialize(chunkIndex, grid, true);
+  if (surf) {
+    surf->initialize(chunkIndex, grid);
     context->add(surf);
   }
 }
