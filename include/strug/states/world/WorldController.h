@@ -10,9 +10,10 @@ class WorldController: public VirtualController, Glade::EventListener
 {
 public:
   enum CameraMode {
-    FREE,
+    FREE = 0,
     THIRD_PERSON,
-    FIRST_PERSON
+    FIRST_PERSON,
+    _ENUM_LAST_VALUE
   };
 
   WorldController(Context &context, GladeObject *character);
@@ -37,10 +38,12 @@ private:
   void updateFreeCamera();
   void updateThirdPersonCamera();
   void thirdPersonCameraMouseMove(float xPos, float yPos, float zPos, int controlId);
+  void updateFirstPersonCamera();
   void updateCharacter();
 
-  static constexpr float gravityAcceleration = -0.08;
-  static constexpr float jumpAcceleration = 0.4;
+  static constexpr float GRAVITY_ACCELERATION = -0.08;
+  static constexpr float JUMP_ACCELERATION = 0.4;
+  static constexpr float CHARACTER_HEIGHT = 0.2;
 
   bool flyMode = false;
   bool characterIsOnTheGround = false;

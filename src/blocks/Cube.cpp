@@ -6,7 +6,7 @@
 
 extern Strug::ResourceManager *game_resource_manager;
 
-void Cube::initialize()
+void Cube::initialize(float scale)
 {
   if (!initialized ) {
     std::shared_ptr<ShaderProgram> program =
@@ -17,13 +17,6 @@ void Cube::initialize()
 
     std::shared_ptr<Glade::Mesh> mesh = game_resource_manager->getMesh("geometry/cube.obj");
     Drawable *view = new Drawable(mesh, program);
-
-    for (int i = 0; i < mesh->getVertexBufferSize(); i += 3) {
-      Glade::Vector3f vertex(mesh->vertices[i], mesh->vertices[i + 1], mesh->vertices[i + 2]);
-      //log("%f %f %f", vertex.x, vertex.y, vertex.z);
-    }
-
-    //log("Num vertex attrs: %d", mesh->vertices.size());
 
     addDrawable(view);
     initialized = true;

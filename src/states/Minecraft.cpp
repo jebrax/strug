@@ -141,7 +141,7 @@ bool Minecraft::pointerDown(float axisX, float axisY, float axisZ, int controlId
 
   for (int i = 0; i < 50; i++) {
     Cube *another = new Cube();
-    //Frank *another = new Frank();
+    //Hull *another = new Hull();
     //another->initialize();
     //another->getTransform()->position->x = stepPoint.x;
     //another->getTransform()->position->y = stepPoint.y;

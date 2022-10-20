@@ -1,11 +1,15 @@
 #pragma once
 
 #include <glade/GladeObject.h>
+#include <vector>
 
 class Frank: public GladeObject
 {
   public:
-    float radius;
+    void initialize(float scale = 1.0);
+    bool toggleCollisionShapeView();
 
-    void initialize(float radius);
+  private:
+    Drawable *collisionShapeView;
 };
+

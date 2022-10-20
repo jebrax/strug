@@ -6,7 +6,7 @@
 class Cube: public GladeObject
 {
   public:
-    virtual void initialize();
+    virtual void initialize(float scale = 1.0);
     void alterTop(float ky1, float ky2, float ky3, float ky4);
 
   private:

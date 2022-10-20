@@ -5,7 +5,7 @@
 #include <glade/debug/log.h>
 
 class Context;
-class Frank;
+class Hull;
 class VirtualContoller;
 
 class CubeTest: public State, VirtualController

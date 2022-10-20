@@ -1,4 +1,5 @@
 #include <strug/states/world/WorldController.h>
+#include <strug/blocks/Frank.h>
 
 #include <glade/controls/VirtualController.h>
 #include <glade/math/Transform.h>
@@ -33,10 +34,17 @@ void WorldController::setCameraMode(CameraMode mode)
 
   if (cameraMode == CameraMode::THIRD_PERSON) {
     Glade::System::toggleMouseCursor(true);
-    thirdPersonCameraMouseMove(0,0,0,0);
-  } else if (cameraMode == CameraMode::FREE) {
-    Glade::System::toggleMouseCursor(false);
+    phi = -PI/4;
+    thirdPersonCameraMouseMove(0,0,0,0); // this reset third person camera parameters
+    updateThirdPersonCamera();
   }
+
+  if (cameraMode == CameraMode::FIRST_PERSON) {
+    context.getRenderer()->getCamera()->rotation->x = 0;
+    updateFirstPersonCamera();
+  }
+
+  Glade::System::toggleMouseCursor(cameraMode == CameraMode::THIRD_PERSON);
 }
 
 bool WorldController::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
@@ -44,6 +52,9 @@ bool WorldController::pointerMove(float xPos, float yPos, float zPos, int contro
   if (cameraMode == CameraMode::FREE) {
     context.getRenderer()->getCamera()->rotation->y = xPos * 0.001;
     context.getRenderer()->getCamera()->rotation->x = yPos * 0.001;
+  } else if (cameraMode == CameraMode::FIRST_PERSON) {
+    context.getRenderer()->getCamera()->rotation->x = yPos * 0.001;
+    character->getTransform()->rotation->y = xPos * 0.001;
   } else {
     thirdPersonCameraMouseMove(xPos, yPos, zPos, controlId);
   }
@@ -98,7 +109,24 @@ void WorldController::update()
     updateFreeCamera();
   } else if (cameraMode == CameraMode::THIRD_PERSON) {
     updateThirdPersonCamera();
+  } else if (cameraMode == CameraMode::FIRST_PERSON) {
+    updateFirstPersonCamera();
   }
+}
+
+void WorldController::updateFirstPersonCamera()
+{
+  float originX = character->getTransform()->position->x,
+        originY = character->getTransform()->position->y,
+        originZ = character->getTransform()->position->z;
+
+  float rotY =  character->getTransform()->rotation->y;
+
+  context.getRenderer()->getCamera()->position->x = originX;
+  context.getRenderer()->getCamera()->position->y = originY + CHARACTER_HEIGHT;
+  context.getRenderer()->getCamera()->position->z = originZ;
+
+  context.getRenderer()->getCamera()->rotation->y = rotY;
 }
 
 void WorldController::updateThirdPersonCamera()
@@ -117,25 +145,26 @@ void WorldController::updateThirdPersonCamera()
 
 void WorldController::updateFreeCamera()
 {
+  float cameraSpeed = 0.1;
   float forward = 0.0, strafe = 0.0, fly = 0.0;
 
   if (isKeyPressed(Glade::Key::GLADE_KEY_UP))
-    forward = -0.1;
+    forward = -cameraSpeed;
 
   if (isKeyPressed(Glade::Key::GLADE_KEY_DOWN))
-    forward = 0.1;
+    forward = cameraSpeed;
 
   if (isKeyPressed(Glade::Key::GLADE_KEY_LEFT))
-    strafe = -0.1;
+    strafe = -cameraSpeed;
 
   if (isKeyPressed(Glade::Key::GLADE_KEY_RIGHT))
-    strafe = 0.1;
+    strafe = cameraSpeed;
 
   if (isKeyPressed(Glade::Key::GLADE_KEY_O))
-    fly = 0.1;
+    fly = cameraSpeed;
 
   if (isKeyPressed(Glade::Key::GLADE_KEY_L))
-    fly = -0.1;
+    fly = -cameraSpeed;
 
   Transform *camera = context.getRenderer()->getCamera();
   float zModifier = forward * cos(camera->rotation->y) + strafe * sin(camera->rotation->y);
@@ -149,19 +178,29 @@ void WorldController::updateFreeCamera()
 
 void WorldController::updateCharacter()
 {
-  float characterSpeed = 0.06;
-
-  if (isKeyPressed(Glade::Key::GLADE_KEY_A))
-    character->getTransform()->position->x -= characterSpeed;
-
-  if (isKeyPressed(Glade::Key::GLADE_KEY_D))
-    character->getTransform()->position->x += characterSpeed;
+  float characterSpeed = 0.1;
+  float forward = 0.0, strafe = 0.0, fly = 0.0;
 
   if (isKeyPressed(Glade::Key::GLADE_KEY_W))
-    character->getTransform()->position->z -= characterSpeed;
+    forward = -characterSpeed;
 
   if (isKeyPressed(Glade::Key::GLADE_KEY_S))
-    character->getTransform()->position->z += characterSpeed;
+    forward = characterSpeed;
+
+  if (isKeyPressed(Glade::Key::GLADE_KEY_A))
+    strafe = -characterSpeed;
+
+  if (isKeyPressed(Glade::Key::GLADE_KEY_D))
+    strafe = characterSpeed;
+
+  Transform *charTransform = character->getTransform();
+  float zModifier = forward * cos(charTransform->rotation->y) + strafe * sin(charTransform->rotation->y);
+  float xModifier = -forward * sin(charTransform->rotation->y) + strafe * cos(charTransform->rotation->y);
+  float yModifier = forward * sin(charTransform->rotation->x) + fly;
+
+  charTransform->position->z += zModifier;
+  charTransform->position->y += yModifier;
+  charTransform->position->x += xModifier;
 
   if (flyMode) {
     if (isKeyPressed(Glade::Key::GLADE_KEY_SPACE))
@@ -171,7 +210,7 @@ void WorldController::updateCharacter()
       character->getTransform()->position->y -= characterSpeed;
   } else {
     // gravity
-    verticalSpeed += gravityAcceleration;
+    verticalSpeed += GRAVITY_ACCELERATION;
     verticalSpeed = std::clamp(verticalSpeed, -0.1f, 0.5f);
     character->getTransform()->position->y += verticalSpeed;
   }
@@ -180,7 +219,10 @@ void WorldController::updateCharacter()
 bool WorldController::buttonPress(Glade::Key key, int terminalId) {
   bool changedState = VirtualController::buttonPress(key, terminalId);
 
-  if (key == Glade::Key::GLADE_KEY_1 && changedState) {
+  if (!changedState)
+    return false;
+
+  if (key == Glade::Key::GLADE_KEY_1) {
     flyMode = !flyMode;
     log("Flying mode is %s", flyMode ? "ON" : "OFF");
 
@@ -188,25 +230,30 @@ bool WorldController::buttonPress(Glade::Key key, int terminalId) {
       characterIsOnTheGround = false;
   }
 
-  if (key == Glade::Key::GLADE_KEY_2 && changedState) {
+  if (key == Glade::Key::GLADE_KEY_2) {
     context.enableCollisionDetector = !context.enableCollisionDetector;
     log("Collisions are %s", context.enableCollisionDetector ? "ON" : "OFF");
   }
 
-  if (key == Glade::Key::GLADE_KEY_3 && changedState) {
+  if (key == Glade::Key::GLADE_KEY_3) {
     resetCameraAndCharacterPositions();
     log("Camera and character positions were reset");
   }
 
-  if (key == Glade::Key::GLADE_KEY_4 && changedState) {
-    if (cameraMode == CameraMode::FREE)
-      setCameraMode(CameraMode::THIRD_PERSON);
-    else
-      setCameraMode(CameraMode::FREE);
+  if (key == Glade::Key::GLADE_KEY_4) {
+    setCameraMode((CameraMode) (cameraMode + 1));
+
+    if (cameraMode == CameraMode::_ENUM_LAST_VALUE)
+      setCameraMode(cameraMode = (CameraMode) 0);
   }
 
-  if (key == Glade::Key::GLADE_KEY_SPACE && characterIsOnTheGround && changedState) {
-      verticalSpeed = jumpAcceleration;
+  if (key == Glade::Key::GLADE_KEY_5) {
+    bool enabled = ((Frank*)character)->toggleCollisionShapeView();
+    log("%s collision shapes", enabled ? "SHOWING " : "HIDING ");
+  }
+
+  if (key == Glade::Key::GLADE_KEY_SPACE && characterIsOnTheGround) {
+      verticalSpeed = JUMP_ACCELERATION;
       characterIsOnTheGround = false;
   }
 

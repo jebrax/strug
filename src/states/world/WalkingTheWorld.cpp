@@ -1,6 +1,6 @@
-#include <algorithm>
 #include <strug/states/world/WalkingTheWorld.h>
 #include <strug/blocks/Sphere.h>
+#include <strug/blocks/Frank.h>
 #include <strug/blocks/Isosurface.h>
 #include <strug/states/world/WorldController.h>
 
@@ -12,8 +12,9 @@
 #include <glade/system.h>
 
 #include <unordered_map>
+#include <algorithm>
 
-static Sphere *sphere= nullptr;
+static Frank *character= nullptr;
 static Isosurface *terrain = nullptr;
 static Grid* grid = nullptr;
 static const float cellSize = 0.25;
@@ -27,9 +28,9 @@ WalkingTheWorld::~WalkingTheWorld()
 
 void WalkingTheWorld::createEntities()
 {
-  sphere = new Sphere();
-  sphere->initialize(cellSize);
-  context->add(sphere);
+  character = new Frank();
+  character->initialize(cellSize);
+  context->add(character);
 
   for (int i = 0; i < grid->getGridSizeChunks(); ++i) {
     for (int j = 0; j < grid->getGridSizeChunks(); ++j) {
@@ -60,7 +61,7 @@ void WalkingTheWorld::init(Context &context)
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
 
-  controller = new WorldController(context, sphere);
+  controller = new WorldController(context, character);
   controller->resetCameraAndCharacterPositions();
 
   Glade::System::toggleMouseCursor(false);

@@ -1,26 +1,27 @@
 #include <glade/render/Drawable.h>
 #include <glade/render/ShaderProgram.h>
+#include <glade/render/meshes/Mesh.h>
 #include <glade/generation/MeshGenerator.h>
-#include <strug/blocks/Sphere.h>
+#include <strug/blocks/Hull.h>
 #include <strug/ResourceManager.h>
 
 extern Strug::ResourceManager *game_resource_manager;
 
-void Sphere::initialize(float radius)
+void Hull::initialize(float radius)
 {
-  if (!initialized ) {
+  if (!initialized) {
     std::shared_ptr<ShaderProgram> program =
       game_resource_manager->getShaderProgram(
         "phong.vertex.glsl",
         "phong.fragment.glsl"
       );
 
-    // TODO get a sphere asset, why generating it?
-    //view = new Drawable(game_resource_manager->getMesh("geometry/sphere.obj"), program);
+    this->radius = radius;
 
-    MeshGenerator gen;
     std::shared_ptr<Glade::Mesh> mesh = std::make_shared<Glade::Mesh>();
+    MeshGenerator gen;
     gen.generateHull(*mesh, radius, true);
+    //gen.generate(*mesh);
     Drawable *view = new Drawable(mesh, program);
 
     addDrawable(view);

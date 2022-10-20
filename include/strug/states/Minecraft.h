@@ -6,14 +6,14 @@
 
 class Context;
 class GladeObject;
-class Frank;
+class Hull;
 class VirtualContoller;
 
 class Minecraft: public State, VirtualController
 {
   private:
     GladeObject *terrain;
-    Frank *shovel;
+    Hull *shovel;
     Context *context;
 
     bool digPressed;
