@@ -33,9 +33,8 @@ void WorldController::setCameraMode(CameraMode mode)
   cameraMode = mode;
 
   if (cameraMode == CameraMode::THIRD_PERSON) {
-    Glade::System::toggleMouseCursor(true);
-    phi = -PI/4;
-    thirdPersonCameraMouseMove(0,0,0,0); // this reset third person camera parameters
+    cameraOwnPhi = -PI/4;
+    thirdPersonCameraMouseMove(0,0,0,0); // this resets third person camera parameters, but maybe it's redundant
     updateThirdPersonCamera();
   }
 
@@ -44,6 +43,7 @@ void WorldController::setCameraMode(CameraMode mode)
     updateFirstPersonCamera();
   }
 
+  //character->toggleView(*character->getView(), cameraMode != CameraMode::FIRST_PERSON);
   Glade::System::toggleMouseCursor(cameraMode == CameraMode::THIRD_PERSON);
 }
 
@@ -54,7 +54,7 @@ bool WorldController::pointerMove(float xPos, float yPos, float zPos, int contro
     context.getRenderer()->getCamera()->rotation->x = yPos * 0.001;
   } else if (cameraMode == CameraMode::FIRST_PERSON) {
     context.getRenderer()->getCamera()->rotation->x = yPos * 0.001;
-    character->getTransform()->rotation->y = xPos * 0.001;
+    character->getTransform()->rotation->y = -xPos * 0.001;
   } else {
     thirdPersonCameraMouseMove(xPos, yPos, zPos, controlId);
   }
@@ -64,41 +64,22 @@ bool WorldController::pointerMove(float xPos, float yPos, float zPos, int contro
 
 void WorldController::thirdPersonCameraMouseMove(float xPos, float yPos, float zPos, int controlId)
 {
-  unsigned int viewportWidth, viewportHeight;
-  Glade::System::getViewportSize(&viewportWidth, &viewportHeight);
-
-  if (rotateIsDown && controlId == 0) {
-    if (firstMove) {
-      xPosRotationDelta = 0;
-      yPosRotationDelta = 0;
-      firstMove = false;
-    } else {
-      xPosRotationDelta = xPos - xPosRotationLast;
-      yPosRotationDelta = yPos - yPosRotationLast;
-    }
-  }
-
   if (controlId == 0) {
+    if (rotateIsDown) {
+      float xPosRotationDelta = xPos - xPosRotationLast;
+      float yPosRotationDelta = yPos - yPosRotationLast;
+
+      cameraOwnPhi += yPosRotationDelta * 0.001;
+      cameraOwnTheta += xPosRotationDelta * 0.001;
+    }
+
     xPosRotationLast = xPos;
     yPosRotationLast = yPos;
-
-    xCursorPosNormalized =  (xPos / viewportWidth * 2 - 1);
-    yCursorPosNormalized = -(yPos / viewportHeight * 2 - 1);
   }
 
-  if (controlId == 0 && rotateIsDown) {
-    phi += yPosRotationDelta * 0.001;
-    theta += xPosRotationDelta * 0.001;
-  }
-
-  if (controlId == 1 && !rotateIsDown) {
+  if (controlId == 1) {
     r -= yPos * 0.1;
   }
-
-  y = cos(phi);
-  x = cos(theta) * sin(phi);
-  z = sin(theta) * sin(phi);
-  x *= r; y *= r; z *= r;
 }
 
 void WorldController::update()
@@ -123,14 +104,22 @@ void WorldController::updateFirstPersonCamera()
   float rotY =  character->getTransform()->rotation->y;
 
   context.getRenderer()->getCamera()->position->x = originX;
-  context.getRenderer()->getCamera()->position->y = originY + CHARACTER_HEIGHT;
+  context.getRenderer()->getCamera()->position->y = originY + CHARACTER_HEIGHT + 1.0;
   context.getRenderer()->getCamera()->position->z = originZ;
 
-  context.getRenderer()->getCamera()->rotation->y = rotY;
+  context.getRenderer()->getCamera()->rotation->y = -rotY;
 }
 
 void WorldController::updateThirdPersonCamera()
 {
+  float phi = cameraOwnPhi;
+  float theta = -character->getTransform()->rotation->y - PI / 2.0 + cameraOwnTheta;
+
+  float
+    x = cos(theta) * sin(phi) * r,
+    y = cos(phi) * r,
+    z = sin(theta) * sin(phi) * r;
+
   float originX = character->getTransform()->position->x,
         originY = character->getTransform()->position->y,
         originZ = character->getTransform()->position->z;
@@ -193,9 +182,15 @@ void WorldController::updateCharacter()
   if (isKeyPressed(Glade::Key::GLADE_KEY_D))
     strafe = characterSpeed;
 
+  if (isKeyPressed(Glade::Key::GLADE_KEY_Q))
+    character->getTransform()->rotation->y += characterSpeed;
+
+  if (isKeyPressed(Glade::Key::GLADE_KEY_E))
+    character->getTransform()->rotation->y -= characterSpeed;
+
   Transform *charTransform = character->getTransform();
-  float zModifier = forward * cos(charTransform->rotation->y) + strafe * sin(charTransform->rotation->y);
-  float xModifier = -forward * sin(charTransform->rotation->y) + strafe * cos(charTransform->rotation->y);
+  float zModifier = forward * cos(-charTransform->rotation->y) + strafe * sin(-charTransform->rotation->y);
+  float xModifier = -forward * sin(-charTransform->rotation->y) + strafe * cos(-charTransform->rotation->y);
   float yModifier = forward * sin(charTransform->rotation->x) + fly;
 
   charTransform->position->z += zModifier;
@@ -269,8 +264,11 @@ bool WorldController::buttonRelease(Glade::Key key, int terminalId) {
 bool WorldController::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
   switch (controlId) {
-    case 0: if (cameraMode == CameraMode::THIRD_PERSON)
+    case 0: if (cameraMode == CameraMode::THIRD_PERSON) {
+              rotateIsDown = true;
+              Glade::System::toggleMouseCursor(false);
               break;  
+            }
             digging = true;
             growing = false;
             break;
@@ -279,12 +277,6 @@ bool WorldController::pointerDown(float axisX, float axisY, float axisZ, int con
             growing = true;
             digging = false;
             break;
-    case 2: if (cameraMode != CameraMode::THIRD_PERSON)
-              break;
-            rotateIsDown = true;
-            firstMove = true;
-            Glade::System::toggleMouseCursor(false);
-            break;
   }
 
   return true;
@@ -292,7 +284,7 @@ bool WorldController::pointerDown(float axisX, float axisY, float axisZ, int con
 
 bool WorldController::pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
-  if (controlId == 2 && CameraMode::THIRD_PERSON) {
+  if (controlId == 0 && CameraMode::THIRD_PERSON) {
     rotateIsDown = false;
     Glade::System::toggleMouseCursor(true);
   } else {

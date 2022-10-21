@@ -51,14 +51,10 @@ private:
   float verticalSpeed = 0.0;
 
   // Third person camera controller variables
-  bool rotateIsDown = false, firstMove = true;
-  float xCursorPosNormalized, yCursorPosNormalized;
-  float xPosRotationDelta, yPosRotationDelta;
+  bool rotateIsDown = false;
   float xPosRotationLast, yPosRotationLast;
-  float phi = 0.0, theta = 0.0;
+  float cameraOwnPhi= 0.0, cameraOwnTheta= 0.0;
   float r = 4.0f;
-  float x = 0.0, y = 0.0, z = 0.0;
-
 
   CameraMode cameraMode = CameraMode::FREE;
   GladeObject *character;

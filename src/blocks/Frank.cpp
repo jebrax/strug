@@ -37,7 +37,7 @@ void Frank::initialize(float scale)
     gen.generateHull(*colShapeMesh, scale, true);
     collisionShapeView = new Drawable(colShapeMesh, program);
     addDrawable(collisionShapeView);
-    toggleCollisionShape();
+    toggleCollisionShapeView();
 
     initialized = true;
   }

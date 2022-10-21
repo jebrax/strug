@@ -245,6 +245,18 @@ void processInput(GLFWwindow* window)
 
   if (glfwGetKey(window, GLFW_KEY_5) == GLFW_RELEASE)
     controller->buttonRelease(Glade::Key::GLADE_KEY_5, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_Q, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_Q, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+    controller->buttonPress(Glade::Key::GLADE_KEY_E, 0);
+
+  if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE)
+    controller->buttonRelease(Glade::Key::GLADE_KEY_E, 0);
 }
 
 int main()
