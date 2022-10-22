@@ -25,6 +25,7 @@ private:
   void createEntities();
   void shoot();
   void reloadChunk(const Glade::Vector2i &chunkIndex);
+  void generateNewChunks();
 
   Context *context;
   WorldController *controller;

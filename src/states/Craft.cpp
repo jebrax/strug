@@ -13,7 +13,7 @@
 #define GRID_CELL_SIZE_COORDS 0.25
 #define GRID_CELLS_IN_A_CHUNK 60 
 
-static Grid grid(GRID_CELLS_IN_A_CHUNK, GRID_CELL_SIZE_COORDS, 1);
+static Grid grid(GRID_CELLS_IN_A_CHUNK, GRID_CELL_SIZE_COORDS);
 
 Craft::Craft(Chunked *mainState):
   State(),

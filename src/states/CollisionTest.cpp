@@ -170,9 +170,9 @@ void CollisionTest::createEntities()
 {
   sphere = new Sphere();
   sphere->initialize(cellSize);
-  sphere->getTransform()->position->x = grid->chunkSizeCells/2 * grid->cellSize - 3;
+  sphere->getTransform()->position->x = (float) grid->chunkSizeCells/2 * grid->cellSize - 3;
   sphere->getTransform()->position->y = 20 * grid->cellSize;
-  sphere->getTransform()->position->z = grid->chunkSizeCells/2 * grid->cellSize;
+  sphere->getTransform()->position->z = (float) grid->chunkSizeCells/2 * grid->cellSize;
   context->add(sphere);
 
   cube = new Cube();
@@ -206,7 +206,7 @@ void CollisionTest::init(Context &context)
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
  
-  grid = new Grid(60, cellSize, 1);
+  grid = new Grid(60, cellSize);
 
   createEntities();
 

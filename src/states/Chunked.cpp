@@ -66,7 +66,7 @@ void Chunked::init(Context &context)
   perception = new Perception();
   context.renderer->setPerception(perception);
 
-  grid = new Grid(60, 0.25, CHUNKS_SIDE);
+  grid = new Grid(60, 0.25);
   createEntities();
   loadAllItems();
 

@@ -18,6 +18,7 @@ static Frank *character= nullptr;
 static Isosurface *terrain = nullptr;
 static Grid* grid = nullptr;
 static const float cellSize = 0.25;
+static const unsigned short CHUNK_GENERATION_RADIUS = 1;
 
 WalkingTheWorld::WalkingTheWorld():
   State()
@@ -32,16 +33,12 @@ void WalkingTheWorld::createEntities()
   character->initialize(cellSize);
   context->add(character);
 
-  for (int i = 0; i < grid->getGridSizeChunks(); ++i) {
-    for (int j = 0; j < grid->getGridSizeChunks(); ++j) {
-      Glade::Vector2i chunkIndex(i, j);
-      terrain = new Isosurface();
-      grid->addChunk(i, j, terrain);
+  Glade::Vector2i chunkIndex(0, 0);
+  terrain = new Isosurface(); // deallocate
+  grid->addChunk(0, 0, terrain);
 
-      terrain->initialize(chunkIndex, *grid, false);
-      context->add(terrain);
-    }
-  }
+  terrain->initialize(chunkIndex, *grid, false);
+  context->add(terrain);
 }
 
 void WalkingTheWorld::init(Context &context)
@@ -52,7 +49,7 @@ void WalkingTheWorld::init(Context &context)
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
  
-  grid = new Grid(60, cellSize, 2);
+  grid = new Grid(60, cellSize);
 
   createEntities();
 
@@ -69,9 +66,44 @@ void WalkingTheWorld::init(Context &context)
   context.setController(*controller);
 }
 
+void WalkingTheWorld::generateNewChunks()
+{
+  Glade::Vector2i characterChunkIndex;
+  float x = character->getTransform()->position->x;
+  float y = character->getTransform()->position->z;
+  x = x < 0 ? x - grid->chunkSizeCoords : x;
+  y = y < 0 ? y - grid->chunkSizeCoords : y;
+
+  characterChunkIndex.x = x / grid->chunkSizeCoords;
+  characterChunkIndex.y = y / grid->chunkSizeCoords;
+
+  Glade::Vector2i checkChunkIndex;
+
+  for (int iinc = -CHUNK_GENERATION_RADIUS; iinc <= CHUNK_GENERATION_RADIUS; ++iinc) {
+    for (int jinc = -CHUNK_GENERATION_RADIUS; jinc <= CHUNK_GENERATION_RADIUS; ++jinc) {
+      checkChunkIndex.x = characterChunkIndex.x + iinc;
+      checkChunkIndex.y = characterChunkIndex.y + jinc;
+
+      if (checkChunkIndex.x < 0 || checkChunkIndex.y < 0)
+        continue;
+
+      if (!grid->getChunk(checkChunkIndex)) {
+        Isosurface *chunk = new Isosurface(); // deallocate
+        grid->addChunk(checkChunkIndex, chunk);
+
+        chunk->initialize(checkChunkIndex, *grid, false);
+        context->add(chunk);
+      }
+    }
+  }
+}
+
 void WalkingTheWorld::applyRules(Context &context)
 {
   controller->update();
+
+  // make it sparse?
+  generateNewChunks();
 
   if (controller->isShootButtonDown())
     shoot();
