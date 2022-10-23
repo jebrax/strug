@@ -23,8 +23,9 @@ void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, bool 
 
     std::shared_ptr<Glade::Mesh> mesh = std::make_shared<Glade::Mesh>();
 
-    getTransform()->position->x = chunkIndex.x * grid.chunkSizeCoords;
-    getTransform()->position->z = chunkIndex.y * grid.chunkSizeCoords;
+    Glade::Vector3f chunkPoint = grid.chunkPoint(chunkIndex);
+    getTransform()->position->x = chunkPoint.x;
+    getTransform()->position->z = chunkPoint.z;
 
     gen.mcGenChunk(chunkIndex, grid, *mesh, 0.5, true, crafting_mode ? AdvancedMeshGenerator::CENTER_CELL_ONLY : AdvancedMeshGenerator::ISOSURFACE_HEIGHTMAP);
 

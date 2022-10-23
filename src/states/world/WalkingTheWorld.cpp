@@ -77,6 +77,8 @@ void WalkingTheWorld::generateNewChunks()
   characterChunkIndex.x = x / grid->chunkSizeCoords;
   characterChunkIndex.y = y / grid->chunkSizeCoords;
 
+  //log("(%d, %d)", characterChunkIndex.x, characterChunkIndex.y);
+
   Glade::Vector2i checkChunkIndex;
 
   for (int iinc = -CHUNK_GENERATION_RADIUS; iinc <= CHUNK_GENERATION_RADIUS; ++iinc) {
@@ -84,8 +86,8 @@ void WalkingTheWorld::generateNewChunks()
       checkChunkIndex.x = characterChunkIndex.x + iinc;
       checkChunkIndex.y = characterChunkIndex.y + jinc;
 
-      if (checkChunkIndex.x < 0 || checkChunkIndex.y < 0)
-        continue;
+      //if (checkChunkIndex.x < 0 || checkChunkIndex.y < 0)
+      //  continue;
 
       if (!grid->getChunk(checkChunkIndex)) {
         Isosurface *chunk = new Isosurface(); // deallocate
@@ -131,13 +133,13 @@ void WalkingTheWorld::shoot()
   Glade::Vector3f stepPoint(nearPoint.x, nearPoint.y, nearPoint.z);
   Grid::CellsI currentCell;
 
-  std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo;
-  std::pair<Glade::Vector2i, Glade::Vector3i> prevCellInfo;
+  Glade::Vector3i cellIndex;
+  Glade::Vector2i chunkIndex;
 
   for (int i = 0; i < 100; i++) {
-    prevCellInfo = cellInfo;
-    cellInfo = grid->getCellIndexByCoords(stepPoint);
-    currentCell = grid->cells.find(cellInfo.second);
+    cellIndex = grid->pointToCellIndex(stepPoint);
+    chunkIndex = grid->cellIndexToChunkIndex(cellIndex);
+    currentCell = grid->cells.find(cellIndex);
 
     if (currentCell == grid->cells.end()) {
       break;
@@ -153,17 +155,17 @@ void WalkingTheWorld::shoot()
     }
 
     if (shotSolid) {
-      grid->addValueAtCell(cellInfo.second, controller->isDigButtonDown()? 0.1 : -0.1);
+      grid->addValueAtCell(cellIndex, controller->isDigButtonDown()? 0.1 : -0.1);
       break;
     }
 
     stepPoint.add(dir);
   }
 
-  reloadChunk(cellInfo.first);
+  reloadChunk(chunkIndex);
 
   std::vector<Glade::Vector2i> adjacentChunks;
-  grid->getAdjacentChunks(cellInfo.second, adjacentChunks);
+  grid->getAdjacentChunks(cellIndex, adjacentChunks);
 
   for (const Glade::Vector2i &chunkIndex: adjacentChunks) {
     //log("Adj chunk (%d, %d)", chunkIndex.x, chunkIndex.y);

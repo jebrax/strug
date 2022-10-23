@@ -81,8 +81,8 @@ bool MarchingCubes::pointerDown(float axisX, float axisY, float axisZ, int contr
   Grid::CellsI currentCell;
 
   for (int i = 0; i < 100; i++) {
-    std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo = grid.getCellIndexByCoords(stepPoint);
-    currentCell = grid.cells.find(cellInfo.second);
+    Glade::Vector3i cellIndex = grid.pointToCellIndex(stepPoint);
+    currentCell = grid.cells.find(cellIndex);
 
     if (currentCell == grid.cells.end()) {
       break;
@@ -96,7 +96,7 @@ bool MarchingCubes::pointerDown(float axisX, float axisY, float axisZ, int contr
       }
     }
 
-    grid.addValueAtCell(cellInfo.second, 0.1);
+    grid.addValueAtCell(cellIndex, 0.1);
 
     if (shotSolid)
       break;

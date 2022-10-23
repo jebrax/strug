@@ -158,8 +158,10 @@ void Craft::shoot()
   Glade::Vector3f stepPoint(towardsPoint.x, towardsPoint.y, towardsPoint.z);
   Grid::CellsI currentCell;
 
-  std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo;
-  std::pair<Glade::Vector2i, Glade::Vector3i> prevCellInfo = grid.getCellIndexByCoords(stepPoint);
+ // std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo;
+  Glade::Vector3i cellIndex, prevCellIndex = grid.pointToCellIndex(stepPoint);
+  Glade::Vector2i chunkIndex;
+  //std::pair<Glade::Vector2i, Glade::Vector3i> prevCellInfo = grid.getCellIndexByCoords(stepPoint);
 
   bool inTheMatter = false;
 
@@ -167,8 +169,9 @@ void Craft::shoot()
 
   for (int i = 0; i < 200; i++) {
     // this might not always work because step is much less then a cell size
-    cellInfo = grid.getCellIndexByCoords(stepPoint);
-    currentCell = grid.cells.find(cellInfo.second);
+    cellIndex = grid.pointToCellIndex(stepPoint);
+    chunkIndex = grid.cellIndexToChunkIndex(cellIndex);
+    currentCell = grid.cells.find(cellIndex);
 
     if (currentCell != grid.cells.end()) {
       if (currentCell->second.getNumberOfPointsWithValueLessThan(0.2) == 8) {
@@ -177,7 +180,7 @@ void Craft::shoot()
         break;
       }
 
-      if ((cellInfo.second != prevCellInfo.second) && inTheMatter) {
+      if ((cellIndex != prevCellIndex) && inTheMatter) {
         if (currentCell->second.getNumberOfPointsWithValueLessThan(0.5) < 4) {
           // The ray went out of the matter so we stop it
           log("RAY RAN OUT OF MATTER");
@@ -192,7 +195,7 @@ void Craft::shoot()
       }
     }
 
-    prevCellInfo = cellInfo;
+    prevCellIndex = cellIndex;
     stepPoint.add(dir);
   }
 
@@ -202,10 +205,10 @@ void Craft::shoot()
     grid.addValueAtCell(iCell->first, (digging ? 0.028 : -0.028) * growSpeedFactor);
   }
 
-  reloadChunk(cellInfo.first);
+  reloadChunk(chunkIndex);
 
   std::vector<Glade::Vector2i> adjacentChunks;
-  grid.getAdjacentChunks(cellInfo.second, adjacentChunks);
+  grid.getAdjacentChunks(cellIndex, adjacentChunks);
 
   for (const Glade::Vector2i &chunkIndex: adjacentChunks) {
     //log("Adj chunk (%d, %d)", chunkIndex.x, chunkIndex.y);
