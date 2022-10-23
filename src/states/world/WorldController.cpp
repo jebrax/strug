@@ -284,7 +284,7 @@ bool WorldController::pointerDown(float axisX, float axisY, float axisZ, int con
 
 bool WorldController::pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId)
 {
-  if (controlId == 0 && CameraMode::THIRD_PERSON) {
+  if (controlId == 0 && cameraMode == CameraMode::THIRD_PERSON) {
     rotateIsDown = false;
     Glade::System::toggleMouseCursor(true);
   } else {

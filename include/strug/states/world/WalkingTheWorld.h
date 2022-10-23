@@ -2,14 +2,11 @@
 
 #include <glade/EventBus.h>
 #include <glade/State.h>
+#include <glade/math/Vector.h>
 #include <glade/debug/log.h>
 
 class Context;
 class WorldController;
-
-namespace Glade {
-  class Vector2i;
-}
 
 class WalkingTheWorld: public State 
 {
@@ -25,9 +22,10 @@ private:
   void createEntities();
   void shoot();
   void reloadChunk(const Glade::Vector2i &chunkIndex);
-  void generateNewChunks();
+  void generateNewChunksIfNeeded();
 
   Context *context;
   WorldController *controller;
+  Glade::Vector2i lastCharacterChunkIndex;
 };
 
