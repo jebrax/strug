@@ -31,3 +31,6 @@
 [submodule "deps/libccd"]
 	path = deps/libccd
 	url = git@github.com:batonez/libccd.git
+[submodule "deps/imgui"]
+	path = deps/imgui
+	url = https://github.com/ocornut/imgui
