@@ -16,6 +16,10 @@
 #include <glade/util/ResourceManager.h>
 #include <glade/controls/VirtualController.h>
 
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -56,18 +60,33 @@ namespace Glade {
 
 static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
+  ImGuiIO& io = ImGui::GetIO();
+
+  if (io.WantCaptureMouse)
+    return;
+
   VirtualController *controller = gameContext->getController();
   controller->pointerMove(xpos, ypos, 0, 0, 0);
 }
 
 static void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+  ImGuiIO& io = ImGui::GetIO();
+
+  if (io.WantCaptureMouse)
+    return;
+
   VirtualController *controller = gameContext->getController();
   controller->pointerMove(xoffset, yoffset, 0, 1, 0, false);
 }
 
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+  ImGuiIO& io = ImGui::GetIO();
+
+  if (io.WantCaptureMouse)
+    return;
+
   int gladeControlId;
 
   if (button == GLFW_MOUSE_BUTTON_LEFT)
@@ -109,6 +128,11 @@ static Path determineAssetsDirectory()
 
 void processInput(GLFWwindow* window)
 {
+  ImGuiIO& io = ImGui::GetIO();
+
+  if (io.WantCaptureKeyboard)
+    return;
+
   VirtualController *controller = gameContext->getController();
 
   if (controller == nullptr)
@@ -293,15 +317,65 @@ int main()
 
   // glfwSetKeyCallback(window, key_callback);
 
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+  //ImGui::StyleColorsLight();
+
+  // Setup Platform/Renderer backends
+  const char* glsl_version = "#version 410";
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+
   gameContext->requestStateChange(new WalkingTheWorld());
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
-    processInput(window);
+
+    //Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    {
+      static float f = 0.0f;
+      static int counter = 0;
+
+      ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+      ImGui::Text("This is some useful text.");
+
+      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+
+      if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+          counter++;
+      ImGui::SameLine();
+      ImGui::Text("counter = %d", counter);
+
+      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+      ImGui::End();
+    }
+
     gameContext->processRequests();
     renderer.onDrawFrame();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    processInput(window);
+
     glfwSwapBuffers(window);
   }
+
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
 
   glfwDestroyWindow(window);
   glfwTerminate();

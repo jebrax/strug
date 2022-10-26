@@ -11,38 +11,45 @@
 #include <glade/generation/Grid.h>
 #include <glade/system.h>
 
+#include <imgui.h>
+
 #include <pthread.h>
 #include <unordered_map>
 #include <algorithm>
 
 static Frank *character= nullptr;
-static Isosurface *terrain = nullptr;
 static Grid* grid = nullptr;
 static const float cellSize = 0.25;
-static const unsigned short CHUNK_GENERATION_RADIUS = 1;
+static const unsigned short CHUNK_GENERATION_RADIUS = 2;
 
-static void* generateNewChunks(void *contextParam)
+struct GenerateNewChunksParameters {
+  Context *context;
+  Glade::Vector2i centralChunkIndex;
+  bool autoDelete;
+};
+
+static void* generateNewChunks(void *p)
 {
-  Context *context = (Context*) contextParam;
-
-  Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*character->getTransform()->position);
-  Glade::Vector2i characterChunkIndex = grid->cellIndexToChunkIndex(characterCellIndex);
+  GenerateNewChunksParameters *params = (GenerateNewChunksParameters*) p;
   Glade::Vector2i checkChunkIndex;
 
   for (int iinc = -CHUNK_GENERATION_RADIUS; iinc <= CHUNK_GENERATION_RADIUS; ++iinc) {
     for (int jinc = -CHUNK_GENERATION_RADIUS; jinc <= CHUNK_GENERATION_RADIUS; ++jinc) {
-      checkChunkIndex.x = characterChunkIndex.x + iinc;
-      checkChunkIndex.y = characterChunkIndex.y + jinc;
+      checkChunkIndex.x = params->centralChunkIndex.x + iinc;
+      checkChunkIndex.y = params->centralChunkIndex.y + jinc;
 
       if (!grid->getChunk(checkChunkIndex)) {
-        Isosurface *chunk = new Isosurface(); // deallocate
+        Isosurface *chunk = new Isosurface();
         grid->addChunk(checkChunkIndex, chunk);
 
         chunk->initialize(checkChunkIndex, *grid, false);
-        context->add(chunk);
+        params->context->add(chunk);
       }
     }
   }
+
+  if (params->autoDelete)
+    delete params;
 
   return NULL;
 }
@@ -62,12 +69,15 @@ void WalkingTheWorld::createEntities()
   Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*character->getTransform()->position);
   lastCharacterChunkIndex = grid->cellIndexToChunkIndex(characterCellIndex);
 
-  Glade::Vector2i chunkIndex(0, 0);
-  terrain = new Isosurface(); // deallocate
-  grid->addChunk(0, 0, terrain);
+  regenerateTerrain();
+}
 
-  terrain->initialize(chunkIndex, *grid, false);
-  context->add(terrain);
+void WalkingTheWorld::regenerateTerrain()
+{
+  grid->walkChunks([this](Grid::ChunksI &chunki) { context->remove(chunki->second); });
+  grid->clear();
+
+  generateNewChunksIfNeeded(true);
 }
 
 void WalkingTheWorld::init(Context &context)
@@ -81,7 +91,6 @@ void WalkingTheWorld::init(Context &context)
   grid = new Grid(60, cellSize);
 
   createEntities();
-  generateNewChunks(&context);
 
   context.getCollisionDetector()->setSpatialIndex(grid);
 
@@ -96,29 +105,55 @@ void WalkingTheWorld::init(Context &context)
   context.setController(*controller);
 }
 
-void WalkingTheWorld::generateNewChunksIfNeeded()
+void WalkingTheWorld::generateNewChunksIfNeeded(bool force)
 {
-  Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*character->getTransform()->position);
-  Glade::Vector2i characterChunkIndex = grid->cellIndexToChunkIndex(characterCellIndex);
+  assert(grid);
 
-  if (characterChunkIndex == lastCharacterChunkIndex)
-    return;
+  Glade::Vector2i centralChunkIndex;
 
-  log("Character enters chunk (%d, %d)", characterChunkIndex.x, characterChunkIndex.y);
+  if (character) {
+    Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*character->getTransform()->position);
+    centralChunkIndex = grid->cellIndexToChunkIndex(characterCellIndex);
+
+    if (centralChunkIndex != lastCharacterChunkIndex) {
+      log("Character enters chunk (%d, %d)", centralChunkIndex.x, centralChunkIndex.y);
+      lastCharacterChunkIndex = centralChunkIndex;
+    } else if (!force) {
+      return;
+    }
+  }
+
+  GenerateNewChunksParameters *params = new GenerateNewChunksParameters;
+  params->context = context;
+  params->centralChunkIndex = centralChunkIndex;
+  params->autoDelete = true;
 
   pthread_t generateChunksThread;
 
-  if (pthread_create(&generateChunksThread, NULL, generateNewChunks, context)) {
+  if (pthread_create(&generateChunksThread, NULL, generateNewChunks, params))
     log("Warning: failed to create thread for generating chunks");
-    return;
-  }
-
-  lastCharacterChunkIndex = characterChunkIndex;
 }
 
 void WalkingTheWorld::applyRules(Context &context)
 {
   controller->update();
+
+  {
+    ImGui::Begin("Terrain parameters");
+
+    //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
+
+    if (ImGui::Button("Regenerate")) {
+      log("Regenerating");
+
+      regenerateTerrain();
+
+      if (character)
+        context.add(character);
+    }
+
+    ImGui::End();
+  }
 
   generateNewChunksIfNeeded();
 
@@ -186,7 +221,6 @@ void WalkingTheWorld::shoot()
     //log("Adj chunk (%d, %d)", chunkIndex.x, chunkIndex.y);
     reloadChunk(chunkIndex);
   }
-
 }
 
 void WalkingTheWorld::reloadChunk(const Glade::Vector2i &chunkIndex)
@@ -201,5 +235,15 @@ void WalkingTheWorld::reloadChunk(const Glade::Vector2i &chunkIndex)
 
 void WalkingTheWorld::shutdown(Context &context)
 {
+  assert(grid);
+  grid->walkChunks([&context](Grid::ChunksI &chunki) { context.remove(chunki->second); });
+  grid->clear();
+  delete grid;
+  grid = nullptr;
+
+  assert(character);
+  context.remove(character);
+  delete character;
+  character = nullptr;
 }
 
