@@ -65,6 +65,10 @@ ${STRUG_BUILD_DIR}/states/world/WalkingTheWorld.o: src/states/world/WalkingTheWo
 	mkdir -p $(@D)
 	${CXX} ${CXXFLAGS} -I${DEPS_PATH}/imgui -c $< -o $@
 
+${STRUG_BUILD_DIR}/states/world/TerrainDemo.o: src/states/world/TerrainDemo.cpp
+	mkdir -p $(@D)
+	${CXX} ${CXXFLAGS} -I${DEPS_PATH}/imgui -c $< -o $@
+
 ${STRUG_BUILD_DIR}/states/CollisionTest.o: src/states/CollisionTest.cpp
 	mkdir -p $(@D)
 	${CXX} ${CXXFLAGS} -I${DEPS_PATH}/glew/include -I${DEPS_PATH}/libccd/src -c $< -o $@

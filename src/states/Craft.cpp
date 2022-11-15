@@ -14,6 +14,7 @@
 #define GRID_CELLS_IN_A_CHUNK 60 
 
 static Grid grid(GRID_CELLS_IN_A_CHUNK, GRID_CELL_SIZE_COORDS);
+static AdvancedMeshGenerator::TerrainGeneratorSettings terrainSettings;
 
 Craft::Craft(Chunked *mainState):
   State(),
@@ -35,7 +36,7 @@ void Craft::createEntities()
   Isosurface* surf = new Isosurface();
   grid.addChunk(chunkIndex.x, chunkIndex.y, surf);
 
-  surf->initialize(chunkIndex, grid, true);
+  surf->initialize(chunkIndex, grid, terrainSettings, true);
   context->add(surf);
 }
 
@@ -255,7 +256,7 @@ void Craft::reloadChunk(const Glade::Vector2i &chunkIndex)
   Isosurface* surf = (Isosurface *) grid.getChunk(chunkIndex.x, chunkIndex.y);
 
   if (surf) {
-    surf->initialize(chunkIndex, grid);
+    surf->initialize(chunkIndex, grid, terrainSettings);
     context->add(surf);
   }
 }

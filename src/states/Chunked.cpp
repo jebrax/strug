@@ -8,6 +8,7 @@
 #include <glade/generation/Grid.h>
 
 static const int CHUNKS_SIDE = 3;
+static AdvancedMeshGenerator::TerrainGeneratorSettings terrainSettings;
 
 Chunked::Chunked():
   State(),
@@ -34,7 +35,7 @@ void Chunked::createEntities()
       Isosurface* surf = new Isosurface();
       grid->addChunk(i, j, surf);
 
-      surf->initialize(chunkIndex, *grid);
+      surf->initialize(chunkIndex, *grid, terrainSettings);
       context->add(surf);
     }
   }
@@ -193,7 +194,7 @@ void Chunked::reloadChunk(const Glade::Vector2i &chunkIndex)
   Isosurface* surf = (Isosurface *) grid->getChunk(chunkIndex.x, chunkIndex.y);
 
   if (surf) {
-    surf->initialize(chunkIndex, *grid);
+    surf->initialize(chunkIndex, *grid, terrainSettings);
     context->add(surf);
   }
 }

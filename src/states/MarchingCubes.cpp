@@ -1,3 +1,4 @@
+#include "glade/generation/AdvancedMeshGenerator.h"
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
 #include <glade/controls/VirtualController.h>
@@ -9,6 +10,7 @@
 
 static Isosurface *surf = nullptr;
 static Grid grid(60, 0.25);
+static AdvancedMeshGenerator::TerrainGeneratorSettings terrainSettings;
 
 MarchingCubes::MarchingCubes():
   State(),
@@ -25,7 +27,7 @@ MarchingCubes::~MarchingCubes()
 void MarchingCubes::createEntities()
 {
   surf = new Isosurface();
-  surf->initialize(Glade::Vector2i(0, 0), grid);
+  surf->initialize(Glade::Vector2i(0, 0), grid, terrainSettings);
   context->add(surf);
 }
 
@@ -104,7 +106,7 @@ bool MarchingCubes::pointerDown(float axisX, float axisY, float axisZ, int contr
     stepPoint.add(dir);
   }
 
-  surf->initialize(Glade::Vector2i(0, 0), grid);
+  surf->initialize(Glade::Vector2i(0, 0), grid, terrainSettings);
   context->add(surf);
 
   return true;

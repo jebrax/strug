@@ -34,6 +34,8 @@ public:
   void resetCameraAndCharacterPositions();
   void setCameraMode(CameraMode mode);
 
+  bool flyMode = false;
+
 private:
   void updateFreeCamera();
   void updateThirdPersonCamera();
@@ -45,14 +47,13 @@ private:
   static constexpr float JUMP_ACCELERATION = 0.4;
   static constexpr float CHARACTER_HEIGHT = 0.2;
 
-  bool flyMode = false;
   bool characterIsOnTheGround = false;
   bool digging = false, growing = false;
   float verticalSpeed = 0.0;
 
   // Third person camera controller variables
   bool rotateIsDown = false;
-  float xPosRotationLast, yPosRotationLast;
+  double lastXPos, lastYPos;
   float cameraOwnPhi= 0.0, cameraOwnTheta= 0.0;
   float r = 4.0f;
 

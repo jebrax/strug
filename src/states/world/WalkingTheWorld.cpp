@@ -9,9 +9,8 @@
 #include <glade/controls/VirtualController.h>
 #include <glade/math/util.h>
 #include <glade/generation/Grid.h>
+#include <glade/generation/AdvancedMeshGenerator.h>
 #include <glade/system.h>
-
-#include <imgui.h>
 
 #include <pthread.h>
 #include <unordered_map>
@@ -20,12 +19,14 @@
 static Frank *character= nullptr;
 static Grid* grid = nullptr;
 static const float cellSize = 0.25;
-static const unsigned short CHUNK_GENERATION_RADIUS = 2;
+static const unsigned short CHUNK_GENERATION_RADIUS = 1;
+static AdvancedMeshGenerator::TerrainGeneratorSettings terrainSettings;
 
 struct GenerateNewChunksParameters {
   Context *context;
   Glade::Vector2i centralChunkIndex;
   bool autoDelete;
+  AdvancedMeshGenerator::TerrainGeneratorSettings terrainSettings;
 };
 
 static void* generateNewChunks(void *p)
@@ -37,12 +38,13 @@ static void* generateNewChunks(void *p)
     for (int jinc = -CHUNK_GENERATION_RADIUS; jinc <= CHUNK_GENERATION_RADIUS; ++jinc) {
       checkChunkIndex.x = params->centralChunkIndex.x + iinc;
       checkChunkIndex.y = params->centralChunkIndex.y + jinc;
+      log("Generating chunk %d, %d", checkChunkIndex.x, checkChunkIndex.y);
 
       if (!grid->getChunk(checkChunkIndex)) {
         Isosurface *chunk = new Isosurface();
         grid->addChunk(checkChunkIndex, chunk);
 
-        chunk->initialize(checkChunkIndex, *grid, false);
+        chunk->initialize(checkChunkIndex, *grid, params->terrainSettings, false);
         params->context->add(chunk);
       }
     }
@@ -88,6 +90,11 @@ void WalkingTheWorld::init(Context &context)
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
  
+  terrainSettings.maxHeight = 15.0;
+  terrainSettings.octaves = 6;
+  terrainSettings.power = 4.0;
+  terrainSettings.wavelength = 10.0;
+
   grid = new Grid(60, cellSize);
 
   createEntities();
@@ -128,6 +135,8 @@ void WalkingTheWorld::generateNewChunksIfNeeded(bool force)
   params->centralChunkIndex = centralChunkIndex;
   params->autoDelete = true;
 
+  params->terrainSettings = terrainSettings;
+
   pthread_t generateChunksThread;
 
   if (pthread_create(&generateChunksThread, NULL, generateNewChunks, params))
@@ -137,23 +146,6 @@ void WalkingTheWorld::generateNewChunksIfNeeded(bool force)
 void WalkingTheWorld::applyRules(Context &context)
 {
   controller->update();
-
-  {
-    ImGui::Begin("Terrain parameters");
-
-    //ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-
-    if (ImGui::Button("Regenerate")) {
-      log("Regenerating");
-
-      regenerateTerrain();
-
-      if (character)
-        context.add(character);
-    }
-
-    ImGui::End();
-  }
 
   generateNewChunksIfNeeded();
 
@@ -228,7 +220,7 @@ void WalkingTheWorld::reloadChunk(const Glade::Vector2i &chunkIndex)
   Isosurface* surf = (Isosurface *) grid->getChunk(chunkIndex.x, chunkIndex.y);
 
   if (surf) {
-    surf->initialize(chunkIndex, *grid);
+    surf->initialize(chunkIndex, *grid, terrainSettings);
     context->add(surf);
   }
 }

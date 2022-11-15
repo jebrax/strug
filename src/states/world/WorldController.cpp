@@ -66,15 +66,16 @@ void WorldController::thirdPersonCameraMouseMove(float xPos, float yPos, float z
 {
   if (controlId == 0) {
     if (rotateIsDown) {
-      float xPosRotationDelta = xPos - xPosRotationLast;
-      float yPosRotationDelta = yPos - yPosRotationLast;
+      log("%f %f", xPos, yPos);
+      float xPosRotationDelta = xPos - lastXPos;
+      float yPosRotationDelta = yPos - lastYPos;
 
       cameraOwnPhi += yPosRotationDelta * 0.001;
       cameraOwnTheta += xPosRotationDelta * 0.001;
     }
 
-    xPosRotationLast = xPos;
-    yPosRotationLast = yPos;
+    lastXPos = xPos;
+    lastYPos = yPos;
   }
 
   if (controlId == 1) {
@@ -287,6 +288,7 @@ bool WorldController::pointerUp(float axisX, float axisY, float axisZ, int contr
   if (controlId == 0 && cameraMode == CameraMode::THIRD_PERSON) {
     rotateIsDown = false;
     Glade::System::toggleMouseCursor(true);
+    Glade::System::getMouseCursorPosition(lastXPos, lastYPos);
   } else {
     digging = growing = false;
   }

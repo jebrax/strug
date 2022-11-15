@@ -1,21 +1,17 @@
-#include "glade/generation/AdvancedMeshGenerator.h"
-#include <strug/blocks/Isosurface.h>
+#include <glade/generation/MeshGenerator.h>
+#include <strug/blocks/Surface.h>
 #include <strug/ResourceManager.h>
 
 #include <glade/generation/Grid.h>
-#include <glade/physics/IsosurfaceCellPhysicalObject.h>
 #include <glade/render/Drawable.h>
 #include <glade/render/ShaderProgram.h>
 #include <glade/render/meshes/Mesh.h>
 
 extern Strug::ResourceManager *game_resource_manager;
 
-void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, AdvancedMeshGenerator::TerrainGeneratorSettings &settings, bool crafting_mode)
+void Surface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, const std::vector<AdvancedMeshGenerator::TerrainGeneratorSettings> &settings)
 {
-  AdvancedMeshGenerator gen;
-
-  if (crafting_mode)
-    settings.type = AdvancedMeshGenerator::CENTER_CELL_ONLY;
+  MeshGenerator gen;
 
   if (!initialized) {
     std::shared_ptr<ShaderProgram> program =
@@ -30,19 +26,12 @@ void Isosurface::initialize(const Glade::Vector2i &chunkIndex, Grid &grid, Advan
     getTransform()->position->x = chunkPoint.x;
     getTransform()->position->z = chunkPoint.z;
 
-    gen.mcGenChunk(chunkIndex, grid, *mesh, settings);
+    gen.generate(*mesh, grid.chunkSizeCells, settings);
 
     Drawable *view = new Drawable(mesh, program);
     addDrawable(view);
 
-    PhysicalObject *phy = new IsosurfaceCellPhysicalObject(this);
-    setPhysicalObject(*phy);
-
     initialized = true;
-  } else {
-    std::shared_ptr<Glade::Mesh> mesh = getView()->getMesh();
-    settings.regenerate = false;
-    gen.mcGenChunk(chunkIndex, grid, *mesh, settings);
   }
 }
 

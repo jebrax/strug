@@ -1,3 +1,4 @@
+#include "glade/generation/AdvancedMeshGenerator.h"
 #include <strug/states/CollisionTest.h>
 #include <strug/blocks/Sphere.h>
 #include <strug/blocks/Cube.h>
@@ -22,6 +23,7 @@ static Cube* cube = nullptr;
 static Cube* cube2 = nullptr;
 static Grid* grid = nullptr;
 static std::vector<GladeObject*> terrainObjects;
+static AdvancedMeshGenerator::TerrainGeneratorSettings terrainSettings;
 
 static const float cellSize = 0.25;
 
@@ -192,7 +194,7 @@ void CollisionTest::createEntities()
 
   Glade::Vector2i chunkIndex(0, 0);
   terrain = new Isosurface();
-  terrain->initialize(chunkIndex, *grid, false);
+  terrain->initialize(chunkIndex, *grid, terrainSettings, false);
   terrain->getView()->getMesh()->neverErase = true;
   context->add(terrain);
   //terrainObjects.push_back(terrain);
