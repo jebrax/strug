@@ -34,3 +34,6 @@
 [submodule "deps/imgui"]
 	path = deps/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "deps/enet"]
+	path = deps/enet
+	url = https://github.com/batonez/enet
