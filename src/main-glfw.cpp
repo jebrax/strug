@@ -288,7 +288,7 @@ void processInput(GLFWwindow* window)
     controller->buttonRelease(Glade::Key::GLADE_KEY_E, 0);
 }
 
-int main()
+int main(int argc, char** argv)
 { 
   glfwInit();
 
@@ -314,7 +314,11 @@ int main()
   Glade::Renderer renderer;
   renderer.onSurfaceCreated();
   renderer.onSurfaceChanged(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
-  gameContext = new Context(&renderer);
+
+  bool server = (argc > 1 && !strcmp(argv[1], "--server"));
+  gameContext = new Context(&renderer, server);
+  if (!gameContext->networkManager->isServer())
+    gameContext->networkManager->connectToServer();
 
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -338,7 +342,7 @@ int main()
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  gameContext->requestStateChange(new TerrainDemo());
+  gameContext->requestStateChange(new WalkingTheWorld());
  
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();

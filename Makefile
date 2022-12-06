@@ -37,7 +37,7 @@ ${STRUG_BUILD_DIR}/strug: ${DEPS_PATH}/glade/build/glade/libglade.a
 ${STRUG_BUILD_DIR}/strug: ${DEPS_PATH}/imgui/build/imgui/libimgui.a
 ${STRUG_BUILD_DIR}/strug: build/sha1/sha1.o
 ${STRUG_BUILD_DIR}/strug: ${OBJS}
-	clang++ -O0 -g -L${DEPS_PATH}/imgui/build/imgui -L${DEPS_PATH}/libccd/src -L${DEPS_PATH}/zlib -L${DEPS_PATH}/assimp/lib -L${DEPS_PATH}/glew/lib/ -L${DEPS_PATH}/glade/build/glade -L${DEPS_PATH}/freetype/objs -L${DEPS_PATH}/glfw/build/src -lz -lassimp -lglfw3 -lGLEW -lfreetype -lglade -lccd -limgui -framework OpenGL -framework AppKit -framework IOKit build/sha1/sha1.o ${OBJS} -o $@
+	clang++ -O0 -g -L${DEPS_PATH}/enet/.libs -L${DEPS_PATH}/imgui/build/imgui -L${DEPS_PATH}/libccd/src -L${DEPS_PATH}/zlib -L${DEPS_PATH}/assimp/lib -L${DEPS_PATH}/glew/lib/ -L${DEPS_PATH}/glade/build/glade -L${DEPS_PATH}/freetype/objs -L${DEPS_PATH}/glfw/build/src -lenet -lz -lassimp -lglfw3 -lGLEW -lfreetype -lglade -lccd -limgui -framework OpenGL -framework AppKit -framework IOKit build/sha1/sha1.o ${OBJS} -o $@
 
 ###################### Compilation
 

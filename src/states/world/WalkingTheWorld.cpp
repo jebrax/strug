@@ -38,9 +38,9 @@ static void* generateNewChunks(void *p)
     for (int jinc = -CHUNK_GENERATION_RADIUS; jinc <= CHUNK_GENERATION_RADIUS; ++jinc) {
       checkChunkIndex.x = params->centralChunkIndex.x + iinc;
       checkChunkIndex.y = params->centralChunkIndex.y + jinc;
-      log("Generating chunk %d, %d", checkChunkIndex.x, checkChunkIndex.y);
 
       if (!grid->getChunk(checkChunkIndex)) {
+        log("Generating chunk %d, %d", checkChunkIndex.x, checkChunkIndex.y);
         Isosurface *chunk = new Isosurface();
         grid->addChunk(checkChunkIndex, chunk);
 
@@ -66,6 +66,7 @@ WalkingTheWorld::~WalkingTheWorld()
 void WalkingTheWorld::createEntities()
 {
   character = new Frank();
+  context->networkManager->AddObject(character);
   character->initialize(cellSize);
   context->add(character);
   Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*character->getTransform()->position);
@@ -90,7 +91,7 @@ void WalkingTheWorld::init(Context &context)
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
  
-  terrainSettings.maxHeight = 15.0;
+  terrainSettings.maxHeight = 1.0;
   terrainSettings.octaves = 6;
   terrainSettings.power = 4.0;
   terrainSettings.wavelength = 10.0;
@@ -145,7 +146,8 @@ void WalkingTheWorld::generateNewChunksIfNeeded(bool force)
 
 void WalkingTheWorld::applyRules(Context &context)
 {
-  controller->update();
+  if (context.networkManager->isServer())
+    controller->update();
 
   generateNewChunksIfNeeded();
 
