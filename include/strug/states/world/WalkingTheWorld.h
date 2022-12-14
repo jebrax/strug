@@ -8,6 +8,8 @@
 class Context;
 class WorldController;
 class GladeObject;
+class ChunkManager;
+class Grid;
 
 class WalkingTheWorld: public State 
 {
@@ -31,14 +33,11 @@ public:
   void onUserLoggedIn(unsigned int userId) override;
 
 private:
-  void createEntities();
   void shoot();
-  void reloadChunk(const Glade::Vector2i &chunkIndex);
-  void generateNewChunksIfNeeded(bool force = false);
-  void regenerateTerrain();
 
+  Grid* grid = nullptr;
   Context *context;
   WorldController *controller;
-  Glade::Vector2i lastCharacterChunkIndex;
+  ChunkManager *mChunkManager;
   unsigned int mUserId;
 };

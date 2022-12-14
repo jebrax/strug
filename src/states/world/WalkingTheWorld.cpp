@@ -3,58 +3,14 @@
 #include <strug/blocks/Frank.h>
 #include <strug/blocks/Isosurface.h>
 #include <strug/states/world/WorldController.h>
+#include <strug/states/world/ChunkManager.h>
 
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
-#include <glade/controls/VirtualController.h>
-#include <glade/math/util.h>
 #include <glade/generation/Grid.h>
-#include <glade/generation/AdvancedMeshGenerator.h>
 #include <glade/system.h>
 
-#include <pthread.h>
 #include <unordered_map>
-#include <algorithm>
-
-static Frank *playerCharacter= nullptr;
-static Grid* grid = nullptr;
-static const float cellSize = 0.25;
-static const unsigned short CHUNK_GENERATION_RADIUS = 1;
-static AdvancedMeshGenerator::TerrainGeneratorSettings terrainSettings;
-
-struct GenerateNewChunksParameters {
-  Context *context;
-  Glade::Vector2i centralChunkIndex;
-  bool autoDelete;
-  AdvancedMeshGenerator::TerrainGeneratorSettings terrainSettings;
-};
-
-static void* generateNewChunks(void *p)
-{
-  GenerateNewChunksParameters *params = (GenerateNewChunksParameters*) p;
-  Glade::Vector2i checkChunkIndex;
-
-  for (int iinc = -CHUNK_GENERATION_RADIUS; iinc <= CHUNK_GENERATION_RADIUS; ++iinc) {
-    for (int jinc = -CHUNK_GENERATION_RADIUS; jinc <= CHUNK_GENERATION_RADIUS; ++jinc) {
-      checkChunkIndex.x = params->centralChunkIndex.x + iinc;
-      checkChunkIndex.y = params->centralChunkIndex.y + jinc;
-
-      if (!grid->getChunk(checkChunkIndex)) {
-        log("Generating chunk %d, %d", checkChunkIndex.x, checkChunkIndex.y);
-        Isosurface *chunk = new Isosurface(&GladeObject::unusedEntityId);
-        grid->addChunk(checkChunkIndex, chunk);
-
-        chunk->initialize(checkChunkIndex, *grid, params->terrainSettings, false);
-        params->context->add(chunk);
-      }
-    }
-  }
-
-  if (params->autoDelete)
-    delete params;
-
-  return NULL;
-}
 
 WalkingTheWorld::WalkingTheWorld():
   State()
@@ -63,23 +19,6 @@ WalkingTheWorld::WalkingTheWorld():
 WalkingTheWorld::~WalkingTheWorld()
 {}
 
-void WalkingTheWorld::createEntities()
-{
-  if (context->networkManager->isServer()) {
-    playerCharacter = (Frank*) CreateEntityByTypeId(ObjectType::CHARACTER, nullptr);
-  }
-
-  regenerateTerrain();
-}
-
-void WalkingTheWorld::regenerateTerrain()
-{
-  grid->walkChunks([this](Grid::ChunksI &chunki) { context->remove(chunki->second); });
-  grid->clear();
-
-  generateNewChunksIfNeeded(true);
-}
-
 GladeObject* WalkingTheWorld::CreateEntityByTypeId(unsigned int type, const unsigned int *forceId)
 {
   GladeObject *entity = nullptr;
@@ -87,7 +26,7 @@ GladeObject* WalkingTheWorld::CreateEntityByTypeId(unsigned int type, const unsi
   switch ((ObjectType) type) {
     case ObjectType::CHARACTER:
       Frank *character = new Frank(forceId);
-      character->initialize(cellSize);
+      character->initialize(0.26);
       context->add(character);
 
       entity = character;
@@ -107,10 +46,8 @@ void WalkingTheWorld::onEntityReplicated(GladeObject *entity)
 
     if (character->mUserId == mUserId) {
       assert(grid);
-      playerCharacter = character;
       controller->setCharacter(character);
-      Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*character->getTransform()->position);
-      lastCharacterChunkIndex = grid->cellIndexToChunkIndex(characterCellIndex);
+      mChunkManager->SetPlayerCharacter(character);
     }
   }
 }
@@ -135,15 +72,14 @@ void WalkingTheWorld::init(Context &context)
 
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
- 
-  terrainSettings.maxHeight = 1.0;
-  terrainSettings.octaves = 6;
-  terrainSettings.power = 4.0;
-  terrainSettings.wavelength = 10.0;
 
-  grid = new Grid(60, cellSize);
+  grid = new Grid(60, 0.25);
 
-  createEntities();
+  Frank *playerCharacter = nullptr;
+  if (context.networkManager->isServer()) {
+    playerCharacter = (Frank *) CreateEntityByTypeId(ObjectType::CHARACTER, nullptr);
+    context.networkManager->addObject(playerCharacter);
+  }
 
   context.getCollisionDetector()->setSpatialIndex(grid);
 
@@ -160,48 +96,14 @@ void WalkingTheWorld::init(Context &context)
     context.networkManager->connectToServer();
 
   context.setController(*controller);
-}
 
-void WalkingTheWorld::generateNewChunksIfNeeded(bool force)
-{
-  if (!playerCharacter) {
-    //log("No player character");
-    return;
-  }
-  assert(grid);
-
-  Glade::Vector2i centralChunkIndex;
-
-  if (playerCharacter) {
-    Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*playerCharacter->getTransform()->position);
-    centralChunkIndex = grid->cellIndexToChunkIndex(characterCellIndex);
-
-    if (centralChunkIndex != lastCharacterChunkIndex) {
-      log("Character enters chunk (%d, %d)", centralChunkIndex.x, centralChunkIndex.y);
-      lastCharacterChunkIndex = centralChunkIndex;
-    } else if (!force) {
-      return;
-    }
-  }
-
-  GenerateNewChunksParameters *params = new GenerateNewChunksParameters;
-  params->context = context;
-  params->centralChunkIndex = centralChunkIndex;
-  params->autoDelete = true;
-
-  params->terrainSettings = terrainSettings;
-
-  pthread_t generateChunksThread;
-
-  if (pthread_create(&generateChunksThread, NULL, generateNewChunks, params))
-    log("Warning: failed to create thread for generating chunks");
+  mChunkManager = new ChunkManager(*grid, playerCharacter, context);
+  mChunkManager->Run();
 }
 
 void WalkingTheWorld::applyRules(Context &context)
 {
   controller->update();
-
-  generateNewChunksIfNeeded();
 
   if (controller->isShootButtonDown())
     shoot();
@@ -258,24 +160,14 @@ void WalkingTheWorld::shoot()
     stepPoint.add(dir);
   }
 
-  reloadChunk(chunkIndex);
+  mChunkManager->ReloadChunk(chunkIndex);
 
   std::vector<Glade::Vector2i> adjacentChunks;
   grid->getAdjacentChunks(cellIndex, adjacentChunks);
 
   for (const Glade::Vector2i &chunkIndex: adjacentChunks) {
     //log("Adj chunk (%d, %d)", chunkIndex.x, chunkIndex.y);
-    reloadChunk(chunkIndex);
-  }
-}
-
-void WalkingTheWorld::reloadChunk(const Glade::Vector2i &chunkIndex)
-{
-  Isosurface* surf = (Isosurface *) grid->getChunk(chunkIndex.x, chunkIndex.y);
-
-  if (surf) {
-    surf->initialize(chunkIndex, *grid, terrainSettings);
-    context->add(surf);
+    mChunkManager->ReloadChunk(chunkIndex);
   }
 }
 
@@ -287,9 +179,10 @@ void WalkingTheWorld::shutdown(Context &context)
   delete grid;
   grid = nullptr;
 
-  assert(playerCharacter);
-  context.remove(playerCharacter);
-  delete playerCharacter;
-  playerCharacter = nullptr;
+  mChunkManager->Stop();
+  delete mChunkManager;
+  mChunkManager = nullptr;
+
+  // TODO delete all entities
 }
 

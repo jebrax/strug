@@ -35,7 +35,7 @@ public:
   void resetCameraAndCharacterPositions();
   void setCameraMode(CameraMode mode);
 
-  bool flyMode = false;
+  bool flyMode = true;
 
 private:
   void updateFreeCamera();

@@ -64,7 +64,9 @@ static void cursor_position_callback(GLFWwindow* window, double xpos, double ypo
     return;
 
   VirtualController *controller = gameContext->getController();
-  controller->pointerMove(xpos, ypos, 0, 0, 0);
+
+  if (controller)
+    controller->pointerMove(xpos, ypos, 0, 0, 0);
 }
 
 static void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -75,11 +77,18 @@ static void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yof
     return;
 
   VirtualController *controller = gameContext->getController();
-  controller->pointerMove(xoffset, yoffset, 0, 1, 0, false);
+
+  if (controller)
+    controller->pointerMove(xoffset, yoffset, 0, 1, 0, false);
 }
 
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+  VirtualController *controller = gameContext->getController();
+
+  if (!controller)
+    return;
+
   ImGuiIO& io = ImGui::GetIO();
 
   if (io.WantCaptureMouse)
@@ -94,8 +103,6 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
   if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
     gladeControlId = 2;
   }
-
-  VirtualController *controller = gameContext->getController();
 
   double x, y;
   glfwGetCursorPos(window, &x, &y);
