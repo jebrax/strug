@@ -33,7 +33,7 @@ Craft::~Craft()
 void Craft::createEntities()
 {
   Glade::Vector2i chunkIndex(0, 0);
-  Isosurface* surf = new Isosurface();
+  Isosurface* surf = new Isosurface(&GladeObject::unusedEntityId);
   grid.addChunk(chunkIndex.x, chunkIndex.y, surf);
 
   surf->initialize(chunkIndex, grid, terrainSettings, true);

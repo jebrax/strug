@@ -170,21 +170,21 @@ CollisionTest::~CollisionTest()
 
 void CollisionTest::createEntities()
 {
-  sphere = new Sphere();
+  sphere = new Sphere(&GladeObject::unusedEntityId);
   sphere->initialize(cellSize);
   sphere->getTransform()->position->x = (float) grid->chunkSizeCells/2 * grid->cellSize - 3;
   sphere->getTransform()->position->y = 20 * grid->cellSize;
   sphere->getTransform()->position->z = (float) grid->chunkSizeCells/2 * grid->cellSize;
   context->add(sphere);
 
-  cube = new Cube();
+  cube = new Cube(&GladeObject::unusedEntityId);
   cube->initialize();
   cube->getTransform()->rotation->y = 0.5;
   cube->getTransform()->position->z = 5;
   context->add(cube);
   terrainObjects.push_back(cube);
 
-  cube2 = new Cube();
+  cube2 = new Cube(&GladeObject::unusedEntityId);
   cube2->initialize();
   cube2->getTransform()->rotation->y = 0.5;
   cube2->getTransform()->position->z = 5;
@@ -193,7 +193,7 @@ void CollisionTest::createEntities()
   terrainObjects.push_back(cube2);
 
   Glade::Vector2i chunkIndex(0, 0);
-  terrain = new Isosurface();
+  terrain = new Isosurface(&GladeObject::unusedEntityId);
   terrain->initialize(chunkIndex, *grid, terrainSettings, false);
   terrain->getView()->getMesh()->neverErase = true;
   context->add(terrain);

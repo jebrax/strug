@@ -32,7 +32,7 @@ void Chunked::createEntities()
   for (int i = 0; i < CHUNKS_SIDE; i++) {
     for (int j = 0; j < CHUNKS_SIDE; j++) {
       Glade::Vector2i chunkIndex(i, j);
-      Isosurface* surf = new Isosurface();
+      Isosurface* surf = new Isosurface(&GladeObject::unusedEntityId);
       grid->addChunk(i, j, surf);
 
       surf->initialize(chunkIndex, *grid, terrainSettings);

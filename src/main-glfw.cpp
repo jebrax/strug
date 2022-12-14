@@ -1,14 +1,10 @@
 #include <strug/ResourceManager.h>
-#include <strug/controls/StrugController.h>
-#include <strug/exception/StrugException.h>
 #include <strug/states/world/WalkingTheWorld.h>
 #include <strug/states/world/TerrainDemo.h>
 #include <strug/states/Chunked.h>
 #include <strug/states/Craft.h>
 
-#include <glade/exception/GladeException.h>
 #include <glade/debug/log.h>
-#include <glade/debug/crashHandler.h>
 #include <glade/render/GladeRenderer.h>
 #include <glade/Context.h>
 #include <glade/State.h>
@@ -24,11 +20,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <sys/syslimits.h>
 #include <mach-o/dyld.h>
 
-#include <fstream>
-#include <cmath>
 #include <cstdlib>
 
 #define VIEWPORT_WIDTH 1280
@@ -316,9 +309,8 @@ int main(int argc, char** argv)
   renderer.onSurfaceChanged(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
 
   bool server = (argc > 1 && !strcmp(argv[1], "--server"));
+
   gameContext = new Context(&renderer, server);
-  if (!gameContext->networkManager->isServer())
-    gameContext->networkManager->connectToServer();
 
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);

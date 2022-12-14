@@ -16,7 +16,7 @@
 #include <unordered_map>
 #include <algorithm>
 
-static Frank *character= nullptr;
+static Frank *playerCharacter= nullptr;
 static Grid* grid = nullptr;
 static const float cellSize = 0.25;
 static const unsigned short CHUNK_GENERATION_RADIUS = 1;
@@ -41,7 +41,7 @@ static void* generateNewChunks(void *p)
 
       if (!grid->getChunk(checkChunkIndex)) {
         log("Generating chunk %d, %d", checkChunkIndex.x, checkChunkIndex.y);
-        Isosurface *chunk = new Isosurface();
+        Isosurface *chunk = new Isosurface(&GladeObject::unusedEntityId);
         grid->addChunk(checkChunkIndex, chunk);
 
         chunk->initialize(checkChunkIndex, *grid, params->terrainSettings, false);
@@ -65,12 +65,9 @@ WalkingTheWorld::~WalkingTheWorld()
 
 void WalkingTheWorld::createEntities()
 {
-  character = new Frank();
-  context->networkManager->AddObject(character);
-  character->initialize(cellSize);
-  context->add(character);
-  Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*character->getTransform()->position);
-  lastCharacterChunkIndex = grid->cellIndexToChunkIndex(characterCellIndex);
+  if (context->networkManager->isServer()) {
+    playerCharacter = (Frank*) CreateEntityByTypeId(ObjectType::CHARACTER, nullptr);
+  }
 
   regenerateTerrain();
 }
@@ -83,9 +80,57 @@ void WalkingTheWorld::regenerateTerrain()
   generateNewChunksIfNeeded(true);
 }
 
+GladeObject* WalkingTheWorld::CreateEntityByTypeId(unsigned int type, const unsigned int *forceId)
+{
+  GladeObject *entity = nullptr;
+
+  switch ((ObjectType) type) {
+    case ObjectType::CHARACTER:
+      Frank *character = new Frank(forceId);
+      character->initialize(cellSize);
+      context->add(character);
+
+      entity = character;
+      break;
+  }
+
+  return entity;
+}
+
+void WalkingTheWorld::onEntityReplicated(GladeObject *entity)
+{
+  if (context->networkManager->isServer())
+    return;
+
+  if (entity->getType() == ObjectType::CHARACTER) {
+    Frank *character = (Frank*) entity;
+
+    if (character->mUserId == mUserId) {
+      assert(grid);
+      playerCharacter = character;
+      controller->setCharacter(character);
+      Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*character->getTransform()->position);
+      lastCharacterChunkIndex = grid->cellIndexToChunkIndex(characterCellIndex);
+    }
+  }
+}
+
+void WalkingTheWorld::onUserLoggedIn(unsigned int userId)
+{
+  if (context->networkManager->isServer()) {
+    log("Adding object");
+    Frank* character = (Frank*) CreateEntityByTypeId(ObjectType::CHARACTER);
+    character->mUserId = userId;
+    context->networkManager->addObject(character);
+  } else {
+    mUserId = userId;
+  }
+}
+
 void WalkingTheWorld::init(Context &context)
 {
   log("Init WalkingTheWorld");
+
   this->context = &context;
 
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
@@ -105,22 +150,30 @@ void WalkingTheWorld::init(Context &context)
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
 
-  controller = new WorldController(context, character);
+  controller = new WorldController(context);
+  controller->setCharacter(playerCharacter);
   controller->resetCameraAndCharacterPositions();
 
   Glade::System::toggleMouseCursor(false);
+
+  if (!context.networkManager->isServer())
+    context.networkManager->connectToServer();
 
   context.setController(*controller);
 }
 
 void WalkingTheWorld::generateNewChunksIfNeeded(bool force)
 {
+  if (!playerCharacter) {
+    //log("No player character");
+    return;
+  }
   assert(grid);
 
   Glade::Vector2i centralChunkIndex;
 
-  if (character) {
-    Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*character->getTransform()->position);
+  if (playerCharacter) {
+    Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*playerCharacter->getTransform()->position);
     centralChunkIndex = grid->cellIndexToChunkIndex(characterCellIndex);
 
     if (centralChunkIndex != lastCharacterChunkIndex) {
@@ -146,8 +199,7 @@ void WalkingTheWorld::generateNewChunksIfNeeded(bool force)
 
 void WalkingTheWorld::applyRules(Context &context)
 {
-  if (context.networkManager->isServer())
-    controller->update();
+  controller->update();
 
   generateNewChunksIfNeeded();
 
@@ -235,9 +287,9 @@ void WalkingTheWorld::shutdown(Context &context)
   delete grid;
   grid = nullptr;
 
-  assert(character);
-  context.remove(character);
-  delete character;
-  character = nullptr;
+  assert(playerCharacter);
+  context.remove(playerCharacter);
+  delete playerCharacter;
+  playerCharacter = nullptr;
 }
 

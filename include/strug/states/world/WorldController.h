@@ -13,11 +13,12 @@ public:
     FREE = 0,
     THIRD_PERSON,
     FIRST_PERSON,
-    _ENUM_LAST_VALUE
+    ENUM_LAST_VALUE
   };
 
-  WorldController(Context &context, GladeObject *character);
+  explicit WorldController(Context &context);
 
+  void setCharacter(GladeObject* character);
   bool isShootButtonDown() { return digging || growing; }
   bool isDigButtonDown() { return digging; }
 

@@ -26,7 +26,7 @@ MarchingCubes::~MarchingCubes()
 
 void MarchingCubes::createEntities()
 {
-  surf = new Isosurface();
+  surf = new Isosurface(&GladeObject::unusedEntityId);
   surf->initialize(Glade::Vector2i(0, 0), grid, terrainSettings);
   context->add(surf);
 }

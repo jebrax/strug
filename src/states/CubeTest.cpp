@@ -20,7 +20,7 @@ CubeTest::~CubeTest()
 
 void CubeTest::createEntities()
 {
-  cube = new Cube();
+  cube = new Cube(&GladeObject::unusedEntityId);
   cube->initialize();
   this->context->add(cube);
 

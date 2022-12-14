@@ -6,11 +6,15 @@
 #include <glade/Context.h>
 #include <glade/system.h>
 
-WorldController::WorldController(Context &context, GladeObject *character):
-    context(context),
-    character(character)
+WorldController::WorldController(Context &context):
+    context(context)
 {
   context.eventBus.registerListener(Glade::EventType::GLADE_COLLISION_EVENT, this);
+}
+
+void WorldController::setCharacter(GladeObject* character)
+{
+  this->character = character;
 }
 
 void WorldController::resetCameraAndCharacterPositions()
@@ -19,9 +23,11 @@ void WorldController::resetCameraAndCharacterPositions()
   context.renderer->getCamera()->position->x = 2.0f;
   context.renderer->getCamera()->position->y = 3.0f;
 
-  character->getTransform()->position->x = 7.5f;
-  character->getTransform()->position->y = 5.0f;
-  character->getTransform()->position->z = 7.5f;
+  if (character) {
+    character->getTransform()->position->x = 7.5f;
+    character->getTransform()->position->y = 5.0f;
+    character->getTransform()->position->z = 7.5f;
+  }
 }
 
 void WorldController::onEvent(Glade::EventType type, void *payload) {
@@ -30,6 +36,11 @@ void WorldController::onEvent(Glade::EventType type, void *payload) {
 
 void WorldController::setCameraMode(CameraMode mode)
 {
+  if (!character) {
+    cameraMode = CameraMode::FREE;
+    return;
+  }
+
   cameraMode = mode;
 
   if (cameraMode == CameraMode::THIRD_PERSON) {
@@ -52,10 +63,10 @@ bool WorldController::pointerMove(float xPos, float yPos, float zPos, int contro
   if (cameraMode == CameraMode::FREE) {
     context.getRenderer()->getCamera()->rotation->y = xPos * 0.001;
     context.getRenderer()->getCamera()->rotation->x = yPos * 0.001;
-  } else if (cameraMode == CameraMode::FIRST_PERSON) {
+  } else if (cameraMode == CameraMode::FIRST_PERSON && character) {
     context.getRenderer()->getCamera()->rotation->x = yPos * 0.001;
     character->getTransform()->rotation->y = -xPos * 0.001;
-  } else {
+  } else if (character) {
     thirdPersonCameraMouseMove(xPos, yPos, zPos, controlId);
   }
 
@@ -98,6 +109,9 @@ void WorldController::update()
 
 void WorldController::updateFirstPersonCamera()
 {
+  if (!character)
+    return;
+
   float originX = character->getTransform()->position->x,
         originY = character->getTransform()->position->y,
         originZ = character->getTransform()->position->z;
@@ -113,6 +127,9 @@ void WorldController::updateFirstPersonCamera()
 
 void WorldController::updateThirdPersonCamera()
 {
+  if (!character)
+    return;
+
   float phi = cameraOwnPhi;
   float theta = -character->getTransform()->rotation->y - PI / 2.0 + cameraOwnTheta;
 
@@ -168,6 +185,9 @@ void WorldController::updateFreeCamera()
 
 void WorldController::updateCharacter()
 {
+  if (!character)
+    return;
+
   float characterSpeed = 0.1;
   float forward = 0.0, strafe = 0.0, fly = 0.0;
 
@@ -239,7 +259,7 @@ bool WorldController::buttonPress(Glade::Key key, int terminalId) {
   if (key == Glade::Key::GLADE_KEY_4) {
     setCameraMode((CameraMode) (cameraMode + 1));
 
-    if (cameraMode == CameraMode::_ENUM_LAST_VALUE)
+    if (cameraMode == CameraMode::ENUM_LAST_VALUE)
       setCameraMode(cameraMode = (CameraMode) 0);
   }
 

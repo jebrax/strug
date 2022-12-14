@@ -32,7 +32,7 @@ TerrainDemo::~TerrainDemo()
 
 void TerrainDemo::createEntities()
 {
-  character = new Frank();
+  character = new Frank(&GladeObject::unusedEntityId);
   character->initialize(cellSize);
   context->add(character);
   Glade::Vector3i characterCellIndex = grid->pointToCellIndex(*character->getTransform()->position);
@@ -51,7 +51,7 @@ void TerrainDemo::regenerateTerrain()
   log("Generating chunk %d, %d", checkChunkIndex.x, checkChunkIndex.y);
 
   if (!grid->getChunk(checkChunkIndex)) {
-    Surface *chunk = new Surface();
+    Surface *chunk = new Surface(&GladeObject::unusedEntityId);
     grid->addChunk(checkChunkIndex, chunk);
 
     chunk->initialize(checkChunkIndex, *grid, octavesSettings);
@@ -83,7 +83,8 @@ void TerrainDemo::init(Context &context)
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
 
-  controller = new WorldController(context, character);
+  controller = new WorldController(context);
+  controller->setCharacter(character);
 
   character->getTransform()->position->x = grid->chunkSizeCells / 2.0;
   character->getTransform()->position->y = 0.0f;

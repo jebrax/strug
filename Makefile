@@ -10,20 +10,24 @@ CXX_SRCS = $(shell find src -type f -name '*.cpp')
 OBJS = $(patsubst src/%.cpp, $(STRUG_BUILD_DIR)/%.o, $(CXX_SRCS))
 DEPS = $(patsubst src/%.cpp, $(STRUG_BUILD_DIR)/%.o.d, $(CXX_SRCS))
 
-.PHONY: r rr run glade clean ass
+.PHONY: run-client run-server glade clean ass
 
-all: glade ${STRUG_BUILD_DIR}/strug ass run
+all: glade ${STRUG_BUILD_DIR}/strug ass
 
 strug: ${STRUG_BUILD_DIR}/strug ass
 
 glade:
 	cd ${DEPS_PATH}/glade && ${MAKE}
 
-run:
+run-client:
 	./${STRUG_BUILD_DIR}/strug
+
+run-server:
+	./${STRUG_BUILD_DIR}/strug --server
 
 clean:
 	rm -rf build
+	cd ${DEPS_PATH}/glade && ${MAKE} clean
 
 ass:
 	rm -rf ${STRUG_BUILD_DIR}/assets
@@ -73,3 +77,4 @@ ${STRUG_BUILD_DIR}/states/CollisionTest.o: src/states/CollisionTest.cpp
 	mkdir -p $(@D)
 	${CXX} ${CXXFLAGS} -I${DEPS_PATH}/glew/include -I${DEPS_PATH}/libccd/src -c $< -o $@
 
+.NOTPARALLEL:
