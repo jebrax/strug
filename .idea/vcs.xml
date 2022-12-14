@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/PerlinNoise" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/assimp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/bullet3" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/enet" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/freetype" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/glade" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/glew" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/glew/auto/EGL-Registry" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/glew/auto/OpenGL-Registry" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/glew/auto/glfixes" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/glfw" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/imgui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/libccd" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/lodepng" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/sha1" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/deps/zlib" vcs="Git" />
+  </component>
+</project>
