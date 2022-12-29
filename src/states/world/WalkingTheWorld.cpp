@@ -44,7 +44,7 @@ void WalkingTheWorld::onEntityReplicated(GladeObject *entity)
   if (entity->getType() == ObjectType::CHARACTER) {
     Frank *character = (Frank*) entity;
 
-    if (character->mUserId == mUserId) {
+    if (character->mUserId == context->networkManager->getCurrentUserId()) {
       assert(grid);
       controller->setCharacter(character);
       mChunkManager->SetPlayerCharacter(character);
@@ -59,9 +59,12 @@ void WalkingTheWorld::onUserLoggedIn(unsigned int userId)
     Frank* character = (Frank*) CreateEntityByTypeId(ObjectType::CHARACTER);
     character->mUserId = userId;
     context->networkManager->addObject(character);
-  } else {
-    mUserId = userId;
   }
+}
+
+void WalkingTheWorld::onClientInputReceived(unsigned int userId, unsigned int gladeKeyCode, bool isPressed)
+{
+
 }
 
 void WalkingTheWorld::init(Context &context)

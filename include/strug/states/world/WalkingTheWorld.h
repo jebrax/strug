@@ -29,6 +29,7 @@ public:
   };
 
   GladeObject *CreateEntityByTypeId(unsigned int type, const unsigned int *force_id = nullptr) override;
+  void onClientInputReceived(unsigned int userId, unsigned int gladeKeyCode, bool isPressed) override;
   void onEntityReplicated(GladeObject *entity) override;
   void onUserLoggedIn(unsigned int userId) override;
 
@@ -39,5 +40,4 @@ private:
   Context *context;
   WorldController *controller;
   ChunkManager *mChunkManager;
-  unsigned int mUserId;
 };

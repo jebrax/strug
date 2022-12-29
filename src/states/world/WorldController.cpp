@@ -238,6 +238,11 @@ bool WorldController::buttonPress(Glade::Key key, int terminalId) {
   if (!changedState)
     return false;
 
+  if (!context.networkManager->isServer()) {
+    context.networkManager->sendButtonToServer(key, true);
+    return true;
+  }
+
   if (key == Glade::Key::GLADE_KEY_1) {
     flyMode = !flyMode;
     log("Flying mode is %s", flyMode ? "ON" : "OFF");
@@ -277,7 +282,13 @@ bool WorldController::buttonPress(Glade::Key key, int terminalId) {
 }
 
 bool WorldController::buttonRelease(Glade::Key key, int terminalId) {
-  VirtualController::buttonRelease(key, terminalId);
+  bool changedState = VirtualController::buttonRelease(key, terminalId);
+
+  if (!changedState)
+    return false;
+
+  if (!context.networkManager->isServer())
+    context.networkManager->sendButtonToServer(key, false);
 
   return true;
 }
