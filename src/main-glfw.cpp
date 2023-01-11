@@ -143,149 +143,30 @@ void processInput(GLFWwindow* window)
   if (controller == nullptr)
     return;
 
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_W, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_W, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_S, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_S, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_A, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_A, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_D, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_D, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_SPACE, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_SPACE, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_X, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_X) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_X, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_G, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_G, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_F, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_F, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_T, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_T, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_R, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_R, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_C, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_C) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_C, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_LEFT, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_LEFT, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_RIGHT, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_RIGHT, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_UP, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_UP, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_DOWN, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_DOWN, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_O, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_O) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_O, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_L, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_L) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_L, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_1, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_1) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_1, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_2, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_2) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_2, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_3, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_3) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_3, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_4, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_4) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_4, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_5, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_5) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_5, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_Q, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_Q, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-    controller->buttonPress(Glade::Key::GLADE_KEY_E, 0);
-
-  if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE)
-    controller->buttonRelease(Glade::Key::GLADE_KEY_E, 0);
+  controller->updateState(Glade::Key::GLADE_KEY_W, 0, glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_S, 0, glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_A, 0, glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_D, 0, glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_SPACE, 0, glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_X, 0, glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_G, 0, glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_F, 0, glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_T, 0, glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_R, 0, glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_C, 0, glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_LEFT, 0, glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_RIGHT, 0, glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_UP, 0, glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_DOWN, 0, glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_O, 0, glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_L, 0, glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_1, 0, glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_2, 0, glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_3, 0, glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_4, 0, glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_5, 0, glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_Q, 0, glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS);
+  controller->updateState(Glade::Key::GLADE_KEY_E, 0, glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS);
 }
 
 int main(int argc, char** argv)

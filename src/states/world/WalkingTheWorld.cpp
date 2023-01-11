@@ -1,7 +1,6 @@
 #include <strug/states/world/WalkingTheWorld.h>
 #include <strug/blocks/Sphere.h>
 #include <strug/blocks/Frank.h>
-#include <strug/blocks/Isosurface.h>
 #include <strug/states/world/WorldController.h>
 #include <strug/states/world/ChunkManager.h>
 
@@ -45,8 +44,6 @@ void WalkingTheWorld::onEntityReplicated(GladeObject *entity)
     Frank *character = (Frank*) entity;
 
     if (character->mUserId == context->networkManager->getCurrentUserId()) {
-      assert(grid);
-      controller->setCharacter(character);
       mChunkManager->SetPlayerCharacter(character);
     }
   }
@@ -59,12 +56,23 @@ void WalkingTheWorld::onUserLoggedIn(unsigned int userId)
     Frank* character = (Frank*) CreateEntityByTypeId(ObjectType::CHARACTER);
     character->mUserId = userId;
     context->networkManager->addObject(character);
+
+    WorldController *controller = new WorldController(*context);
+    controller->setCharacter(character);
+    characterControllers[userId] = controller;
   }
 }
 
 void WalkingTheWorld::onClientInputReceived(unsigned int userId, unsigned int gladeKeyCode, bool isPressed)
 {
+  auto entry = characterControllers.find(userId);
 
+  if (entry == characterControllers.end()) {
+    log("Warning: network input message for user id %d for which there is no character controller", userId);
+    return;
+  }
+
+  entry->second->updateState((Glade::Key) gladeKeyCode, 0, isPressed);
 }
 
 void WalkingTheWorld::init(Context &context)
@@ -89,16 +97,18 @@ void WalkingTheWorld::init(Context &context)
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
 
-  controller = new WorldController(context);
+  WorldController *controller = new WorldController(context);
+
   controller->setCharacter(playerCharacter);
+  characterControllers[context.networkManager->getCurrentUserId()] = controller;
+
   controller->resetCameraAndCharacterPositions();
+  context.setController(*controller);
 
   Glade::System::toggleMouseCursor(false);
 
   if (!context.networkManager->isServer())
     context.networkManager->connectToServer();
-
-  context.setController(*controller);
 
   mChunkManager = new ChunkManager(*grid, playerCharacter, context);
   mChunkManager->Run();
@@ -106,10 +116,12 @@ void WalkingTheWorld::init(Context &context)
 
 void WalkingTheWorld::applyRules(Context &context)
 {
-  controller->update();
+  for (auto entry: characterControllers) {
+    entry.second->update();
+  }
 
-  if (controller->isShootButtonDown())
-    shoot();
+  //if (entry->second->isShootButtonDown())
+  //  shoot();
 }
 
 void WalkingTheWorld::shoot()
@@ -156,7 +168,11 @@ void WalkingTheWorld::shoot()
     }
 
     if (shotSolid) {
-      grid->addValueAtCell(cellIndex, controller->isDigButtonDown()? 0.1 : -0.1);
+      auto entry = characterControllers.find(context->networkManager->getCurrentUserId());
+      if (entry == characterControllers.end())
+        return;
+
+      grid->addValueAtCell(cellIndex, entry->second->isDigButtonDown()? 0.1 : -0.1);
       break;
     }
 

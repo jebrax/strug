@@ -233,11 +233,6 @@ void WorldController::updateCharacter()
 }
 
 bool WorldController::buttonPress(Glade::Key key, int terminalId) {
-  bool changedState = VirtualController::buttonPress(key, terminalId);
-
-  if (!changedState)
-    return false;
-
   if (!context.networkManager->isServer()) {
     context.networkManager->sendButtonToServer(key, true);
     return true;
@@ -278,15 +273,10 @@ bool WorldController::buttonPress(Glade::Key key, int terminalId) {
       characterIsOnTheGround = false;
   }
 
-  return changedState;
+  return true;
 }
 
 bool WorldController::buttonRelease(Glade::Key key, int terminalId) {
-  bool changedState = VirtualController::buttonRelease(key, terminalId);
-
-  if (!changedState)
-    return false;
-
   if (!context.networkManager->isServer())
     context.networkManager->sendButtonToServer(key, false);
 

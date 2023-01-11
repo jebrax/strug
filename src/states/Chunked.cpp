@@ -88,8 +88,6 @@ bool Chunked::pointerMove(float xPos, float yPos, float zPos, int controlId, int
 
 bool Chunked::buttonPress(Glade::Key controlId, int terminalId)
 {
-  VirtualController::buttonPress(controlId, terminalId);
-
   if (controlId == Glade::Key::GLADE_KEY_F) {
     context->requestStateChange(new Craft(this), true);
   }
@@ -99,7 +97,6 @@ bool Chunked::buttonPress(Glade::Key controlId, int terminalId)
 
 bool Chunked::buttonRelease(Glade::Key controlId, int terminalId)
 {
-  VirtualController::buttonRelease(controlId, terminalId);
   return true;
 }
 

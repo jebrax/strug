@@ -34,10 +34,11 @@ public:
   void onUserLoggedIn(unsigned int userId) override;
 
 private:
+  typedef std::unordered_map<unsigned int, WorldController*> CharacterControllers;
   void shoot();
 
   Grid* grid = nullptr;
   Context *context;
-  WorldController *controller;
+  CharacterControllers characterControllers;
   ChunkManager *mChunkManager;
 };
