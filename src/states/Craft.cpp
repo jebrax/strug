@@ -117,9 +117,9 @@ bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int t
   return true;
 }
 
-bool Craft::buttonPress(Glade::Key controlId, int terminalId)
+bool Craft::InputActionPress(unsigned int inputAction, int terminalId)
 {
-  if (controlId == 1) {
+  if (inputAction == 1) {
     Glade::Vector2i chunkIndex(0, 0);
     mMainState->addItem(grid.getChunk(0, 0));
     context->requestStateChange(mMainState);
@@ -128,7 +128,7 @@ bool Craft::buttonPress(Glade::Key controlId, int terminalId)
   return true;
 }
 
-bool Craft::buttonRelease(Glade::Key controlId, int terminalId)
+bool Craft::InputActionRelease(unsigned int inputAction, int terminalId)
 {
   return true;
 }

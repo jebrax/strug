@@ -1,4 +1,5 @@
 #include <strug/states/world/WorldController.h>
+#include <strug/controls/StrugInputAction.h>
 #include <strug/blocks/Frank.h>
 
 #include <glade/controls/VirtualController.h>
@@ -155,22 +156,22 @@ void WorldController::updateFreeCamera()
   float cameraSpeed = 0.1;
   float forward = 0.0, strafe = 0.0, fly = 0.0;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_UP))
+  if (isActionPressed(StrugInputAction::FREE_CAMERA_MOVE_FORWARD))
     forward = -cameraSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_DOWN))
+  if (isActionPressed(StrugInputAction::FREE_CAMERA_MOVE_BACKWARDS))
     forward = cameraSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_LEFT))
+  if (isActionPressed(StrugInputAction::FREE_CAMERA_STRAFE_LEFT))
     strafe = -cameraSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_RIGHT))
+  if (isActionPressed(StrugInputAction::FREE_CAMERA_STRAFE_RIGHT))
     strafe = cameraSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_O))
+  if (isActionPressed(StrugInputAction::FREE_CAMERA_FLY_UP))
     fly = cameraSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_L))
+  if (isActionPressed(StrugInputAction::FREE_CAMERA_FLY_DOWN))
     fly = -cameraSpeed;
 
   Transform *camera = context.getRenderer()->getCamera();
@@ -191,22 +192,22 @@ void WorldController::updateCharacter()
   float characterSpeed = 0.1;
   float forward = 0.0, strafe = 0.0, fly = 0.0;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_W))
+  if (isActionPressed(StrugInputAction::CHARACTER_MOVE_FORWARD))
     forward = -characterSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_S))
+  if (isActionPressed(StrugInputAction::CHARACTER_MOVE_BACKWARDS))
     forward = characterSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_A))
+  if (isActionPressed(StrugInputAction::CHARACTER_STRAFE_LEFT))
     strafe = -characterSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_D))
+  if (isActionPressed(StrugInputAction::CHARACTER_STRAFE_RIGHT))
     strafe = characterSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_Q))
+  if (isActionPressed(StrugInputAction::CHARACTER_TURN_LEFT))
     character->getTransform()->rotation->y += characterSpeed;
 
-  if (isKeyPressed(Glade::Key::GLADE_KEY_E))
+  if (isActionPressed(StrugInputAction::CHARACTER_TURN_RIGHT))
     character->getTransform()->rotation->y -= characterSpeed;
 
   Transform *charTransform = character->getTransform();
@@ -219,10 +220,10 @@ void WorldController::updateCharacter()
   charTransform->position->x += xModifier;
 
   if (flyMode) {
-    if (isKeyPressed(Glade::Key::GLADE_KEY_SPACE))
+    if (isActionPressed(StrugInputAction::CHARACTER_FLY_UP))
       character->getTransform()->position->y += characterSpeed;
 
-    if (isKeyPressed(Glade::Key::GLADE_KEY_X))
+    if (isActionPressed(StrugInputAction::CHARACTER_FLY_DOWN))
       character->getTransform()->position->y -= characterSpeed;
   } else {
     // gravity
@@ -232,13 +233,13 @@ void WorldController::updateCharacter()
   }
 }
 
-bool WorldController::buttonPress(Glade::Key key, int terminalId) {
+bool WorldController::InputActionPress(unsigned int inputAction, int terminalId) {
   if (!context.networkManager->isServer()) {
-    context.networkManager->sendButtonToServer(key, true);
+    context.networkManager->sendInputActionToServer(inputAction, true);
     return true;
   }
 
-  if (key == Glade::Key::GLADE_KEY_1) {
+  if (inputAction == StrugInputAction::TOGGLE_CHARACTER_FLY_MODE) {
     flyMode = !flyMode;
     log("Flying mode is %s", flyMode ? "ON" : "OFF");
 
@@ -246,29 +247,29 @@ bool WorldController::buttonPress(Glade::Key key, int terminalId) {
       characterIsOnTheGround = false;
   }
 
-  if (key == Glade::Key::GLADE_KEY_2) {
+  if (inputAction == StrugInputAction::TOGGLE_TERRAIN_COLLISIONS) {
     context.enableCollisionDetector = !context.enableCollisionDetector;
     log("Collisions are %s", context.enableCollisionDetector ? "ON" : "OFF");
   }
 
-  if (key == Glade::Key::GLADE_KEY_3) {
+  if (inputAction == StrugInputAction::RESET_CAMERA_AND_CHARACTER_POSITIONS) {
     resetCameraAndCharacterPositions();
     log("Camera and character positions were reset");
   }
 
-  if (key == Glade::Key::GLADE_KEY_4) {
+  if (inputAction == StrugInputAction::SWITCH_CAMERA_MODE) {
     setCameraMode((CameraMode) (cameraMode + 1));
 
     if (cameraMode == CameraMode::ENUM_LAST_VALUE)
       setCameraMode(cameraMode = (CameraMode) 0);
   }
 
-  if (key == Glade::Key::GLADE_KEY_5) {
+  if (inputAction == StrugInputAction::TOGGLE_COLLIDERS_VISUALISATION) {
     bool enabled = ((Frank*)character)->toggleCollisionShapeView();
     log("%s collision shapes", enabled ? "SHOWING " : "HIDING ");
   }
 
-  if (key == Glade::Key::GLADE_KEY_SPACE && characterIsOnTheGround) {
+  if (inputAction == Glade::Key::GLADE_KEY_SPACE && characterIsOnTheGround) {
       verticalSpeed = JUMP_ACCELERATION;
       characterIsOnTheGround = false;
   }
@@ -276,9 +277,9 @@ bool WorldController::buttonPress(Glade::Key key, int terminalId) {
   return true;
 }
 
-bool WorldController::buttonRelease(Glade::Key key, int terminalId) {
+bool WorldController::InputActionRelease(unsigned int inputAction, int terminalId) {
   if (!context.networkManager->isServer())
-    context.networkManager->sendButtonToServer(key, false);
+    context.networkManager->sendInputActionToServer(inputAction, false);
 
   return true;
 }

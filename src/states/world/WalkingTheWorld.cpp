@@ -3,6 +3,7 @@
 #include <strug/blocks/Frank.h>
 #include <strug/states/world/WorldController.h>
 #include <strug/states/world/ChunkManager.h>
+#include <strug/controls/StrugKeyMapper.h>
 
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
@@ -63,7 +64,7 @@ void WalkingTheWorld::onUserLoggedIn(unsigned int userId)
   }
 }
 
-void WalkingTheWorld::onClientInputReceived(unsigned int userId, unsigned int gladeKeyCode, bool isPressed)
+void WalkingTheWorld::onClientInputReceived(unsigned int userId, unsigned int inputAction, bool isPressed)
 {
   auto entry = characterControllers.find(userId);
 
@@ -72,7 +73,7 @@ void WalkingTheWorld::onClientInputReceived(unsigned int userId, unsigned int gl
     return;
   }
 
-  entry->second->updateState((Glade::Key) gladeKeyCode, 0, isPressed);
+  entry->second->UpdateInputActionState(inputAction, isPressed);
 }
 
 void WalkingTheWorld::init(Context &context)
@@ -98,7 +99,7 @@ void WalkingTheWorld::init(Context &context)
   context.renderer->setPerception(perception);
 
   WorldController *controller = new WorldController(context);
-
+  controller->SetKeyMapper(new StrugKeyMapper());
   controller->setCharacter(playerCharacter);
   characterControllers[context.networkManager->getCurrentUserId()] = controller;
 

@@ -21,7 +21,6 @@ class CollisionTest: public State, VirtualController
     void applyRules(Context &context) override;
     void createEntities();
 
-    void initController() override {};
     bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId) override;
     bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId) override;
     bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute = true) override;

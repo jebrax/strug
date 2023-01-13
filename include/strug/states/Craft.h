@@ -35,9 +35,8 @@ class Craft: public State, VirtualController
     void shutdown(Context &context) override;
     void applyRules(Context &context) override;
 
-    void initController() override {};
-    bool buttonPress(Glade::Key controlId, int terminalId) override;
-    bool buttonRelease(Glade::Key controlId, int terminalId) override;
+    bool InputActionPress(unsigned int inputAction, int terminalId) override;
+    bool InputActionRelease(unsigned int inputAction, int terminalId) override;
     bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId) override;
     bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId) override;
     bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute = true) override;
