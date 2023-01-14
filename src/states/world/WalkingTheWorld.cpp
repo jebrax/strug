@@ -13,7 +13,8 @@
 #include <unordered_map>
 
 WalkingTheWorld::WalkingTheWorld():
-  State()
+  State(),
+  mChunkManager(nullptr)
 {}
 
 WalkingTheWorld::~WalkingTheWorld()
@@ -44,8 +45,17 @@ void WalkingTheWorld::onEntityReplicated(GladeObject *entity)
   if (entity->getType() == ObjectType::CHARACTER) {
     Frank *character = (Frank*) entity;
 
-    if (character->mUserId == context->networkManager->getCurrentUserId()) {
-      mChunkManager->SetPlayerCharacter(character);
+    unsigned int currentUserId = context->networkManager->getCurrentUserId();
+    if (character->mUserId == currentUserId) {
+      WorldController *controller = new WorldController(*context);
+      controller->SetKeyMapper(new StrugKeyMapper());
+      controller->setCharacter(character);
+      characterControllers[currentUserId] = controller;
+      context->setController(*controller);
+
+      // FIXME don't need a chunk manager on the client or it should be networked somehow
+      mChunkManager = new ChunkManager(*grid, character, *context);
+      mChunkManager->Run();
     }
   }
 }
@@ -60,6 +70,7 @@ void WalkingTheWorld::onUserLoggedIn(unsigned int userId)
 
     WorldController *controller = new WorldController(*context);
     controller->setCharacter(character);
+    controller->resetCameraAndCharacterPositions();
     characterControllers[userId] = controller;
   }
 }
@@ -87,32 +98,32 @@ void WalkingTheWorld::init(Context &context)
 
   grid = new Grid(60, 0.25);
 
-  Frank *playerCharacter = nullptr;
-  if (context.networkManager->isServer()) {
-    playerCharacter = (Frank *) CreateEntityByTypeId(ObjectType::CHARACTER, nullptr);
-    context.networkManager->addObject(playerCharacter);
-  }
-
   context.getCollisionDetector()->setSpatialIndex(grid);
 
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
 
-  WorldController *controller = new WorldController(context);
-  controller->SetKeyMapper(new StrugKeyMapper());
-  controller->setCharacter(playerCharacter);
-  characterControllers[context.networkManager->getCurrentUserId()] = controller;
-
-  controller->resetCameraAndCharacterPositions();
-  context.setController(*controller);
-
   Glade::System::toggleMouseCursor(false);
+
+  if (context.networkManager->isServer()) {
+    // Create character for the server player (if it's not a dedicated server)
+    Frank *playerCharacter = nullptr;
+    playerCharacter = (Frank *) CreateEntityByTypeId(ObjectType::CHARACTER, nullptr);
+    context.networkManager->addObject(playerCharacter);
+    WorldController *controller = new WorldController(context);
+    controller->SetKeyMapper(new StrugKeyMapper());
+    controller->setCharacter(playerCharacter);
+    characterControllers[context.networkManager->getCurrentUserId()] = controller;
+
+    controller->resetCameraAndCharacterPositions();
+    context.setController(*controller);
+
+    mChunkManager = new ChunkManager(*grid, playerCharacter, context);
+    mChunkManager->Run();
+  }
 
   if (!context.networkManager->isServer())
     context.networkManager->connectToServer();
-
-  mChunkManager = new ChunkManager(*grid, playerCharacter, context);
-  mChunkManager->Run();
 }
 
 void WalkingTheWorld::applyRules(Context &context)
@@ -127,6 +138,11 @@ void WalkingTheWorld::applyRules(Context &context)
 
 void WalkingTheWorld::shoot()
 {
+  if (!mChunkManager) {
+    log("No chunk manager");
+    return;
+  }
+
   Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
 
   //log("Near point: %f %f %f", nearPoint.x, nearPoint.y, nearPoint.z);
@@ -199,9 +215,11 @@ void WalkingTheWorld::shutdown(Context &context)
   delete grid;
   grid = nullptr;
 
-  mChunkManager->Stop();
-  delete mChunkManager;
-  mChunkManager = nullptr;
+  if (mChunkManager) {
+    mChunkManager->Stop();
+    delete mChunkManager;
+    mChunkManager = nullptr;
+  }
 
   // TODO delete all entities
 }

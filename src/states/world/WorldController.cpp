@@ -234,7 +234,7 @@ void WorldController::updateCharacter()
 }
 
 bool WorldController::InputActionPress(unsigned int inputAction, int terminalId) {
-  if (!context.networkManager->isServer()) {
+  if (!context.networkManager->isServer() && IsActionNetworked(inputAction)) {
     context.networkManager->sendInputActionToServer(inputAction, true);
     return true;
   }
@@ -269,7 +269,7 @@ bool WorldController::InputActionPress(unsigned int inputAction, int terminalId)
     log("%s collision shapes", enabled ? "SHOWING " : "HIDING ");
   }
 
-  if (inputAction == Glade::Key::GLADE_KEY_SPACE && characterIsOnTheGround) {
+  if (inputAction == StrugInputAction::CHARACTER_FLY_UP && characterIsOnTheGround && !flyMode) {
       verticalSpeed = JUMP_ACCELERATION;
       characterIsOnTheGround = false;
   }
@@ -278,7 +278,7 @@ bool WorldController::InputActionPress(unsigned int inputAction, int terminalId)
 }
 
 bool WorldController::InputActionRelease(unsigned int inputAction, int terminalId) {
-  if (!context.networkManager->isServer())
+  if (!context.networkManager->isServer() && IsActionNetworked(inputAction))
     context.networkManager->sendInputActionToServer(inputAction, false);
 
   return true;
