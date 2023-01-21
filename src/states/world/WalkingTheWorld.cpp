@@ -52,10 +52,6 @@ void WalkingTheWorld::onEntityReplicated(GladeObject *entity)
       controller->setCharacter(character);
       characterControllers[currentUserId] = controller;
       context->setController(*controller);
-
-      // FIXME don't need a chunk manager on the client or it should be networked somehow
-      mChunkManager = new ChunkManager(*grid, character, *context);
-      mChunkManager->Run();
     }
   }
 }
@@ -72,6 +68,7 @@ void WalkingTheWorld::onUserLoggedIn(unsigned int userId)
     controller->setCharacter(character);
     controller->resetCameraAndCharacterPositions();
     characterControllers[userId] = controller;
+    mChunkManager->AddCharacter(character);
   }
 }
 
@@ -118,7 +115,8 @@ void WalkingTheWorld::init(Context &context)
     controller->resetCameraAndCharacterPositions();
     context.setController(*controller);
 
-    mChunkManager = new ChunkManager(*grid, playerCharacter, context);
+    mChunkManager = new ChunkManager(*grid, context);
+    mChunkManager->AddCharacter(playerCharacter);
     mChunkManager->Run();
   }
 

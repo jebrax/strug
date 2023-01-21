@@ -38,15 +38,16 @@ void* ChunkManager::Worker()
       mClearRequested = false;
     }
 
-    if (mPlayerCharacter) {
+    for (auto& character: mPlayerCharacters) {
       Glade::Vector2i centralChunkIndex;
-      Glade::Vector3i characterCellIndex = mGrid.pointToCellIndex(*mPlayerCharacter->getTransform()->position);
+      Glade::Vector3i characterCellIndex = mGrid.pointToCellIndex(*character->getTransform()->position);
       centralChunkIndex = mGrid.cellIndexToChunkIndex(characterCellIndex);
-      bool characterMovedToANewChunk = (centralChunkIndex != mLastCharacterChunkIndex);
+      auto entry = mLastCharacterChunkIndices.find(character);
+      bool characterMovedToANewChunk = (centralChunkIndex != entry->second);
 
       if (characterMovedToANewChunk) {
         log("Character enters chunk (%d, %d)", centralChunkIndex.x, centralChunkIndex.y);
-        mLastCharacterChunkIndex = centralChunkIndex;
+        entry->second = centralChunkIndex;
       }
 
       if (characterMovedToANewChunk || mForceRegen) {
@@ -90,17 +91,15 @@ void ChunkManager::Stop()
   }
 }
 
-void ChunkManager::SetPlayerCharacter(GladeObject *character)
+void ChunkManager::AddCharacter(GladeObject *character)
 {
-  if (character == nullptr) {
-    mPlayerCharacter = character;
+  if (character == nullptr)
     return;
-  }
 
-  if (mPlayerCharacter == nullptr)
+  if (mPlayerCharacters.empty())
     mForceRegen = true;
 
-  mPlayerCharacter = character;
-  Glade::Vector3i characterCellIndex = mGrid.pointToCellIndex(*mPlayerCharacter->getTransform()->position);
-  mLastCharacterChunkIndex = mGrid.cellIndexToChunkIndex(characterCellIndex);
+  mPlayerCharacters.push_back(character);
+  Glade::Vector3i characterCellIndex = mGrid.pointToCellIndex(*character->getTransform()->position);
+  mLastCharacterChunkIndices[character] = mGrid.cellIndexToChunkIndex(characterCellIndex);
 }

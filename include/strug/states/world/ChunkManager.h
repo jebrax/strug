@@ -12,10 +12,9 @@ public:
   static constexpr int SLEEP_MILLISEC = 1000;
   static constexpr unsigned short CHUNK_GENERATION_RADIUS = 1;
 
-  ChunkManager(Grid &grid, GladeObject *playerCharacter, Context &context):
+  ChunkManager(Grid &grid, Context &context):
     mContext(context),
     mGrid(grid),
-    mPlayerCharacter(playerCharacter),
     mThreadHandle(0),
     mStopRequested(false),
     mClearRequested(false),
@@ -30,7 +29,7 @@ public:
   void Run();
   void Stop();
   void RemoveAllTerrain(Context *context) { mClearRequested = true; }
-  void SetPlayerCharacter(GladeObject *character);
+  void AddCharacter(GladeObject *character);
   void GenerateNewChunks(Glade::Vector2i &centralChunkIndex);
   void ReloadChunk(const Glade::Vector2i &chunkIndex);
   void* Worker();
@@ -39,9 +38,9 @@ private:
   static void ThreadStart(ChunkManager *instance);
 
   Context &mContext;
-  GladeObject *mPlayerCharacter;
+  std::vector<GladeObject*> mPlayerCharacters;
   Grid mGrid;
-  Glade::Vector2i mLastCharacterChunkIndex;
+  std::unordered_map<GladeObject*, Glade::Vector2i> mLastCharacterChunkIndices;
   bool mClearRequested, mForceRegen, mStopRequested;
   AdvancedMeshGenerator::TerrainGeneratorSettings mTerrainSettings;
 
