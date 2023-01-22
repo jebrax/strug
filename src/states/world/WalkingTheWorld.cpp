@@ -1,6 +1,7 @@
 #include <strug/states/world/WalkingTheWorld.h>
 #include <strug/blocks/Sphere.h>
 #include <strug/blocks/Frank.h>
+#include <strug/blocks/Isosurface.h>
 #include <strug/states/world/WorldController.h>
 #include <strug/states/world/ChunkManager.h>
 #include <strug/controls/StrugKeyMapper.h>
@@ -20,18 +21,26 @@ WalkingTheWorld::WalkingTheWorld():
 WalkingTheWorld::~WalkingTheWorld()
 {}
 
-GladeObject* WalkingTheWorld::CreateEntityByTypeId(unsigned int type, const unsigned int *forceId)
+GladeObject* WalkingTheWorld::CreateEntityByTypeId(unsigned int type, const unsigned int *forceId, bool replicate)
 {
   GladeObject *entity = nullptr;
 
   switch ((ObjectType) type) {
-    case ObjectType::CHARACTER:
+    case ObjectType::CHARACTER: {
       Frank *character = new Frank(forceId);
       character->initialize(0.26);
-      context->add(character);
+      mContext->add(character, replicate);
 
       entity = character;
       break;
+    }
+    case ObjectType::ISOSURFACE_CHUNK: {
+      Isosurface *chunk = new Isosurface(forceId, *mGrid);
+
+      mContext->add(chunk, replicate);
+      entity = chunk;
+      break;
+    }
   }
 
   return entity;
@@ -39,44 +48,56 @@ GladeObject* WalkingTheWorld::CreateEntityByTypeId(unsigned int type, const unsi
 
 void WalkingTheWorld::onEntityReplicated(GladeObject *entity)
 {
-  if (context->networkManager->isServer())
+  if (mContext->networkManager->isServer())
     return;
 
   if (entity->getType() == ObjectType::CHARACTER) {
     Frank *character = (Frank*) entity;
 
-    unsigned int currentUserId = context->networkManager->getCurrentUserId();
+    unsigned int currentUserId = mContext->networkManager->getCurrentUserId();
     if (character->mUserId == currentUserId) {
-      WorldController *controller = new WorldController(*context);
+      WorldController *controller = new WorldController(*mContext);
       controller->SetKeyMapper(new StrugKeyMapper());
       controller->setCharacter(character);
-      characterControllers[currentUserId] = controller;
-      context->setController(*controller);
+      mCharacterControllers[currentUserId] = controller;
+      mContext->setController(*controller);
     }
+  }
+
+  if (entity->getType() == ObjectType::ISOSURFACE_CHUNK) {
+    Isosurface *surface = (Isosurface*) entity;
+    mGrid->addChunk(surface->GetChunkIndex(), surface);
+  }
+}
+
+void WalkingTheWorld::onEntityUnserialized(GladeObject *entity) {
+  // Objects whos mesh may be updated must be re-added to the context
+  // in order for the mesh to be updated in the video memory
+  if (entity->getType() == ObjectType::ISOSURFACE_CHUNK) {
+    mContext->add(entity);
   }
 }
 
 void WalkingTheWorld::onUserLoggedIn(unsigned int userId)
 {
-  if (context->networkManager->isServer()) {
+  if (mContext->networkManager->isServer()) {
     log("Adding object");
     Frank* character = (Frank*) CreateEntityByTypeId(ObjectType::CHARACTER);
     character->mUserId = userId;
-    context->networkManager->addObject(character);
 
-    WorldController *controller = new WorldController(*context);
+    WorldController *controller = new WorldController(*mContext);
     controller->setCharacter(character);
     controller->resetCameraAndCharacterPositions();
-    characterControllers[userId] = controller;
+    mCharacterControllers[userId] = controller;
     mChunkManager->AddCharacter(character);
   }
 }
 
 void WalkingTheWorld::onClientInputReceived(unsigned int userId, unsigned int inputAction, bool isPressed)
 {
-  auto entry = characterControllers.find(userId);
+  auto entry = mCharacterControllers.find(userId);
 
-  if (entry == characterControllers.end()) {
+  if (entry == mCharacterControllers.end()) {
     log("Warning: network input message for user id %d for which there is no character controller", userId);
     return;
   }
@@ -88,14 +109,14 @@ void WalkingTheWorld::init(Context &context)
 {
   log("Init WalkingTheWorld");
 
-  this->context = &context;
+  this->mContext = &context;
 
   context.renderer->setBackgroundColor(0.2f, 0.1f, 0.5f);
   context.renderer->setSceneProjectionMode(Glade::Renderer::PERSPECTIVE);
 
-  grid = new Grid(60, 0.25);
+  mGrid = new Grid(60, 0.25);
 
-  context.getCollisionDetector()->setSpatialIndex(grid);
+  context.getCollisionDetector()->setSpatialIndex(mGrid);
 
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
@@ -106,16 +127,15 @@ void WalkingTheWorld::init(Context &context)
     // Create character for the server player (if it's not a dedicated server)
     Frank *playerCharacter = nullptr;
     playerCharacter = (Frank *) CreateEntityByTypeId(ObjectType::CHARACTER, nullptr);
-    context.networkManager->addObject(playerCharacter);
     WorldController *controller = new WorldController(context);
     controller->SetKeyMapper(new StrugKeyMapper());
     controller->setCharacter(playerCharacter);
-    characterControllers[context.networkManager->getCurrentUserId()] = controller;
+    mCharacterControllers[context.networkManager->getCurrentUserId()] = controller;
 
     controller->resetCameraAndCharacterPositions();
     context.setController(*controller);
 
-    mChunkManager = new ChunkManager(*grid, context);
+    mChunkManager = new ChunkManager(*mGrid, context);
     mChunkManager->AddCharacter(playerCharacter);
     mChunkManager->Run();
   }
@@ -126,7 +146,7 @@ void WalkingTheWorld::init(Context &context)
 
 void WalkingTheWorld::applyRules(Context &context)
 {
-  for (auto entry: characterControllers) {
+  for (auto entry: mCharacterControllers) {
     entry.second->update();
   }
 
@@ -141,11 +161,11 @@ void WalkingTheWorld::shoot()
     return;
   }
 
-  Glade::Vector3f nearPoint = context->getRenderer()->unprojectPoint(0, 0, 0);
+  Glade::Vector3f nearPoint = mContext->getRenderer()->unprojectPoint(0, 0, 0);
 
   //log("Near point: %f %f %f", nearPoint.x, nearPoint.y, nearPoint.z);
 
-  Glade::Vector3f cameraPos = *context->getRenderer()->getCamera()->position;
+  Glade::Vector3f cameraPos = *mContext->getRenderer()->getCamera()->position;
 
   Glade::Vector3f dir(nearPoint.x, nearPoint.y, nearPoint.z);
   dir.subtract(cameraPos);
@@ -159,35 +179,35 @@ void WalkingTheWorld::shoot()
   //log("Ray dir: %f %f %f", dir.x, dir.y, dir.z);
 
   Glade::Vector3f stepPoint(nearPoint.x, nearPoint.y, nearPoint.z);
-  Grid::CellsI currentCell;
+  Grid::Cell* currentCell = nullptr;
 
   Glade::Vector3i cellIndex;
   Glade::Vector2i chunkIndex;
 
   for (int i = 0; i < 100; i++) {
-    cellIndex = grid->pointToCellIndex(stepPoint);
-    chunkIndex = grid->cellIndexToChunkIndex(cellIndex);
-    currentCell = grid->cells.find(cellIndex);
+    cellIndex = mGrid->pointToCellIndex(stepPoint);
+    chunkIndex = mGrid->cellIndexToChunkIndex(cellIndex);
+    currentCell = mGrid->getCell(cellIndex);
 
-    if (currentCell == grid->cells.end()) {
+    if (!currentCell) {
       break;
     }
 
     bool shotSolid = false;
 
     for (int j = 0; j < 8; j++) {
-      if (currentCell->second.val[j] < 0.5) {
+      if (currentCell->val[j] < 0.5) {
         shotSolid = true;
         break;
       }
     }
 
     if (shotSolid) {
-      auto entry = characterControllers.find(context->networkManager->getCurrentUserId());
-      if (entry == characterControllers.end())
+      auto entry = mCharacterControllers.find(mContext->networkManager->getCurrentUserId());
+      if (entry == mCharacterControllers.end())
         return;
 
-      grid->addValueAtCell(cellIndex, entry->second->isDigButtonDown()? 0.1 : -0.1);
+      mGrid->addValueAtCell(cellIndex, entry->second->isDigButtonDown() ? 0.1 : -0.1);
       break;
     }
 
@@ -197,7 +217,7 @@ void WalkingTheWorld::shoot()
   mChunkManager->ReloadChunk(chunkIndex);
 
   std::vector<Glade::Vector2i> adjacentChunks;
-  grid->getAdjacentChunks(cellIndex, adjacentChunks);
+  mGrid->getAdjacentChunks(cellIndex, adjacentChunks);
 
   for (const Glade::Vector2i &chunkIndex: adjacentChunks) {
     //log("Adj chunk (%d, %d)", chunkIndex.x, chunkIndex.y);
@@ -207,11 +227,11 @@ void WalkingTheWorld::shoot()
 
 void WalkingTheWorld::shutdown(Context &context)
 {
-  assert(grid);
-  grid->walkChunks([&context](Grid::ChunksI &chunki) { context.remove(chunki->second); });
-  grid->clear();
-  delete grid;
-  grid = nullptr;
+  assert(mGrid);
+  mGrid->walkChunks([&context](Grid::ChunksI &chunki) { context.remove(chunki->second); });
+  mGrid->clear();
+  delete mGrid;
+  mGrid = nullptr;
 
   if (mChunkManager) {
     mChunkManager->Stop();

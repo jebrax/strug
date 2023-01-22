@@ -17,11 +17,10 @@ void ChunkManager::GenerateNewChunks(Glade::Vector2i &centralChunkIndex)
 
       if (!mGrid.getChunk(checkChunkIndex)) {
         log("Generating chunk %d, %d", checkChunkIndex.x, checkChunkIndex.y);
-        Isosurface *chunk = new Isosurface(&GladeObject::unusedEntityId);
+        Isosurface *chunk = new Isosurface(nullptr, mGrid, false, checkChunkIndex);
         mGrid.addChunk(checkChunkIndex, chunk);
-
-        chunk->initialize(checkChunkIndex, mGrid, mTerrainSettings, false);
-        mContext.add(chunk);
+        chunk->InitializeByGenerating(mTerrainSettings);
+        mContext.add(chunk, true);
       }
     }
   }
@@ -66,7 +65,7 @@ void ChunkManager::ReloadChunk(const Glade::Vector2i &chunkIndex)
   Isosurface* surf = (Isosurface *) mGrid.getChunk(chunkIndex.x, chunkIndex.y);
 
   if (surf) {
-    surf->initialize(chunkIndex, mGrid, mTerrainSettings);
+    surf->InitializeWithIsoValues();
     mContext.add(surf);
   }
 }

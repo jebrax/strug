@@ -33,10 +33,10 @@ Craft::~Craft()
 void Craft::createEntities()
 {
   Glade::Vector2i chunkIndex(0, 0);
-  Isosurface* surf = new Isosurface(&GladeObject::unusedEntityId);
+  Isosurface* surf = new Isosurface(&GladeObject::unusedEntityId, grid, true, chunkIndex);
   grid.addChunk(chunkIndex.x, chunkIndex.y, surf);
 
-  surf->initialize(chunkIndex, grid, terrainSettings, true);
+  surf->InitializeByGenerating(terrainSettings);
   context->add(surf);
 }
 
@@ -154,7 +154,7 @@ void Craft::shoot()
   //log("Ray dir: %f %f %f", dir.x, dir.y, dir.z);
 
   Glade::Vector3f stepPoint(towardsPoint.x, towardsPoint.y, towardsPoint.z);
-  Grid::CellsI currentCell;
+  Grid::Cell* currentCell = nullptr;
 
  // std::pair<Glade::Vector2i, Glade::Vector3i> cellInfo;
   Glade::Vector3i cellIndex, prevCellIndex = grid.pointToCellIndex(stepPoint);
@@ -163,31 +163,33 @@ void Craft::shoot()
 
   bool inTheMatter = false;
 
-  std::vector<Grid::CellsI> shotCells;
+  std::vector<Grid::Cell*> shotCells;
+  std::vector<Glade::Vector3i> shotCellsIndices;
 
   for (int i = 0; i < 200; i++) {
     // this might not always work because step is much less then a cell size
     cellIndex = grid.pointToCellIndex(stepPoint);
     chunkIndex = grid.cellIndexToChunkIndex(cellIndex);
-    currentCell = grid.cells.find(cellIndex);
+    currentCell = grid.getCell(cellIndex);
 
-    if (currentCell != grid.cells.end()) {
-      if (currentCell->second.getNumberOfPointsWithValueLessThan(0.2) == 8) {
+    if (currentCell) {
+      if (currentCell->getNumberOfPointsWithValueLessThan(0.2) == 8) {
         // The ray shot a piece of matter with maximum solidity so we stop it
         log("SHOT MAX SOLID");
         break;
       }
 
       if ((cellIndex != prevCellIndex) && inTheMatter) {
-        if (currentCell->second.getNumberOfPointsWithValueLessThan(0.5) < 4) {
+        if (currentCell->getNumberOfPointsWithValueLessThan(0.5) < 4) {
           // The ray went out of the matter so we stop it
           log("RAY RAN OUT OF MATTER");
           break;
         }
       }
 
-      if (currentCell->second.getNumberOfPointsWithValueLessThan(0.5) > (digging ? 0 : 1)) {
+      if (currentCell->getNumberOfPointsWithValueLessThan(0.5) > (digging ? 0 : 1)) {
         shotCells.push_back(currentCell);
+        shotCellsIndices.push_back(cellIndex);
         inTheMatter = true;
         log("GOT INTO MATER");
       }
@@ -197,10 +199,12 @@ void Craft::shoot()
     stepPoint.add(dir);
   }
 
-  for (auto iCell: shotCells) {
-    float growSpeedFactor = iCell->second.sumValues() / 8.0;
+  assert(shotCells.size() == shotCellsIndices.size());
+
+  for (int i = 0; i < shotCells.size(); ++i) {
+    float growSpeedFactor = shotCells[i]->sumValues() / 8.0;
     growSpeedFactor = std::clamp(growSpeedFactor, 0.2f, 1.0f);
-    grid.addValueAtCell(iCell->first, (digging ? 0.028 : -0.028) * growSpeedFactor);
+    grid.addValueAtCell(shotCellsIndices[i], (digging ? 0.028 : -0.028) * growSpeedFactor);
   }
 
   reloadChunk(chunkIndex);
@@ -253,7 +257,7 @@ void Craft::reloadChunk(const Glade::Vector2i &chunkIndex)
   Isosurface* surf = (Isosurface *) grid.getChunk(chunkIndex.x, chunkIndex.y);
 
   if (surf) {
-    surf->initialize(chunkIndex, grid, terrainSettings);
+    surf->InitializeWithIsoValues();
     context->add(surf);
   }
 }

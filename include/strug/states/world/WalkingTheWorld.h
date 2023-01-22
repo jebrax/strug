@@ -28,17 +28,18 @@ public:
     SURFACE_CHUNK
   };
 
-  GladeObject *CreateEntityByTypeId(unsigned int type, const unsigned int *force_id = nullptr) override;
+  GladeObject *CreateEntityByTypeId(unsigned int type, const unsigned int *force_id = nullptr, bool replicate = true) override;
   void onClientInputReceived(unsigned int userId, unsigned int inputAction, bool isPressed) override;
   void onEntityReplicated(GladeObject *entity) override;
+  void onEntityUnserialized(GladeObject *entity) override;
   void onUserLoggedIn(unsigned int userId) override;
 
 private:
   typedef std::unordered_map<unsigned int, WorldController*> CharacterControllers;
   void shoot();
 
-  Grid* grid = nullptr;
-  Context *context;
-  CharacterControllers characterControllers;
+  Grid* mGrid = nullptr;
+  Context *mContext;
+  CharacterControllers mCharacterControllers;
   ChunkManager *mChunkManager;
 };

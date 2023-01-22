@@ -192,9 +192,8 @@ void CollisionTest::createEntities()
   context->add(cube2);
   terrainObjects.push_back(cube2);
 
-  Glade::Vector2i chunkIndex(0, 0);
-  terrain = new Isosurface(&GladeObject::unusedEntityId);
-  terrain->initialize(chunkIndex, *grid, terrainSettings, false);
+  terrain = new Isosurface(&GladeObject::unusedEntityId, *grid);
+  terrain->InitializeByGenerating(terrainSettings);
   terrain->getView()->getMesh()->neverErase = true;
   context->add(terrain);
   //terrainObjects.push_back(terrain);
@@ -286,16 +285,14 @@ void CollisionTest::applyRules(Context &context)
     for (int j = 0; j < Grid::CHUNK_HEIGHT; j++) {
       for (int k = 0; k < grid->chunkSizeCells; k++) {
         Glade::Vector3i centerCellCoord(i, j, k);
-        auto celli = grid->cells.find(centerCellCoord);
+        Grid::Cell* cell = grid->getCell(centerCellCoord);
 
-        if (celli == grid->cells.end()) {
+        if (!cell) {
           //log("No cell here");
           continue;
         }
 
-        Grid::Cell &cell = celli->second;
-
-        if (cell.numVertices <= 0) {
+        if (cell->numVertices <= 0) {
           //log("No vertices in this cell");
           continue;
         }

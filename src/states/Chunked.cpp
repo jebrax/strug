@@ -32,10 +32,10 @@ void Chunked::createEntities()
   for (int i = 0; i < CHUNKS_SIDE; i++) {
     for (int j = 0; j < CHUNKS_SIDE; j++) {
       Glade::Vector2i chunkIndex(i, j);
-      Isosurface* surf = new Isosurface(&GladeObject::unusedEntityId);
+      Isosurface* surf = new Isosurface(&GladeObject::unusedEntityId, *grid, false, chunkIndex);
       grid->addChunk(i, j, surf);
 
-      surf->initialize(chunkIndex, *grid, terrainSettings);
+      surf->InitializeByGenerating(terrainSettings);
       context->add(surf);
     }
   }
@@ -120,7 +120,7 @@ void Chunked::shoot()
   log("Ray dir: %f %f %f", dir.x, dir.y, dir.z);
 
   Glade::Vector3f stepPoint(nearPoint.x, nearPoint.y, nearPoint.z);
-  Grid::CellsI currentCell;
+  Grid::Cell* currentCell = nullptr;
 
   Glade::Vector3i cellIndex;
   Glade::Vector2i chunkIndex; 
@@ -130,16 +130,15 @@ void Chunked::shoot()
     cellIndex = grid->pointToCellIndex(stepPoint);
     chunkIndex = grid->cellIndexToChunkIndex(cellIndex);
 
-    currentCell = grid->cells.find(cellIndex);
+    currentCell = grid->getCell(cellIndex);
 
-    if (currentCell == grid->cells.end()) {
+    if (!currentCell)
       break;
-    }
 
     bool shotSolid = false;
 
     for (int j = 0; j < 8; j++) {
-      if (currentCell->second.val[j] < 0.5) {
+      if (currentCell->val[j] < 0.5) {
         shotSolid = true;
         break;
       }
@@ -191,7 +190,7 @@ void Chunked::reloadChunk(const Glade::Vector2i &chunkIndex)
   Isosurface* surf = (Isosurface *) grid->getChunk(chunkIndex.x, chunkIndex.y);
 
   if (surf) {
-    surf->initialize(chunkIndex, *grid, terrainSettings);
+    surf->InitializeWithIsoValues();
     context->add(surf);
   }
 }
