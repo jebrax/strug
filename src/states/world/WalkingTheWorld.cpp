@@ -2,6 +2,7 @@
 #include <strug/blocks/Sphere.h>
 #include <strug/blocks/Frank.h>
 #include <strug/blocks/Isosurface.h>
+#include <strug/blocks/DebugObject.h>
 #include <strug/states/world/WorldController.h>
 #include <strug/states/world/ChunkManager.h>
 #include <strug/controls/StrugKeyMapper.h>
@@ -41,6 +42,13 @@ GladeObject* WalkingTheWorld::CreateEntityByTypeId(unsigned int type, const unsi
       entity = chunk;
       break;
     }
+    case ObjectType::GENERIC: {
+      DebugObject *obj = new DebugObject();
+
+      mContext->add(obj, replicate);
+      entity = obj;
+      break;
+    }
   }
 
   return entity;
@@ -56,6 +64,7 @@ void WalkingTheWorld::onEntityReplicated(GladeObject *entity)
 
     unsigned int currentUserId = mContext->networkManager->getCurrentUserId();
     if (character->mUserId == currentUserId) {
+      log("Player entity received, creating controller");
       WorldController *controller = new WorldController(*mContext);
       controller->SetKeyMapper(new StrugKeyMapper());
       controller->setCharacter(character);
@@ -82,7 +91,7 @@ void WalkingTheWorld::onUserLoggedIn(unsigned int userId)
 {
   if (mContext->networkManager->isServer()) {
     log("Adding object");
-    Frank* character = (Frank*) CreateEntityByTypeId(ObjectType::CHARACTER);
+    Frank* character = (Frank*) CreateEntityByTypeId(ObjectType::CHARACTER, nullptr, true);
     character->mUserId = userId;
 
     WorldController *controller = new WorldController(*mContext);
@@ -126,7 +135,7 @@ void WalkingTheWorld::init(Context &context)
   if (context.networkManager->isServer()) {
     // Create character for the server player (if it's not a dedicated server)
     Frank *playerCharacter = nullptr;
-    playerCharacter = (Frank *) CreateEntityByTypeId(ObjectType::CHARACTER, nullptr);
+    playerCharacter = (Frank *) CreateEntityByTypeId(ObjectType::CHARACTER, nullptr, true);
     WorldController *controller = new WorldController(context);
     controller->SetKeyMapper(new StrugKeyMapper());
     controller->setCharacter(playerCharacter);
@@ -139,6 +148,8 @@ void WalkingTheWorld::init(Context &context)
     mChunkManager->AddCharacter(playerCharacter);
     mChunkManager->Run();
   }
+
+  CreateEntityByTypeId(ObjectType::GENERIC, nullptr, true);
 
   if (!context.networkManager->isServer())
     context.networkManager->connectToServer();

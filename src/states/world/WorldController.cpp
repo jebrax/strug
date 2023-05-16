@@ -28,6 +28,8 @@ void WorldController::resetCameraAndCharacterPositions()
     character->getTransform()->position->x = 7.5f;
     character->getTransform()->position->y = 5.0f;
     character->getTransform()->position->z = 7.5f;
+
+    character->SetReplicasOutdated(true);
   }
 }
 
@@ -124,6 +126,8 @@ void WorldController::updateFirstPersonCamera()
   context.getRenderer()->getCamera()->position->z = originZ;
 
   context.getRenderer()->getCamera()->rotation->y = -rotY;
+
+  // don't forget to SetReplicasOutdated on character on mouselook
 }
 
 void WorldController::updateThirdPersonCamera()
@@ -191,53 +195,78 @@ void WorldController::updateCharacter()
 
   float characterSpeed = 0.1;
   float forward = 0.0, strafe = 0.0, fly = 0.0;
+  bool characterUpdated = false;
 
-  if (isActionPressed(StrugInputAction::CHARACTER_MOVE_FORWARD))
+  if (isActionPressed(StrugInputAction::CHARACTER_MOVE_FORWARD)) {
     forward = -characterSpeed;
+    characterUpdated = true;
+  }
 
-  if (isActionPressed(StrugInputAction::CHARACTER_MOVE_BACKWARDS))
+  if (isActionPressed(StrugInputAction::CHARACTER_MOVE_BACKWARDS)) {
     forward = characterSpeed;
+    characterUpdated = true;
+  }
 
-  if (isActionPressed(StrugInputAction::CHARACTER_STRAFE_LEFT))
+  if (isActionPressed(StrugInputAction::CHARACTER_STRAFE_LEFT)) {
     strafe = -characterSpeed;
+    characterUpdated = true;
+  }
 
-  if (isActionPressed(StrugInputAction::CHARACTER_STRAFE_RIGHT))
+  if (isActionPressed(StrugInputAction::CHARACTER_STRAFE_RIGHT)) {
     strafe = characterSpeed;
+    characterUpdated = true;
+  }
 
-  if (isActionPressed(StrugInputAction::CHARACTER_TURN_LEFT))
+  if (isActionPressed(StrugInputAction::CHARACTER_TURN_LEFT)) {
     character->getTransform()->rotation->y += characterSpeed;
+    characterUpdated = true;
+  }
 
-  if (isActionPressed(StrugInputAction::CHARACTER_TURN_RIGHT))
+  if (isActionPressed(StrugInputAction::CHARACTER_TURN_RIGHT)) {
     character->getTransform()->rotation->y -= characterSpeed;
+    characterUpdated = true;
+  }
 
-  Transform *charTransform = character->getTransform();
-  float zModifier = forward * cos(-charTransform->rotation->y) + strafe * sin(-charTransform->rotation->y);
-  float xModifier = -forward * sin(-charTransform->rotation->y) + strafe * cos(-charTransform->rotation->y);
-  float yModifier = forward * sin(charTransform->rotation->x) + fly;
+  if (characterUpdated) {
+    Transform *charTransform = character->getTransform();
+    float zModifier = forward * cos(-charTransform->rotation->y) + strafe * sin(-charTransform->rotation->y);
+    float xModifier = -forward * sin(-charTransform->rotation->y) + strafe * cos(-charTransform->rotation->y);
+    float yModifier = forward * sin(charTransform->rotation->x) + fly;
 
-  charTransform->position->z += zModifier;
-  charTransform->position->y += yModifier;
-  charTransform->position->x += xModifier;
+    charTransform->position->z += zModifier;
+    charTransform->position->y += yModifier;
+    charTransform->position->x += xModifier;
+  }
 
   if (flyMode) {
-    if (isActionPressed(StrugInputAction::CHARACTER_FLY_UP))
+    if (isActionPressed(StrugInputAction::CHARACTER_FLY_UP)) {
       character->getTransform()->position->y += characterSpeed;
+      characterUpdated = true;
+    }
 
-    if (isActionPressed(StrugInputAction::CHARACTER_FLY_DOWN))
+    if (isActionPressed(StrugInputAction::CHARACTER_FLY_DOWN)) {
       character->getTransform()->position->y -= characterSpeed;
+      characterUpdated = true;
+    }
   } else {
     // gravity
     verticalSpeed += GRAVITY_ACCELERATION;
     verticalSpeed = std::clamp(verticalSpeed, -0.1f, 0.5f);
     character->getTransform()->position->y += verticalSpeed;
+    characterUpdated = true;
   }
+
+  if (characterUpdated)
+    character->SetReplicasOutdated(true);
 }
 
 bool WorldController::InputActionPress(unsigned int inputAction, int terminalId) {
   if (!context.networkManager->isServer() && IsActionNetworked(inputAction)) {
+    log("Sending action");
     context.networkManager->sendInputActionToServer(inputAction, true);
     return true;
   }
+  log("Performing action");
 
   if (inputAction == StrugInputAction::TOGGLE_CHARACTER_FLY_MODE) {
     flyMode = !flyMode;

@@ -20,7 +20,7 @@ void ChunkManager::GenerateNewChunks(Glade::Vector2i &centralChunkIndex)
         Isosurface *chunk = new Isosurface(nullptr, mGrid, false, checkChunkIndex);
         mGrid.addChunk(checkChunkIndex, chunk);
         chunk->InitializeByGenerating(mTerrainSettings);
-        mContext.add(chunk, true);
+        mContext.add(chunk, false);
       }
     }
   }

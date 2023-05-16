@@ -85,6 +85,8 @@ void Isosurface::serialize(Glade::MemoryOutputStream &stream) {
       }
     }
   }
+
+  log("Isosurface serialized size: %d", stream.GetWrittenSize());
 }
 
 void Isosurface::unserialize(Glade::MemoryInputStream &stream)
