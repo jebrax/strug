@@ -1,17 +1,17 @@
 #include <glade/Context.h>
 #include <glade/render/Perception.h>
-#include <glade/controls/VirtualController.h>
-#include <glade/math/util.h>
 #include <strug/states/CubeTest.h>
-#include <strug/blocks/Cube.h>
+#include <strug/blocks/Woodenbox.h>
+#include <strug/states/world/WorldController.h>
+#include <strug/controls/StrugKeyMapper.h>
 
 #include <unordered_map>
 
-static Cube* cube;
+static Woodenbox* cube;
 
 CubeTest::CubeTest():
   State(),
-  rotateIsDown(false)
+  mController(nullptr)
 {}
 
 CubeTest::~CubeTest()
@@ -20,11 +20,8 @@ CubeTest::~CubeTest()
 
 void CubeTest::createEntities()
 {
-  cube = new Cube(&GladeObject::unusedEntityId);
+  cube = new Woodenbox(&GladeObject::unusedEntityId);
   cube->initialize();
-  this->context->add(cube);
-
-  cube->alterTop(0.5, 1.0, 1.0, 1.0);
   this->context->add(cube);
 }
 
@@ -41,63 +38,16 @@ void CubeTest::init(Context &context)
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
 
-  context.setController(*this);
-  pointerMove(0,0,0,0,0);
-}
-
-bool CubeTest::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
-{
-  static float phi = 0.0, theta = 0.0;
-  static float r = 4.0f;
-
-  if (controlId == 0 || controlId == 1) {
-    float x, y, z;
-
-    if (controlId == 0 && rotateIsDown) {
-      phi = yPos * 0.001;
-      theta = xPos * 0.001;
-    }
-
-    if (controlId == 1) {
-      r += yPos * 0.1;
-    }
-
-    y = cos(phi);
-    x = cos(theta) * sin(phi);
-    z = sin(theta) * sin(phi);
-    x *= r; y *= r; z *= r;
-
-    context->getRenderer()->getCamera()->position->x = x;
-    context->getRenderer()->getCamera()->position->y = y;
-    context->getRenderer()->getCamera()->position->z = z;
-
-    context->getRenderer()->getCamera()->rotation->x = phi + PI / 2.0;
-    context->getRenderer()->getCamera()->rotation->y = theta + PI / 2.0;
-   }
-
-  return true;
-}
-
-bool CubeTest::pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId)
-{
-  if (controlId == 2) {
-    rotateIsDown = true;
-  }
-
-  return true;
-}
-
-bool CubeTest::pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId)
-{
-  if (controlId == 2) {
-    rotateIsDown = false;
-  }
-
-  return true;
+  mController = new WorldController(context);
+  mController->SetKeyMapper(new StrugKeyMapper());
+  mController->setCharacter(cube);
+  context.setController(*mController);
 }
 
 void CubeTest::applyRules(Context &context)
 {
+  if (mController)
+    mController->update();
 }
 
 void CubeTest::shutdown(Context &context)
@@ -105,3 +55,7 @@ void CubeTest::shutdown(Context &context)
 
 }
 
+GladeObject *CubeTest::CreateEntityByTypeId(unsigned int type, const unsigned int *force_id, bool replicate)
+{
+  return nullptr;
+}
