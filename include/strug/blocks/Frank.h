@@ -19,12 +19,12 @@ public:
 
   void serialize(Glade::MemoryOutputStream &stream) override {
     GladeObject::serialize(stream);
-    stream.Write(mUserId);
+    stream.write(mUserId);
   }
 
   void unserialize(Glade::MemoryInputStream &stream) override {
     GladeObject::unserialize(stream);
-    stream.Read(mUserId);
+    stream.read(mUserId);
   }
 
   unsigned int mUserId;

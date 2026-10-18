@@ -25,8 +25,8 @@ public:
   void onEvent(Glade::EventType type, void *payload) override;
 
   bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute) override;
-  bool InputActionPress(unsigned int inputAction, int terminalId) override;
-  bool InputActionRelease(unsigned int inputAction, int terminalId) override;
+  bool inputActionPress(unsigned int inputAction, int terminalId) override;
+  bool inputActionRelease(unsigned int inputAction, int terminalId) override;
   bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId) override;
   bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId) override;
 

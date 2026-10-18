@@ -20,7 +20,7 @@ CubeTest::~CubeTest()
 
 void CubeTest::createEntities()
 {
-  cube = new Woodenbox(&GladeObject::unusedEntityId);
+  cube = new Woodenbox(&GladeObject::UNUSED_ENTITY_ID);
   cube->initialize();
   this->context->add(cube);
 }
@@ -39,7 +39,7 @@ void CubeTest::init(Context &context)
   context.renderer->setPerception(perception);
 
   mController = new WorldController(context);
-  mController->SetKeyMapper(new StrugKeyMapper());
+  mController->setKeyMapper(new StrugKeyMapper());
   mController->setCharacter(cube);
   context.setController(*mController);
 }
@@ -55,7 +55,7 @@ void CubeTest::shutdown(Context &context)
 
 }
 
-GladeObject *CubeTest::CreateEntityByTypeId(unsigned int type, const unsigned int *force_id, bool replicate)
+GladeObject *CubeTest::createEntityByTypeId(unsigned int type, const unsigned int *force_id, bool replicate)
 {
   return nullptr;
 }

@@ -38,20 +38,20 @@ Context *gameContext = NULL;
 
 namespace Glade {
   namespace System {
-    void getViewportSize(unsigned int *width, unsigned int *height) {
+    void get_viewport_size(unsigned int *width, unsigned int *height) {
       *width = VIEWPORT_WIDTH;
       *height = VIEWPORT_HEIGHT;
     }
 
-    void toggleMouseCursor(bool enable) {
+    void toggle_mouse_cursor(bool enable) {
       glfwSetInputMode(window, GLFW_CURSOR, enable ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
     }
 
-    void setMouseCursorPosition(double x, double y) {
+    void set_mouse_cursor_position(double x, double y) {
       glfwSetCursorPos(window, x, y);
     }
 
-    void getMouseCursorPosition(double &x, double &y) {
+    void get_mouse_cursor_position(double &x, double &y) {
       glfwGetCursorPos(window, &x, &y);
     }
   }
@@ -144,30 +144,30 @@ void processInput(GLFWwindow* window)
   if (controller == nullptr)
     return;
 
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_W, 0, glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_S, 0, glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_A, 0, glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_D, 0, glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_SPACE, 0, glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_X, 0, glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_G, 0, glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_F, 0, glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_T, 0, glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_R, 0, glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_C, 0, glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_LEFT, 0, glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_RIGHT, 0, glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_UP, 0, glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_DOWN, 0, glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_O, 0, glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_L, 0, glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_1, 0, glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_2, 0, glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_3, 0, glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_4, 0, glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_5, 0, glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_Q, 0, glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS);
-  controller->UpdateKeyState(Glade::Key::GLADE_KEY_E, 0, glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_W, 0, glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_S, 0, glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_A, 0, glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_D, 0, glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_SPACE, 0, glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_X, 0, glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_G, 0, glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_F, 0, glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_T, 0, glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_R, 0, glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_C, 0, glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_LEFT, 0, glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_RIGHT, 0, glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_UP, 0, glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_DOWN, 0, glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_O, 0, glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_L, 0, glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_1, 0, glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_2, 0, glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_3, 0, glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_4, 0, glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_5, 0, glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_Q, 0, glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS);
+  controller->updateKeyState(Glade::Key::GLADE_KEY_E, 0, glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS);
 }
 
 int main(int argc, char** argv)

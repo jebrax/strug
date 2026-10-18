@@ -140,3 +140,25 @@ make run
 
 🔬*We are all set for experiments!*
 
+## Glade API rename status (18 October 2026)
+
+Strug's Glade calls, hook implementations, and overrides have been updated to
+match the naming changes in the main `../glade` repository. These include:
+
+- Controller methods: `Remap` → `remap`, `SetKeyMapper` → `setKeyMapper`,
+  `UpdateKeyState` → `updateKeyState`, and `InputActionPress`/`InputActionRelease`
+  → `inputActionPress`/`inputActionRelease`.
+- State and object methods: `CreateEntityByTypeId` → `createEntityByTypeId`,
+  `GetCurrentState` → `getCurrentState`, and `SetReplicasOutdated` →
+  `setReplicasOutdated`.
+- Stream methods: `Read`/`Write` → `read`/`write`, and `GetWrittenSize` →
+  `getWrittenSize`.
+- Other affected engine APIs, including `UpdateMeshVerticesFromGridIsoValues`
+  → `updateMeshVerticesFromGridIsoValues` and free functions such as
+  `getViewportSize` → `get_viewport_size` and `noise3D` → `noise3_d`.
+
+No behaviour changes are intended. **Strug has not been rebuilt, run, or tested
+after these renames; verification is still pending.** The successful beatemup
+smoke test against main Glade does not verify Strug. The `deps/glade` checkout
+was not updated as part of this work, so Strug needs the matching Glade API
+changes before verification.

@@ -32,7 +32,7 @@ void Chunked::createEntities()
   for (int i = 0; i < CHUNKS_SIDE; i++) {
     for (int j = 0; j < CHUNKS_SIDE; j++) {
       Glade::Vector2i chunkIndex(i, j);
-      Isosurface* surf = new Isosurface(&GladeObject::unusedEntityId, *grid, false, chunkIndex);
+      Isosurface* surf = new Isosurface(&GladeObject::UNUSED_ENTITY_ID, *grid, false, chunkIndex);
       grid->addChunk(i, j, surf);
 
       surf->InitializeByGenerating(terrainSettings);
@@ -71,7 +71,7 @@ void Chunked::init(Context &context)
   createEntities();
   loadAllItems();
 
-  Glade::System::toggleMouseCursor(false);
+  Glade::System::toggle_mouse_cursor(false);
   context.setController(*this);
 }
 
@@ -86,7 +86,7 @@ bool Chunked::pointerMove(float xPos, float yPos, float zPos, int controlId, int
   return true;
 }
 
-bool Chunked::InputActionPress(unsigned int inputAction, int terminalId)
+bool Chunked::inputActionPress(unsigned int inputAction, int terminalId)
 {
   if (inputAction == Glade::Key::GLADE_KEY_F) {
     context->requestStateChange(new Craft(this), true);
@@ -95,7 +95,7 @@ bool Chunked::InputActionPress(unsigned int inputAction, int terminalId)
   return true;
 }
 
-bool Chunked::InputActionRelease(unsigned int inputAction, int terminalId)
+bool Chunked::inputActionRelease(unsigned int inputAction, int terminalId)
 {
   return true;
 }
@@ -261,7 +261,7 @@ void Chunked::wakeup(Context &context)
 
   loadAllItems();
 
-  Glade::System::toggleMouseCursor(false);
-  Glade::System::setMouseCursorPosition(lastMousePos.x, lastMousePos.y);
+  Glade::System::toggle_mouse_cursor(false);
+  Glade::System::set_mouse_cursor_position(lastMousePos.x, lastMousePos.y);
   context.setController(*this);
 }

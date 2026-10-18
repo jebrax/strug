@@ -42,7 +42,7 @@ void Minecraft::createEntities()
 
   auto createBlock = [this](Glade::Vector3i &gridCoord, float y1, float y2, float y3, float y4) {
     Block block;
-    block.gladeObject = new Cube(&GladeObject::unusedEntityId);
+    block.gladeObject = new Cube(&GladeObject::UNUSED_ENTITY_ID);
     block.gladeObject->initialize();
     block.bisected = true;
     block.ky1 = std::clamp(y1 - gridCoord.y, 0.0f, 1.0f);
@@ -54,7 +54,7 @@ void Minecraft::createEntities()
     gridCoord.y--;
 
     for (; gridCoord.y >= 0; gridCoord.y--) {
-      block.gladeObject = new Cube(&GladeObject::unusedEntityId);
+      block.gladeObject = new Cube(&GladeObject::UNUSED_ENTITY_ID);
       block.gladeObject->initialize();
       block.bisected = false;
       spatialIndex[gridCoord] = block;
@@ -141,7 +141,7 @@ bool Minecraft::pointerDown(float axisX, float axisY, float axisZ, int controlId
   SpatialIndexI currentCell;
 
   for (int i = 0; i < 50; i++) {
-    Cube *another = new Cube(&GladeObject::unusedEntityId);
+    Cube *another = new Cube(&GladeObject::UNUSED_ENTITY_ID);
     //Hull *another = new Hull();
     //another->initialize();
     //another->getTransform()->position->x = stepPoint.x;

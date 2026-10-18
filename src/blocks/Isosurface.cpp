@@ -40,7 +40,7 @@ void Isosurface::InitializeWithIsoValues()
      mesh = std::make_shared<Glade::Mesh>();
 
   AdvancedMeshGenerator gen;
-  gen.UpdateMeshVerticesFromGridIsoValues(mChunkIndex, mGrid, *mesh, mIsolevel);
+  gen.updateMeshVerticesFromGridIsoValues(mChunkIndex, mGrid, *mesh, mIsolevel);
 
   InitializeDrawableAndPhysicalObject(mesh);
   initialized = true;
@@ -62,7 +62,7 @@ void Isosurface::InitializeByGenerating(AdvancedMeshGenerator::TerrainGeneratorS
 
   mIsolevel = settings.isolevel;
   gen.mcGenChunk(mChunkIndex, mGrid, settings);
-  gen.UpdateMeshVerticesFromGridIsoValues(mChunkIndex, mGrid, *mesh, mIsolevel);
+  gen.updateMeshVerticesFromGridIsoValues(mChunkIndex, mGrid, *mesh, mIsolevel);
 
   InitializeDrawableAndPhysicalObject(mesh);
   initialized = true;
@@ -70,9 +70,9 @@ void Isosurface::InitializeByGenerating(AdvancedMeshGenerator::TerrainGeneratorS
 
 void Isosurface::serialize(Glade::MemoryOutputStream &stream) {
   GladeObject::serialize(stream);
-  stream.Write(mChunkIndex);
-  stream.Write(mCraftingMode);
-  stream.Write(mIsolevel);
+  stream.write(mChunkIndex);
+  stream.write(mCraftingMode);
+  stream.write(mIsolevel);
 
   for (int i = 0; i < mGrid.chunkSizeCells; i++) {
     for (int j = 0; j < Grid::CHUNK_HEIGHT; j++) {
@@ -86,15 +86,15 @@ void Isosurface::serialize(Glade::MemoryOutputStream &stream) {
     }
   }
 
-  log("Isosurface serialized size: %d", stream.GetWrittenSize());
+  log("Isosurface serialized size: %d", stream.getWrittenSize());
 }
 
 void Isosurface::unserialize(Glade::MemoryInputStream &stream)
 {
   GladeObject::unserialize(stream);
-  stream.Read(mChunkIndex);
-  stream.Read(mCraftingMode);
-  stream.Read(mIsolevel);
+  stream.read(mChunkIndex);
+  stream.read(mCraftingMode);
+  stream.read(mIsolevel);
 
   for (int i = 0; i < mGrid.chunkSizeCells; i++) {
     for (int j = 0; j < Grid::CHUNK_HEIGHT; j++) {

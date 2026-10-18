@@ -22,7 +22,7 @@ WalkingTheWorld::WalkingTheWorld():
 WalkingTheWorld::~WalkingTheWorld()
 {}
 
-GladeObject* WalkingTheWorld::CreateEntityByTypeId(unsigned int type, const unsigned int *forceId, bool replicate)
+GladeObject* WalkingTheWorld::createEntityByTypeId(unsigned int type, const unsigned int *forceId, bool replicate)
 {
   GladeObject *entity = nullptr;
 
@@ -66,7 +66,7 @@ void WalkingTheWorld::onEntityReplicated(GladeObject *entity)
     if (character->mUserId == currentUserId) {
       log("Player entity received, creating controller");
       WorldController *controller = new WorldController(*mContext);
-      controller->SetKeyMapper(new StrugKeyMapper());
+      controller->setKeyMapper(new StrugKeyMapper());
       controller->setCharacter(character);
       mCharacterControllers[currentUserId] = controller;
       mContext->setController(*controller);
@@ -91,7 +91,7 @@ void WalkingTheWorld::onUserLoggedIn(unsigned int userId)
 {
   if (mContext->networkManager->isServer()) {
     log("Adding object");
-    Frank* character = (Frank*) CreateEntityByTypeId(ObjectType::CHARACTER, nullptr, true);
+    Frank* character = (Frank*) createEntityByTypeId(ObjectType::CHARACTER, nullptr, true);
     character->mUserId = userId;
 
     WorldController *controller = new WorldController(*mContext);
@@ -111,7 +111,7 @@ void WalkingTheWorld::onClientInputReceived(unsigned int userId, unsigned int in
     return;
   }
 
-  entry->second->UpdateInputActionState(inputAction, isPressed);
+  entry->second->updateInputActionState(inputAction, isPressed);
 }
 
 void WalkingTheWorld::init(Context &context)
@@ -130,14 +130,14 @@ void WalkingTheWorld::init(Context &context)
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
 
-  Glade::System::toggleMouseCursor(false);
+  Glade::System::toggle_mouse_cursor(false);
 
   if (context.networkManager->isServer()) {
     // Create character for the server player (if it's not a dedicated server)
     Frank *playerCharacter = nullptr;
-    playerCharacter = (Frank *) CreateEntityByTypeId(ObjectType::CHARACTER, nullptr, true);
+    playerCharacter = (Frank *) createEntityByTypeId(ObjectType::CHARACTER, nullptr, true);
     WorldController *controller = new WorldController(context);
-    controller->SetKeyMapper(new StrugKeyMapper());
+    controller->setKeyMapper(new StrugKeyMapper());
     controller->setCharacter(playerCharacter);
     mCharacterControllers[context.networkManager->getCurrentUserId()] = controller;
 
@@ -149,7 +149,7 @@ void WalkingTheWorld::init(Context &context)
     mChunkManager->Run();
   }
 
-  CreateEntityByTypeId(ObjectType::GENERIC, nullptr, true);
+  createEntityByTypeId(ObjectType::GENERIC, nullptr, true);
 
   if (!context.networkManager->isServer())
     context.networkManager->connectToServer();

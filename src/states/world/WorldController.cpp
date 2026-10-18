@@ -29,7 +29,7 @@ void WorldController::resetCameraAndCharacterPositions()
     character->getTransform()->position->y = 5.0f;
     character->getTransform()->position->z = 7.5f;
 
-    character->SetReplicasOutdated(true);
+    character->setReplicasOutdated(true);
   }
 }
 
@@ -58,7 +58,7 @@ void WorldController::setCameraMode(CameraMode mode)
   }
 
   //character->toggleView(*character->getView(), cameraMode != CameraMode::FIRST_PERSON);
-  Glade::System::toggleMouseCursor(cameraMode == CameraMode::THIRD_PERSON);
+  Glade::System::toggle_mouse_cursor(cameraMode == CameraMode::THIRD_PERSON);
 }
 
 bool WorldController::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
@@ -257,11 +257,11 @@ void WorldController::updateCharacter()
   }
 
   if (characterUpdated)
-    character->SetReplicasOutdated(true);
+    character->setReplicasOutdated(true);
 }
 
-bool WorldController::InputActionPress(unsigned int inputAction, int terminalId) {
-  if (!context.networkManager->isServer() && IsActionNetworked(inputAction)) {
+bool WorldController::inputActionPress(unsigned int inputAction, int terminalId) {
+  if (!context.networkManager->isServer() && isActionNetworked(inputAction)) {
     log("Sending action");
     context.networkManager->sendInputActionToServer(inputAction, true);
     return true;
@@ -306,8 +306,8 @@ bool WorldController::InputActionPress(unsigned int inputAction, int terminalId)
   return true;
 }
 
-bool WorldController::InputActionRelease(unsigned int inputAction, int terminalId) {
-  if (!context.networkManager->isServer() && IsActionNetworked(inputAction))
+bool WorldController::inputActionRelease(unsigned int inputAction, int terminalId) {
+  if (!context.networkManager->isServer() && isActionNetworked(inputAction))
     context.networkManager->sendInputActionToServer(inputAction, false);
 
   return true;
@@ -318,7 +318,7 @@ bool WorldController::pointerDown(float axisX, float axisY, float axisZ, int con
   switch (controlId) {
     case 0: if (cameraMode == CameraMode::THIRD_PERSON) {
               rotateIsDown = true;
-              Glade::System::toggleMouseCursor(false);
+              Glade::System::toggle_mouse_cursor(false);
               break;  
             }
             digging = true;
@@ -338,8 +338,8 @@ bool WorldController::pointerUp(float axisX, float axisY, float axisZ, int contr
 {
   if (controlId == 0 && cameraMode == CameraMode::THIRD_PERSON) {
     rotateIsDown = false;
-    Glade::System::toggleMouseCursor(true);
-    Glade::System::getMouseCursorPosition(lastXPos, lastYPos);
+    Glade::System::toggle_mouse_cursor(true);
+    Glade::System::get_mouse_cursor_position(lastXPos, lastYPos);
   } else {
     digging = growing = false;
   }

@@ -33,7 +33,7 @@ Craft::~Craft()
 void Craft::createEntities()
 {
   Glade::Vector2i chunkIndex(0, 0);
-  Isosurface* surf = new Isosurface(&GladeObject::unusedEntityId, grid, true, chunkIndex);
+  Isosurface* surf = new Isosurface(&GladeObject::UNUSED_ENTITY_ID, grid, true, chunkIndex);
   grid.addChunk(chunkIndex.x, chunkIndex.y, surf);
 
   surf->InitializeByGenerating(terrainSettings);
@@ -53,7 +53,7 @@ void Craft::init(Context &context)
   Perception *perception = new Perception();
   context.renderer->setPerception(perception);
 
-  Glade::System::toggleMouseCursor(true);
+  Glade::System::toggle_mouse_cursor(true);
   context.setController(*this);
   pointerMove(0,0,0,0,0); // wtf?
 }
@@ -61,7 +61,7 @@ void Craft::init(Context &context)
 bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute)
 {
   unsigned int viewportWidth, viewportHeight;
-  Glade::System::getViewportSize(&viewportWidth, &viewportHeight);
+  Glade::System::get_viewport_size(&viewportWidth, &viewportHeight);
 
   if (rotateIsDown && controlId == 0) {
     if (firstMove) {
@@ -117,7 +117,7 @@ bool Craft::pointerMove(float xPos, float yPos, float zPos, int controlId, int t
   return true;
 }
 
-bool Craft::InputActionPress(unsigned int inputAction, int terminalId)
+bool Craft::inputActionPress(unsigned int inputAction, int terminalId)
 {
   if (inputAction == 1) {
     Glade::Vector2i chunkIndex(0, 0);
@@ -128,7 +128,7 @@ bool Craft::InputActionPress(unsigned int inputAction, int terminalId)
   return true;
 }
 
-bool Craft::InputActionRelease(unsigned int inputAction, int terminalId)
+bool Craft::inputActionRelease(unsigned int inputAction, int terminalId)
 {
   return true;
 }
@@ -233,7 +233,7 @@ bool Craft::pointerDown(float axisX, float axisY, float axisZ, int controlId, in
             break;
     case 2: rotateIsDown = true;
             firstMove = true;
-            Glade::System::toggleMouseCursor(false);
+            Glade::System::toggle_mouse_cursor(false);
             break;
   }
 
@@ -244,7 +244,7 @@ bool Craft::pointerUp(float axisX, float axisY, float axisZ, int controlId, int 
 {
   if (controlId == 2) {
     rotateIsDown = false;
-    Glade::System::toggleMouseCursor(true);
+    Glade::System::toggle_mouse_cursor(true);
   } else {
     digging = growing = false;
   }

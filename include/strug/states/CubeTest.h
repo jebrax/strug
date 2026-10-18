@@ -24,5 +24,5 @@ class CubeTest: public State
     void applyRules(Context &context) override;
     void createEntities();
 
-    GladeObject *CreateEntityByTypeId(unsigned int type, const unsigned int *force_id = nullptr, bool replicate = true) override;
+    GladeObject *createEntityByTypeId(unsigned int type, const unsigned int *force_id = nullptr, bool replicate = true) override;
 };

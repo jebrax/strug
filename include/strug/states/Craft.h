@@ -35,11 +35,11 @@ class Craft: public State, VirtualController
     void shutdown(Context &context) override;
     void applyRules(Context &context) override;
 
-    bool InputActionPress(unsigned int inputAction, int terminalId) override;
-    bool InputActionRelease(unsigned int inputAction, int terminalId) override;
+    bool inputActionPress(unsigned int inputAction, int terminalId) override;
+    bool inputActionRelease(unsigned int inputAction, int terminalId) override;
     bool pointerDown(float axisX, float axisY, float axisZ, int controlId, int terminalId) override;
     bool pointerUp(float axisX, float axisY, float axisZ, int controlId, int terminalId) override;
     bool pointerMove(float xPos, float yPos, float zPos, int controlId, int terminalId, bool isAbsolute = true) override;
-    GladeObject *CreateEntityByTypeId(unsigned int type, const unsigned int *force_id = nullptr, bool replicate = true) override { return nullptr; };
+    GladeObject *createEntityByTypeId(unsigned int type, const unsigned int *force_id = nullptr, bool replicate = true) override { return nullptr; };
 };
 

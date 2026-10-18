@@ -88,7 +88,7 @@ static void meshSupportFunction(const void *obj, const ccd_vec3_t *dir, ccd_vec3
   ccdVec3Add(point, &translation);
 }
 
-static void isosurfaceCellSupportFunction(const void *obj, const ccd_vec3_t *dir, ccd_vec3_t *point)
+static void isosurface_cell_support_function(const void *obj, const ccd_vec3_t *dir, ccd_vec3_t *point)
 {
   Grid::Cell *cell= (Grid::Cell*) obj;
 
@@ -144,7 +144,7 @@ static void isosurfaceCellSupportFunction(const void *obj, const ccd_vec3_t *dir
   ccdVec3Add(point, &translation);
 }
 
-static void sphereSupportFunction(const void *obj, const ccd_vec3_t *dir, ccd_vec3_t *point)
+static void sphere_support_function(const void *obj, const ccd_vec3_t *dir, ccd_vec3_t *point)
 {
   Sphere *sphere = (Sphere*) obj;
   Glade::Vector3f direction(ccdVec3X(dir), ccdVec3Y(dir), ccdVec3Z(dir));
@@ -170,21 +170,21 @@ CollisionTest::~CollisionTest()
 
 void CollisionTest::createEntities()
 {
-  sphere = new Sphere(&GladeObject::unusedEntityId);
+  sphere = new Sphere(&GladeObject::UNUSED_ENTITY_ID);
   sphere->initialize(cellSize);
   sphere->getTransform()->position->x = (float) grid->chunkSizeCells/2 * grid->cellSize - 3;
   sphere->getTransform()->position->y = 20 * grid->cellSize;
   sphere->getTransform()->position->z = (float) grid->chunkSizeCells/2 * grid->cellSize;
   context->add(sphere);
 
-  cube = new Cube(&GladeObject::unusedEntityId);
+  cube = new Cube(&GladeObject::UNUSED_ENTITY_ID);
   cube->initialize();
   cube->getTransform()->rotation->y = 0.5;
   cube->getTransform()->position->z = 5;
   context->add(cube);
   terrainObjects.push_back(cube);
 
-  cube2 = new Cube(&GladeObject::unusedEntityId);
+  cube2 = new Cube(&GladeObject::UNUSED_ENTITY_ID);
   cube2->initialize();
   cube2->getTransform()->rotation->y = 0.5;
   cube2->getTransform()->position->z = 5;
@@ -192,7 +192,7 @@ void CollisionTest::createEntities()
   context->add(cube2);
   terrainObjects.push_back(cube2);
 
-  terrain = new Isosurface(&GladeObject::unusedEntityId, *grid);
+  terrain = new Isosurface(&GladeObject::UNUSED_ENTITY_ID, *grid);
   terrain->InitializeByGenerating(terrainSettings);
   terrain->getView()->getMesh()->neverErase = true;
   context->add(terrain);
@@ -218,7 +218,7 @@ void CollisionTest::init(Context &context)
   context.renderer->getCamera()->position->x = 10.0;
   context.renderer->getCamera()->position->y = 5.0;
 
-  Glade::System::toggleMouseCursor(false);
+  Glade::System::toggle_mouse_cursor(false);
 
   context.setController(*this);
 }
@@ -253,7 +253,7 @@ void CollisionTest::applyRules(Context &context)
 
   // set up ccd_t struct
   ccd.support1       = meshSupportFunction; // support function for first object
-  ccd.support2       = sphereSupportFunction; // support function for second object
+  ccd.support2       = sphere_support_function; // support function for second object
   ccd.max_iterations = 100;     // maximal number of iterations
   ccd.epa_tolerance  = 0.0001;  // maximal tolerance fro EPA part
 
@@ -279,7 +279,7 @@ void CollisionTest::applyRules(Context &context)
     }
   }
 
-  ccd.support1 = isosurfaceCellSupportFunction;
+  ccd.support1 = isosurface_cell_support_function;
 
   for (int i = 0; i < grid->chunkSizeCells; i++) {
     for (int j = 0; j < Grid::CHUNK_HEIGHT; j++) {

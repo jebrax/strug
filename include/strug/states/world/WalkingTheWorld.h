@@ -28,7 +28,7 @@ public:
     SURFACE_CHUNK
   };
 
-  GladeObject *CreateEntityByTypeId(unsigned int type, const unsigned int *force_id = nullptr, bool replicate = true) override;
+  GladeObject *createEntityByTypeId(unsigned int type, const unsigned int *force_id = nullptr, bool replicate = true) override;
   void onClientInputReceived(unsigned int userId, unsigned int inputAction, bool isPressed) override;
   void onEntityReplicated(GladeObject *entity) override;
   void onEntityUnserialized(GladeObject *entity) override;
