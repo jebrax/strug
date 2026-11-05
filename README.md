@@ -162,3 +162,9 @@ after these renames; verification is still pending.** The successful beatemup
 smoke test against main Glade does not verify Strug. The `deps/glade` checkout
 was not updated as part of this work, so Strug needs the matching Glade API
 changes before verification.
+
+# Support status
+
+Strug is unsupported from 2026-10-27. Future Glade changes do not preserve
+compatibility with this application. See [GLADE_SUPPORT.md](GLADE_SUPPORT.md)
+for the last supported Glade commit. The build instructions below are historical.
