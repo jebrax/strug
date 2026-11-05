@@ -1,8 +1,8 @@
-# 🧪 How to start doing the cool stuff?
+# 🧪 How to build
 
-For starters, get yourself a computer. With macOS. Becuase this pile of code won't compile easily elsewhere :)
+Right now only the macOS build is tested, building for other platforms might require some minor code modifications.
 
-Got it? Ok, now clone this repo:
+Clone this repo:
 
 <pre>
 git clone git@github.com:batonez/strug.git
@@ -14,7 +14,7 @@ Then go to the repository root:
 cd strug
 </pre>
 
-And stay in this directory for the rest of the build process (I warned you!).
+Stay in this directory for the rest of the build process.
 
 We have a bunch of dependencies living in submodules, so let's update those too:
 <pre>
@@ -22,9 +22,9 @@ git submodule init
 git submodule update
 </pre>
 
-## 🔧 Now let's build build build!
+## 🔧 Now let's build
 
-Check if you are missing any of these good old tools (I'm sure you don't):
+Check if you are missing any of these tools:
 
 <pre>
 brew install autoconf automake libtool cmake
@@ -35,9 +35,9 @@ brew install autoconf automake libtool cmake
 
 ### Assimp
 
-[Assimp](http://www.assimp.org/) stands for the asset import library and not what you thought. We use it to load 3D models that were authored with external 3D modeling software.
+[Assimp](http://www.assimp.org/). We use it to load 3D models that were authored with external 3D modeling software.
 
-To build it, execute this stuff:
+To build it, execute these commands:
 
 <pre>
 pushd deps/assimp
@@ -50,7 +50,7 @@ For troubleshooting consult the [Build.md](https://github.com/batonez/assimp/blo
 
 ### GLEW
 
-[GLEW](http://glew.sourceforge.net/) stands for OpenGL extension wrangler library. Without it we'd have to spend weeks writing boilerplate code that queries the OS for available OpenGL functions. Praise the gods other people do boring stuff, not us. 
+[GLEW](http://glew.sourceforge.net/) stands for OpenGL extension wrangler library.
 
 To build it, issue the following:
 
@@ -68,7 +68,7 @@ Or see the `README.md` file in the root of our [GLEW repo](https://github.com/ba
 
 ### GLFW
 
-Not as boring as what GLEW does, but very helpful if you don't wanna mess with platform specific windowing, events and input APIs. I used to do that manually on Windows, but then I <strike>got an arrow in the knee</strike> switched to macOS and realised I can stay cross platform with [GLFW](https://www.glfw.org/) at no additional cost! (The project still lost it's compilability on Windows due to my laziness, but that's another story). Nuff said: 
+Glade uses [GLFW](https://www.glfw.org/), it's helpful if you don't wanna mess with platform specific windowing, events and input APIs Build: 
 
 <pre>
 pushd deps/glfw
@@ -83,7 +83,7 @@ The original build manual for GLFW is [here](https://www.glfw.org/docs/latest/co
 
 ### Zlib
 
-Everyone knows what [this](http://zlib.net/) is. Some assets (3D models, textures and what not) use compression internally and we need to unpack that. Let's build the library:
+[Zlib](http://zlib.net/) is. Some assets (3D models, textures and what not) use compression internally and we need to unpack them. Build the library:
 
 <pre>
 pushd deps/zlib
@@ -97,7 +97,7 @@ If something goes wrong consult the README file in the root of our [Zlib repo](h
 
 ### Freetype
 
-We need to render fonts on the screen right? It's a tricky thing to do when all you have is a GPU. That's why the world is grateful to the dudes who maintain [Freetype](http://freetype.org/) exactly for this purpose. To build this magic library issue the following:
+Renders fonts on the screen. [Freetype](http://freetype.org/) is exactly for this purpose. To build this library issue the following commands:
 
 <pre>
 pushd deps/freetype
@@ -111,7 +111,7 @@ Again, original build instructions for Freetype are [here](https://github.com/ba
 
 ### Lightweight dependencies
 
-There are some other dependencies but they are either single source or header only. They get compiled together with the app, so you don't need to build them separately. If you wonder what these dependencies are:
+There are some other dependencies but they are either single source or header only. They get compiled together with the app, so you don't need to build them separately. These dependencies are:
 
 * [sha1](https://github.com/batonez/sha1) generates [SHA1 digests](https://en.wikipedia.org/wiki/SHA-1). We use it to store different kinds of objects in a hashmap.
 * [PerlinNoise](https://github.com/batonez/PerlinNoise) is (as you have already guessed) a library for generating [Perlin gradient noises](https://en.wikipedia.org/wiki/Perlin_noise).
@@ -138,7 +138,7 @@ Finally, if you only need to run a previously built executable without recompili
 make run
 </pre>
 
-🔬*We are all set for experiments!*
+🔬*We are all set!*
 
 ## Glade API rename status (18 October 2026)
 
