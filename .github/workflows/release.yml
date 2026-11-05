@@ -1,0 +1,87 @@
+# Every push and pull request builds and verifies the packages. Pushing a v* tag also publishes them
+# as a GitHub Release. See docs/DELIVERY.md.
+name: Build and release
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # A tag v1.2.3 becomes version 1.2.3, other builds leave this empty and take their version from git
+  STRUG_VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Create builder image
+        run: docker build -t strug-builder -f ci/linux-builder.Dockerfile ci
+      - name: Build and test
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -e STRUG_VERSION="${STRUG_VERSION#v}" \
+            -v "$PWD:/strug" -w /strug strug-builder \
+            sh -c 'scripts/build-deps.sh && scripts/package.sh && scripts/verify-package.sh dist/strug-linux-x86_64.tar.gz'
+      - uses: actions/upload-artifact@v7
+        with:
+          name: strug-linux-x86_64
+          path: dist/strug-linux-x86_64.tar.gz
+          if-no-files-found: error
+
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Install build tools
+        run: brew install autoconf automake libtool
+      - name: Build dependencies
+        run: scripts/build-deps.sh
+      - name: Package
+        run: STRUG_VERSION="${STRUG_VERSION#v}" scripts/package.sh
+      - name: Verify package
+        run: scripts/verify-package.sh dist/strug-macos-arm64.tar.gz
+      - uses: actions/upload-artifact@v7
+        with:
+          name: strug-macos-arm64
+          path: dist/strug-macos-arm64.tar.gz
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [linux, macos]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create manifest and checksums
+        run: >
+          python3 scripts/make-manifest.py dist
+          --version "${GITHUB_REF_NAME#v}"
+          --tag "$GITHUB_REF_NAME"
+          --commit "$GITHUB_SHA"
+          --repository "$GITHUB_REPOSITORY"
+      # Tags with a suffix like v1.2.0-rc.1 are prereleases, the "latest" links ignore those
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          case "$GITHUB_REF_NAME" in
+            *-*) PRERELEASE=--prerelease ;;
+            *) PRERELEASE= ;;
+          esac
+          gh release create "$GITHUB_REF_NAME" dist/* --verify-tag --generate-notes $PRERELEASE

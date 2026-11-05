@@ -1,3 +1,7 @@
+# 📦 How to get it
+
+Download the latest build for [macOS](https://github.com/jebrax/strug/releases/latest/download/strug-macos-arm64.tar.gz) or [Linux](https://github.com/jebrax/strug/releases/latest/download/strug-linux-x86_64.tar.gz). See [docs/DELIVERY.md](docs/DELIVERY.md) for how builds are released and delivered.
+
 # 🧪 How to build
 
 Right now only the macOS build is tested, building for other platforms might require some minor code modifications.
@@ -23,6 +27,8 @@ git submodule update
 </pre>
 
 ## 🔧 Now let's build
+
+`scripts/build-deps.sh` fetches the submodules and builds all the dependencies. The sections below describe them one by one.
 
 Check if you are missing any of these tools:
 

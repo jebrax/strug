@@ -21,9 +21,16 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#ifdef __APPLE__
 #include <mach-o/dyld.h>
+#else
+#include <limits.h>
+#include <unistd.h>
+#endif
 
+#include <cassert>
 #include <cstdlib>
+#include <cstring>
 
 #define VIEWPORT_WIDTH 1280
 #define VIEWPORT_HEIGHT 720
@@ -116,12 +123,19 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 
 static Path determineAssetsDirectory()
 {
+#ifdef __APPLE__
   char* executablePath = nullptr;
   uint32_t size = 0;
 
   assert(_NSGetExecutablePath(executablePath, &size) < 0);
   executablePath = (char*) malloc(size);
   assert(_NSGetExecutablePath(executablePath, &size) == 0);
+#else
+  char executablePath[PATH_MAX + 1];
+  ssize_t length = readlink("/proc/self/exe", executablePath, PATH_MAX);
+  assert(length > 0);
+  executablePath[length] = '\0';
+#endif
 
   Path assetsDir(executablePath);
   assetsDir = assetsDir.base();
