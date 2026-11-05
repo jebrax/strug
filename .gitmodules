@@ -1,39 +1,44 @@
 [submodule "deps/glade"]
 	path = deps/glade
-	url = git@github.com:batonez/glade.git
+	url = https://github.com/batonez/glade.git
 [submodule "deps/PerlinNoise"]
 	path = deps/PerlinNoise
-	url = git@github.com:batonez/PerlinNoise.git
+	url = https://github.com/batonez/PerlinNoise.git
 [submodule "deps/lodepng"]
 	path = deps/lodepng
-	url = git@github.com:batonez/lodepng.git
+	url = https://github.com/batonez/lodepng.git
 [submodule "deps/sha1"]
 	path = deps/sha1
-	url = git@github.com:batonez/sha1.git
+	url = https://github.com/batonez/sha1.git
 [submodule "deps/assimp"]
 	path = deps/assimp
 	url = https://github.com/batonez/assimp
 [submodule "deps/glew"]
 	path = deps/glew
-	url = git@github.com:batonez/glew.git
+	url = https://github.com/batonez/glew.git
 [submodule "deps/glfw"]
 	path = deps/glfw
-	url = git@github.com:batonez/glfw.git
+	url = https://github.com/batonez/glfw.git
 [submodule "deps/zlib"]
 	path = deps/zlib
-	url = git@github.com:batonez/zlib.git
+	url = https://github.com/batonez/zlib.git
 [submodule "deps/freetype"]
 	path = deps/freetype
-	url = git@github.com:batonez/freetype.git
+	url = https://github.com/batonez/freetype.git
 [submodule "deps/bullet3"]
 	path = deps/bullet3
-	url = git@github.com:batonez/bullet3.git
+	url = https://github.com/batonez/bullet3.git
+	update = none
 [submodule "deps/libccd"]
 	path = deps/libccd
-	url = git@github.com:batonez/libccd.git
+	url = https://github.com/batonez/libccd.git
 [submodule "deps/imgui"]
 	path = deps/imgui
 	url = https://github.com/ocornut/imgui
 [submodule "deps/enet"]
 	path = deps/enet
 	url = https://github.com/batonez/enet
+	ignore = untracked
+[submodule "deps/rapidjson"]
+	path = deps/rapidjson
+	url = https://github.com/Tencent/rapidjson
